@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KLCF - Saison 9</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Banderole supérieure -->
+  <header class="banner">
+    <div class="banner-content">
+      <h1 class="logo">KLCF S9</h1>
+      
+      <!-- Menu de navigation -->
+      <nav class="nav-links">
+        <a href="#about">Le Jeu</a>
+        <a href="#candidats">Candidats</a>
+        <a href="#agenda">Agenda</a>
+      </nav>
+
+      <!-- Bouton de connexion -->
+      <button class="login-btn" onclick="window.location.href='login.html'">Connexion</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Section : Explication du jeu -->
+    <section id="about" class="section-container">
+      <h2>Qu'est-ce que KLCF ?</h2>
+      <p>Bienvenue dans la Saison 9 de KLCF ! Dans cette aventure stratégique et intense, les joueurs s'affrontent à travers des épreuves intellectuelles, des alliances complexes et des trahisons inattendues. Seul le plus rusé et le plus résilient remportera la victoire finale et la cagnotte. Préparez-vous pour une saison explosive où rien ne se passe comme prévu !</p>
+    </section>
+
+    <!-- Section : Candidats -->
+    <section id="candidats" class="section-container bg-light">
+      <h2>Les Candidats de la S9</h2>
+      <p>Découvrez les profils des joueurs qui vont marquer cette saison :</p>
+      
+      <div class="candidates-grid">
+        <!-- Cartes temporaires, à remplacer plus tard -->
+        <div class="candidate-card">Profil 1<br><small>(À venir)</small></div>
+        <div class="candidate-card">Profil 2<br><small>(À venir)</small></div>
+        <div class="candidate-card">Profil 3<br><small>(À venir)</small></div>
+        <div class="candidate-card">Profil 4<br><small>(À venir)</small></div>
+      </div>
+    </section>
+
+    <!-- Section : Agenda -->
+    <section id="agenda" class="section-container">
+      <h2>Agenda des Événements</h2>
+      <p><em>Tous les événements sont affichés à l'heure de Paris.</em></p>
+      
+      <div class="calendar-wrapper">
+        <!-- Intégration d'un Google Agenda réglé sur l'heure de Paris -->
+        <!-- J'ai mis un agenda démo, tu pourras le remplacer par le tien -->
+        <iframe src="https://calendar.google.com/calendar/embed?src=fr.french%23holiday%40group.v.calendar.google.com&ctz=Europe%2FParis" style="border: 0" width="100%" height="400" frameborder="0" scrolling="no"></iframe>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>
