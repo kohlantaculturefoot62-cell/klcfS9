@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Candidat - KLCF S9</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Styles spécifiques à l'espace candidat */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .solde-box {
+      background-color: #ffcc00;
+      color: #1a1a1a;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #bd2130;
+    }
+
+    /* Menu d'onglets (Boutique / Agenda) */
+    .tabs-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: #e0e0e0;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .tab-btn.active {
+      background: #ffcc00;
+      color: #1a1a1a;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banderole Espace Candidat -->
+  <header class="banner">
+    <div class="banner-content">
+      <h1 class="logo">KLCF S9</h1>
+      
+      <!-- Infos Joueur & Déconnexion à droite -->
+      <div class="user-info">
+        <span id="player-name" style="font-weight: 500;">Candidat</span>
+        <div class="solde-box">Solde : <span id="player-solde">150</span> Kohrocks</div>
+        <button class="logout-btn" onclick="deconnexion()">Déconnexion</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="section-container">
+    
+    <!-- Boutons de navigation entre la Boutique et l'Agenda -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="afficherOnglet('boutique', this)">Boutique</button>
+      <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
+    </div>
+
+    <!-- ONGLET 1 : BOUTIQUE -->
+    <div id="tab-boutique" class="tab-content active">
+      <h2>Boutique KLCF</h2>
+      <p>Achetez des avantages ou des objets pour le jeu grâce à vos Kohrocks.</p>
+      
+      <div class="candidates-grid" style="margin-top: 20px;">
+        <!-- Objet 1 de test -->
+        <div class="candidate-card">
+          <h3>Immunité Conseil</h3>
+          <p class="candidate-desc">Annule les voix contre vous lors du prochain conseil.</p>
+          <strong style="color: #d9a700; margin: 10px 0; display: block;">100 Kohrocks</strong>
+          <button class="login-btn" onclick="alert('Fonctionnalité d\'achat à venir !')">Acheter</button>
+        </div>
+
+        <!-- Objet 2 de test -->
+        <div class="candidate-card">
+          <h3>Indice Épreuve</h3>
+          <p class="candidate-desc">Obtenez un indice exclusif pour la prochaine épreuve.</p>
+          <strong style="color: #d9a700; margin: 10px 0; display: block;">50 Kohrocks</strong>
+          <button class="login-btn" onclick="alert('Fonctionnalité d\'achat à venir !')">Acheter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONGLET 2 : AGENDA -->
+    <div id="tab-agenda" class="tab-content">
+      <h2>Agenda des Événements</h2>
+      <p>Consultez le calendrier officiel de la saison (Heure de Paris).</p>
+      
+      <div class="calendar-wrapper">
+        <iframe 
+          src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" 
+          style="border: 0" 
+          width="100%" 
+          height="500" 
+          frameborder="0" 
+          scrolling="no">
+        </iframe>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Vérification de la session au chargement de la page
+    document.addEventListener("DOMContentLoaded", () => {
+      const joueur = sessionStorage.getItem("joueur_connecte");
+      
+      // Si aucun joueur n'est connecté, on le redirige vers l'accueil
+      if (!joueur) {
+        window.location.href = "index.html";
+        return;
+      }
+      
+      // Affichage du nom du joueur connecté
+      document.getElementById("player-name").innerText = joueur;
+    });
+
+    // Fonction pour changer d'onglet (Boutique / Agenda)
+    function afficherOnglet(nomOnglet, btnElement) {
+      // Masquer tous les contenus
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      // Désactiver tous les boutons
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+      
+      // Activer l'onglet sélectionné
+      document.getElementById("tab-" + nomOnglet).classList.add("active");
+      btnElement.classList.add("active");
+    }
+
+    // Fonction de déconnexion
+    function deconnexion() {
+      sessionStorage.removeItem("joueur_connecte");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
