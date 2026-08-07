@@ -48,7 +48,7 @@
     if (result.status === "success") {
       sessionStorage.setItem("joueur_connecte", result.candidat);
       alert("Connexion réussie ! Bienvenue " + result.candidat);
-      // window.location.href = "espace-candidat.html";
+      window.location.href = "espace-candidat.html";
     } else {
       errorMsg.innerText = result.message;
     }
