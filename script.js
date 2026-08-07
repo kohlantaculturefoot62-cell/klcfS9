@@ -9,28 +9,31 @@ async function chargerCandidats() {
   const grid = document.getElementById("candidates-grid");
   
   try {
-    const response = await fetch(API_URL); // Appel HTTP GET vers Apps Script
+    const response = await fetch(API_URL);
     const result = await response.json();
     
     if (result.status === "success") {
       grid.innerHTML = ""; // On vide le texte "Chargement..."
       
       result.data.forEach(candidat => {
-        // Transformation du lien Google Drive pour l'afficher en tant qu'image
         let photoUrl = candidat.photo;
+        
+        // Extraction de l'ID de l'image Drive et utilisation du meilleur format d'URL
         if (photoUrl.includes("file/d/")) {
           const fileId = photoUrl.split("file/d/")[1].split("/")[0];
-          photoUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+          // lh3.googleusercontent est la méthode la plus stable pour afficher une image Drive
+          photoUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
         }
 
-        // Création de la carte HTML pour le candidat
+        // Création de la carte avec les nouvelles classes CSS
         const card = document.createElement("div");
         card.className = "candidate-card";
         card.innerHTML = `
-          <img src="${photoUrl}" alt="${candidat.nom}" style="width:100%; border-radius:8px; margin-bottom:10px; height:200px; object-fit:cover;">
+          <img src="${photoUrl}" alt="Photo de ${candidat.nom}" loading="lazy">
           <h3>${candidat.nom}</h3>
-          <p style="font-size:14px; font-weight:normal; margin-top:10px;">${candidat.description}</p>
+          <div class="candidate-desc">${candidat.description}</div>
         `;
+        
         grid.appendChild(card);
       });
     }
