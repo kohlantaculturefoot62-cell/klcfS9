@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion KLCF</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .login-container { max-width: 400px; margin: 100px auto; padding: 20px; background: white; text-align: center; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    .login-btn { width: 95%; margin-top: 15px; }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="login-container">
+    <h2 style="color: #ffcc00; margin-bottom: 20px;">Accès Candidat S9</h2>
+    <input type="text" id="username" placeholder="Nom du candidat" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button class="login-btn" onclick="seConnecter()">Se connecter</button>
+    <p id="error-msg" style="color: red; margin-top: 15px;"></p>
+  </div>
+
+  <script>
+    // METS LA MEME URL ICI AUSSI
+    const API_URL = "URL_DE_TON_APPS_SCRIPT_ICI"; 
+
+    async function seConnecter() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      const errorMsg = document.getElementById("error-msg");
+      
+      errorMsg.innerText = "Connexion en cours...";
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          // Attention : Ne pas mettre de Content-Type spécifique pour éviter les erreurs CORS de Google
+          body: JSON.stringify({
+            action: "login",
+            username: user,
+            password: pass
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          // Succès ! On enregistre qui est connecté dans le navigateur
+          sessionStorage.setItem("joueur_connecte", result.candidat);
+          window.location.href = "espace-candidat.html"; // Redirection vers sa page privée
+        } else {
+          errorMsg.innerText = result.message; // "Identifiants incorrects."
+        }
+      } catch (error) {
+        console.error("Erreur de connexion", error);
+        errorMsg.innerText = "Erreur serveur.";
+      }
+    }
+  </script>
+</body>
+</html>
