@@ -22,40 +22,41 @@
 
   <script>
     // METS LA MEME URL ICI AUSSI
-    const API_URL = "URL_DE_TON_APPS_SCRIPT_ICI"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec"; 
 
     async function seConnecter() {
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
-      const errorMsg = document.getElementById("error-msg");
-      
-      errorMsg.innerText = "Connexion en cours...";
-      
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          // Attention : Ne pas mettre de Content-Type spécifique pour éviter les erreurs CORS de Google
-          body: JSON.stringify({
-            action: "login",
-            username: user,
-            password: pass
-          })
-        });
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+  const errorMsg = document.getElementById("error-msg");
+  
+  errorMsg.innerText = "Connexion en cours...";
+  
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      // On utilise text/plain pour que le navigateur n'envoie pas de requête pré-flight CORS
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "login",
+        username: user,
+        password: pass
+      })
+    });
 
-        const result = await response.json();
-        
-        if (result.status === "success") {
-          // Succès ! On enregistre qui est connecté dans le navigateur
-          sessionStorage.setItem("joueur_connecte", result.candidat);
-          window.location.href = "espace-candidat.html"; // Redirection vers sa page privée
-        } else {
-          errorMsg.innerText = result.message; // "Identifiants incorrects."
-        }
-      } catch (error) {
-        console.error("Erreur de connexion", error);
-        errorMsg.innerText = "Erreur serveur.";
-      }
+    const result = await response.json();
+    
+    if (result.status === "success") {
+      sessionStorage.setItem("joueur_connecte", result.candidat);
+      alert("Connexion réussie ! Bienvenue " + result.candidat);
+      // window.location.href = "espace-candidat.html";
+    } else {
+      errorMsg.innerText = result.message;
     }
+  } catch (error) {
+    console.error("Erreur connexion:", error);
+    errorMsg.innerText = "Erreur de connexion au serveur.";
+  }
+}
   </script>
 </body>
 </html>
