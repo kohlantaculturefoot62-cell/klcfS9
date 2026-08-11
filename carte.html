@@ -59,7 +59,7 @@
     });
 
     // 2. Définition logique de la Grille
-    var numCols = 400; // Largeur (1 à 300)
+    var numCols = 400; // Largeur (1 à 400)
     var numRows = 26;  // Hauteur (A à Z)
 
     // 3. Taille visuelle de l'image (3000x1500 donne un bon format paysage 2:1)
@@ -79,7 +79,7 @@
 
     // 5. Dessin de la grille et des axes
     
-    // LIGNES VERTICALES (1 à 300) & CHIFFRES EN HAUT
+    // LIGNES VERTICALES (1 à 400) & CHIFFRES EN HAUT
     for (let i = 0; i <= numCols; i++) {
       let x = i * colWidth;
       
@@ -124,7 +124,7 @@
       
       if(colIndex >= 0 && colIndex < numCols && rowIndex >= 0 && rowIndex < numRows) {
          var rowLetter = letters[rowIndex]; // A-Z
-         var colNum = colIndex + 1;         // 1-300
+         var colNum = colIndex + 1;         // 1-400
          
          L.popup()
           .setLatLng(e.latlng)
