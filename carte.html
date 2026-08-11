@@ -5,19 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carte Interactive - KLCF S9</title>
   
-  <!-- Intégration de Leaflet (Moteur de carte) -->
+  <!-- Intégration de Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="style.css">
 
   <style>
-    /* Le conteneur de la carte prendra 80% de la hauteur de l'écran */
+    /* Le conteneur de la carte */
     #map { 
       height: 80vh; 
       width: 100%; 
-      background: #1a1a1a; /* Fond noir derrière la carte */
+      background: #000; /* Fond noir derrière la carte */
       border-radius: 8px;
       border: 2px solid #ffcc00;
+    }
+    
+    /* Design des lettres et des chiffres sur les axes */
+    .axis-label {
+      color: #ffcc00;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      text-shadow: 2px 2px 4px black; /* Pour être lisible sur l'image */
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      padding: 2px;
     }
   </style>
 </head>
@@ -25,14 +37,14 @@
 
   <header class="banner">
     <div class="banner-content">
-      <h1 class="logo">KLCF S9 - Exploration</h1>
-      <button class="login-btn" onclick="window.location.href='index.html'">Retour à l'accueil</button>
+      <h1 class="logo">KLCF S9 - Carte</h1>
+      <button class="login-btn" onclick="window.location.href='index.html'">Retour</button>
     </div>
   </header>
 
-  <main class="section-container" style="max-width: 1200px;">
-    <h2 style="margin-bottom: 10px;">Carte de l'Île</h2>
-    <p style="margin-bottom: 20px;">Utilisez la molette de la souris ou vos doigts (sur mobile) pour zoomer. <strong>Cliquez sur une zone pour afficher les coordonnées exactes de la case (A à Z, 1 à 300).</strong></p>
+  <main class="section-container" style="max-width: 1400px;">
+    <h2 style="margin-bottom: 10px;">Carte de l'Île (Grille A-Z / 1-300)</h2>
+    <p style="margin-bottom: 20px;">Zoom pour voir les 300 cases en détail. Les repères (10, 20, 30...) t'aident à te repérer. <strong>Clique n'importe où pour avoir la case exacte.</strong></p>
     
     <div id="map"></div>
   </main>
@@ -42,60 +54,80 @@
     var map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: -1,
-      maxZoom: 3
+      maxZoom: 4 // Permet de zoomer assez près pour bien voir les cases
     });
 
-    // 2. Définition des dimensions logiques de la GRILLE
-    var numCols = 300; // X (Largeur de 1 à 300)
-    var numRows = 26;  // Y (Hauteur de A à Z)
+    // 2. Définition logique de la Grille
+    var numCols = 300; // Largeur (1 à 300)
+    var numRows = 26;  // Hauteur (A à Z)
 
-    // 3. Définition de la taille VISUELLE de la carte (Format 16:9 très large pour remplir l'écran)
-    var mapWidth = 1600;  
-    var mapHeight = 900; 
+    // 3. Taille visuelle de l'image (3000x1500 donne un bon format paysage 2:1)
+    var mapWidth = 3000;  
+    var mapHeight = 1500; 
+    
+    // Calcul de la taille physique d'une case
+    var colWidth = mapWidth / numCols; // = 10
+    var rowHeight = mapHeight / numRows; // = 57.7
+    
     var bounds = [[0, 0], [mapHeight, mapWidth]];
 
-    // 4. Importation de l'image de l'île
+    // 4. Importation de l'image de fond (Lien à remplacer par ton île)
     var imgUrl = 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
     L.imageOverlay(imgUrl, bounds).addTo(map);
-    map.fitBounds(bounds); 
+    map.fitBounds(bounds);
 
-    // 5. Dessiner le quadrillage (Transparent)
-    // Lignes verticales (1 à 300) -> On en dessine une sur 10 pour ne pas saturer l'écran
+    // 5. Dessin de la grille et des axes
+    
+    // LIGNES VERTICALES (1 à 300) & CHIFFRES EN HAUT
     for (let i = 0; i <= numCols; i++) {
-      let x = (i / numCols) * mapWidth;
-      if (i % 10 === 0) {
-          L.polyline([[0, x], [mapHeight, x]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+      let x = i * colWidth;
+      
+      // On affiche toutes les lignes, mais on renforce toutes les 10 cases
+      let isDecade = (i % 10 === 0);
+      let lineWeight = isDecade ? 2 : 0.5;
+      let lineOpacity = isDecade ? 0.8 : 0.3;
+      
+      L.polyline([[0, x], [mapHeight, x]], {color: '#fff', weight: lineWeight, opacity: lineOpacity}).addTo(map);
+
+      // Ajouter le label (10, 20, 30...) tout en haut (Y = mapHeight)
+      if (isDecade && i !== 0) {
+        L.marker([mapHeight, x], {
+          icon: L.divIcon({className: 'axis-label', html: i, iconSize: [30, 25], iconAnchor: [15, 30]})
+        }).addTo(map);
       }
     }
-    // Lignes horizontales (A à Z) -> Il n'y en a que 26, on les dessine toutes
+
+    // LIGNES HORIZONTALES (A à Z) & LETTRES À GAUCHE
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (let j = 0; j <= numRows; j++) {
-      let y = (j / numRows) * mapHeight;
-      L.polyline([[y, 0], [y, mapWidth]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+      let y = mapHeight - (j * rowHeight); // On part du haut
+      
+      L.polyline([[y, 0], [y, mapWidth]], {color: '#fff', weight: 1, opacity: 0.5}).addTo(map);
+
+      // Ajouter la lettre (A, B, C...) sur le côté gauche (X = 0) au milieu de la case
+      if (j < 26) {
+        let yCenter = y - (rowHeight / 2); // Centre de la case verticalement
+        L.marker([yCenter, 0], {
+          icon: L.divIcon({className: 'axis-label', html: letters[j], iconSize: [25, 25], iconAnchor: [30, 12]})
+        }).addTo(map);
+      }
     }
 
-    // 6. Interactivité : Révéler la case au clic
+    // 6. Clic pour récupérer la case
     map.on('click', function(e) {
       var clickedX = e.latlng.lng;
       var clickedY = e.latlng.lat;
       
-      // Calculer l'index
-      var colIndex = Math.floor((clickedX / mapWidth) * numCols); // 0 à 299
-      var rowIndex = Math.floor(((mapHeight - clickedY) / mapHeight) * numRows); // 0 à 25
+      var colIndex = Math.floor(clickedX / colWidth); 
+      var rowIndex = Math.floor((mapHeight - clickedY) / rowHeight); 
       
-      // Sécurité : On vérifie qu'on est bien sur l'image
       if(colIndex >= 0 && colIndex < numCols && rowIndex >= 0 && rowIndex < numRows) {
+         var rowLetter = letters[rowIndex]; // A-Z
+         var colNum = colIndex + 1;         // 1-300
          
-         // Transformation en A-Z
-         var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-         var rowLetter = letters[rowIndex];
-         
-         // Transformation en 1-300
-         var colNum = colIndex + 1; 
-         
-         // Afficher l'infobulle
          L.popup()
           .setLatLng(e.latlng)
-          .setContent("<div style='font-size:16px; text-align:center;'>Case<br><strong style='font-size:24px; color:#d93025;'>" + rowLetter + colNum + "</strong></div>")
+          .setContent("<div style='font-size:16px; text-align:center;'>Case cliquée<br><strong style='font-size:24px; color:#d93025;'>" + rowLetter + colNum + "</strong></div>")
           .openOn(map);
       }
     });
