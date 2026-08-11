@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte Interactive - KLCF S9</title>
+  
+  <!-- Intégration de Leaflet (Moteur de carte) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Le conteneur de la carte prendra 80% de la hauteur de l'écran */
+    #map { 
+      height: 80vh; 
+      width: 100%; 
+      background: #1a1a1a; /* Fond noir derrière la carte */
+      border-radius: 8px;
+      border: 2px solid #ffcc00;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <header class="banner">
+    <div class="banner-content">
+      <h1 class="logo">KLCF S9 - Exploration</h1>
+      <button class="login-btn" onclick="window.location.href='index.html'">Retour à l'accueil</button>
+    </div>
+  </header>
+
+  <main class="section-container" style="max-width: 1200px;">
+    <h2 style="margin-bottom: 10px;">Carte de l'Île</h2>
+    <p style="margin-bottom: 20px;">Utilisez la molette de la souris ou vos doigts (sur mobile) pour zoomer. <strong>Cliquez sur une zone pour afficher les coordonnées exactes de la case (A à Z, 1 à 300).</strong></p>
+    
+    <div id="map"></div>
+  </main>
+
+  <script>
+    // 1. Initialisation de la carte (Mode Image Simple, pas de carte du monde)
+    var map = L.map('map', {
+      crs: L.CRS.Simple, // Système de coordonnées basique (X,Y)
+      minZoom: -1,       // Permet de dézoomer pour voir toute l'île
+      maxZoom: 3         // Permet de zoomer fort sur une case
+    });
+
+    // 2. Définition des dimensions (300 lignes, 26 colonnes)
+    var numRows = 300;
+    var numCols = 26;
+    
+    // Les limites de notre carte : [Y, X]
+    var bounds = [[0, 0], [numRows, numCols]];
+
+    // 3. Importation de l'image de l'île
+    // J'ai mis une image d'île tropicale libre de droit par défaut.
+    // Quand tu auras ton image, remplace le lien par le nom de ton fichier (ex: 'ile.jpg')
+    var imgUrl = 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
+    L.imageOverlay(imgUrl, bounds).addTo(map);
+    map.fitBounds(bounds); // Ajuste la vue pour montrer l'île en entier au chargement
+
+    // 4. Dessiner le quadrillage (Transparent pour ne pas gâcher la vue)
+    // Lignes verticales (A à Z)
+    for (let i = 0; i <= numCols; i++) {
+      L.polyline([[0, i], [numRows, i]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+    }
+    // Lignes horizontales (1 à 300)
+    for (let j = 0; j <= numRows; j++) {
+      L.polyline([[j, 0], [j, numCols]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+    }
+
+    // 5. Interactivité : Révéler la case au clic
+    map.on('click', function(e) {
+      // Récupérer la position cliquée
+      var x = Math.floor(e.latlng.lng);
+      var y = Math.floor(e.latlng.lat);
+      
+      // Sécurité pour s'assurer qu'on clique bien DANS la grille
+      if(x >= 0 && x < numCols && y >= 0 && y < numRows) {
+         var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+         var colLetter = letters[x]; // Convertit 0 en A, 1 en B, etc.
+         
+         // Inversion de l'axe Y : Dans Leaflet, 0 est en bas, on veut la Ligne 1 en haut
+         var rowNum = numRows - y; 
+         
+         // Afficher une petite infobulle
+         L.popup()
+          .setLatLng(e.latlng)
+          .setContent("<div style='font-size:16px; text-align:center;'>Case<br><strong style='font-size:24px; color:#d93025;'>" + colLetter + rowNum + "</strong></div>")
+          .openOn(map);
+      }
+    });
+  </script>
+</body>
+</html>
