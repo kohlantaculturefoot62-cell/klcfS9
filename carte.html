@@ -38,55 +38,64 @@
   </main>
 
   <script>
-    // 1. Initialisation de la carte (Mode Image Simple, pas de carte du monde)
+    // 1. Initialisation de la carte
     var map = L.map('map', {
-      crs: L.CRS.Simple, // Système de coordonnées basique (X,Y)
-      minZoom: -1,       // Permet de dézoomer pour voir toute l'île
-      maxZoom: 3         // Permet de zoomer fort sur une case
+      crs: L.CRS.Simple,
+      minZoom: -1,
+      maxZoom: 3
     });
 
-    // 2. Définition des dimensions (300 lignes, 26 colonnes)
-    var numRows = 300;
-    var numCols = 26;
-    
-    // Les limites de notre carte : [Y, X]
-    var bounds = [[0, 0], [numRows, numCols]];
+    // 2. Définition des dimensions logiques de la GRILLE
+    var numCols = 300; // X (Largeur de 1 à 300)
+    var numRows = 26;  // Y (Hauteur de A à Z)
 
-    // 3. Importation de l'image de l'île
-    // J'ai mis une image d'île tropicale libre de droit par défaut.
-    // Quand tu auras ton image, remplace le lien par le nom de ton fichier (ex: 'ile.jpg')
+    // 3. Définition de la taille VISUELLE de la carte (Format 16:9 très large pour remplir l'écran)
+    var mapWidth = 1600;  
+    var mapHeight = 900; 
+    var bounds = [[0, 0], [mapHeight, mapWidth]];
+
+    // 4. Importation de l'image de l'île
     var imgUrl = 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
     L.imageOverlay(imgUrl, bounds).addTo(map);
-    map.fitBounds(bounds); // Ajuste la vue pour montrer l'île en entier au chargement
+    map.fitBounds(bounds); 
 
-    // 4. Dessiner le quadrillage (Transparent pour ne pas gâcher la vue)
-    // Lignes verticales (A à Z)
+    // 5. Dessiner le quadrillage (Transparent)
+    // Lignes verticales (1 à 300) -> On en dessine une sur 10 pour ne pas saturer l'écran
     for (let i = 0; i <= numCols; i++) {
-      L.polyline([[0, i], [numRows, i]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+      let x = (i / numCols) * mapWidth;
+      if (i % 10 === 0) {
+          L.polyline([[0, x], [mapHeight, x]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+      }
     }
-    // Lignes horizontales (1 à 300)
+    // Lignes horizontales (A à Z) -> Il n'y en a que 26, on les dessine toutes
     for (let j = 0; j <= numRows; j++) {
-      L.polyline([[j, 0], [j, numCols]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
+      let y = (j / numRows) * mapHeight;
+      L.polyline([[y, 0], [y, mapWidth]], {color: 'rgba(255, 255, 255, 0.2)', weight: 1}).addTo(map);
     }
 
-    // 5. Interactivité : Révéler la case au clic
+    // 6. Interactivité : Révéler la case au clic
     map.on('click', function(e) {
-      // Récupérer la position cliquée
-      var x = Math.floor(e.latlng.lng);
-      var y = Math.floor(e.latlng.lat);
+      var clickedX = e.latlng.lng;
+      var clickedY = e.latlng.lat;
       
-      // Sécurité pour s'assurer qu'on clique bien DANS la grille
-      if(x >= 0 && x < numCols && y >= 0 && y < numRows) {
+      // Calculer l'index
+      var colIndex = Math.floor((clickedX / mapWidth) * numCols); // 0 à 299
+      var rowIndex = Math.floor(((mapHeight - clickedY) / mapHeight) * numRows); // 0 à 25
+      
+      // Sécurité : On vérifie qu'on est bien sur l'image
+      if(colIndex >= 0 && colIndex < numCols && rowIndex >= 0 && rowIndex < numRows) {
+         
+         // Transformation en A-Z
          var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-         var colLetter = letters[x]; // Convertit 0 en A, 1 en B, etc.
+         var rowLetter = letters[rowIndex];
          
-         // Inversion de l'axe Y : Dans Leaflet, 0 est en bas, on veut la Ligne 1 en haut
-         var rowNum = numRows - y; 
+         // Transformation en 1-300
+         var colNum = colIndex + 1; 
          
-         // Afficher une petite infobulle
+         // Afficher l'infobulle
          L.popup()
           .setLatLng(e.latlng)
-          .setContent("<div style='font-size:16px; text-align:center;'>Case<br><strong style='font-size:24px; color:#d93025;'>" + colLetter + rowNum + "</strong></div>")
+          .setContent("<div style='font-size:16px; text-align:center;'>Case<br><strong style='font-size:24px; color:#d93025;'>" + rowLetter + colNum + "</strong></div>")
           .openOn(map);
       }
     });
