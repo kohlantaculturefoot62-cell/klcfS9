@@ -229,9 +229,9 @@ async function chargerRecherche() {
     if(result.status === "success") {
       currentPosition = result.position;
       
-      // Afficher l'historique
+      // Affichage de l'historique
       if(result.historique.length === 0) {
-        histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment. Vous pouvez choisir n'importe quelle case de départ.</li>";
+        histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment.</li>";
       } else {
         result.historique.forEach(h => {
           const color = h.resultat.includes("TROUVÉ") ? "green" : "red";
@@ -242,21 +242,33 @@ async function chargerRecherche() {
         });
       }
 
-      // Gérer le délai / Timer
+      // VÉRIFICATION FERMETURE NOCTURNE (00h00 - 08h00)
+      if (!result.isOpen) {
+        statusDiv.innerHTML = `
+          <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; text-align: center;">
+            🌙 <strong>Recherche fermée pour la nuit</strong><br>
+            Les recherches rouvrent chaque jour à <strong>08h00</strong> du matin. Vous pourrez alors choisir une nouvelle case de départ !
+          </div>
+        `;
+        actionDiv.style.display = "none";
+        return;
+      }
+
+      // Gérer la position et le Timer
       const nextAction = result.prochaineAction;
       const now = result.maintenant;
 
       if (!currentPosition) {
-        // Premier tour, on affiche juste la saisie
-        statusDiv.innerHTML = `<p style="font-weight:bold; color: #1a1a1a;">Aucune position. Entrez votre point de départ ci-dessous (A1 à Z300).</p>`;
+        // Nouveau jour (ou premier coup) : Proposition du point de départ
+        statusDiv.innerHTML = `<p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z300).</p>`;
         actionDiv.style.display = "block";
       } else if (now < nextAction) {
-        // Joueur bloqué par le temps, on lance le timer
+        // En attente du délai de déplacement
         lancerTimer(nextAction, statusDiv, actionDiv);
       } else {
-        // Joueur libre de bouger
+        // Prêt à bouger
         statusDiv.innerHTML = `
-          <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">En attente sur : ${currentPosition}</div>
+          <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position actuelle : ${currentPosition}</div>
           <span style="color: green;">Prêt pour un nouveau déplacement !</span>
         `;
         actionDiv.style.display = "block";
