@@ -135,7 +135,41 @@
         </iframe>
       </div>
     </div>
+  <!-- ONGLET 3 : RECHERCHE COLLIER -->
+<div id="tab-recherche" class="tab-content">
+  <h2>Chasse au Collier (Grille A1 à Z300)</h2>
+  
+  <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+    
+    <!-- Zone de gauche : Actions -->
+    <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <h3 style="margin-bottom: 15px;">Votre Position</h3>
+      
+      <div id="recherche-status">
+        <p>Chargement de votre position...</p>
+      </div>
 
+      <div id="recherche-actions" style="display: none; margin-top: 20px;">
+        <h4 style="margin-bottom: 10px;">Fouiller une nouvelle case</h4>
+        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Le temps d'attente sera de 1 heure par case de distance parcourue.</p>
+        
+        <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
+        
+        <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider le déplacement</button>
+        <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
+      </div>
+    </div>
+
+    <!-- Zone de droite : Historique -->
+    <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <h3>Votre Historique</h3>
+      <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;">
+        <!-- Sera rempli en JS -->
+      </ul>
+    </div>
+
+  </div>
+</div>
   </main>
 
   <script>
