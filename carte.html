@@ -53,8 +53,9 @@
     // 1. Initialisation de la carte
     var map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -1,
-      maxZoom: 4 // Permet de zoomer assez près pour bien voir les cases
+      minZoom: -4,      // Permet de dézoomer beaucoup plus loin (surtout sur mobile)
+      maxZoom: 4,
+      zoomSnap: 0       // Permet un ajustement fluide pour afficher toute l'image au millimètre près
     });
 
     // 2. Définition logique de la Grille
