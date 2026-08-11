@@ -204,6 +204,129 @@
       sessionStorage.removeItem("joueur_connecte");
       window.location.href = "index.html";
     }
+  let currentPosition = null;
+let timerInterval = null;
+const API_URL = "VOTRE_URL_APPS_SCRIPT_ICI"; // A REMPLACER !
+
+async function chargerRecherche() {
+  const joueur = sessionStorage.getItem("joueur_connecte");
+  const statusDiv = document.getElementById("recherche-status");
+  const actionDiv = document.getElementById("recherche-actions");
+  const histList = document.getElementById("recherche-historique");
+  
+  statusDiv.innerHTML = "<p>Actualisation...</p>";
+  actionDiv.style.display = "none";
+  histList.innerHTML = "";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "get_recherche", username: joueur })
+    });
+    const result = await response.json();
+    
+    if(result.status === "success") {
+      currentPosition = result.position;
+      
+      // Afficher l'historique
+      if(result.historique.length === 0) {
+        histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment. Vous pouvez choisir n'importe quelle case de départ.</li>";
+      } else {
+        result.historique.forEach(h => {
+          const color = h.resultat.includes("TROUVÉ") ? "green" : "red";
+          histList.innerHTML += `<li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+            <strong>${h.case}</strong> à ${h.date.split(" ")[1]} <br>
+            <span style="color: ${color};">${h.resultat}</span>
+          </li>`;
+        });
+      }
+
+      // Gérer le délai / Timer
+      const nextAction = result.prochaineAction;
+      const now = result.maintenant;
+
+      if (!currentPosition) {
+        // Premier tour, on affiche juste la saisie
+        statusDiv.innerHTML = `<p style="font-weight:bold; color: #1a1a1a;">Aucune position. Entrez votre point de départ ci-dessous (A1 à Z300).</p>`;
+        actionDiv.style.display = "block";
+      } else if (now < nextAction) {
+        // Joueur bloqué par le temps, on lance le timer
+        lancerTimer(nextAction, statusDiv, actionDiv);
+      } else {
+        // Joueur libre de bouger
+        statusDiv.innerHTML = `
+          <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">En attente sur : ${currentPosition}</div>
+          <span style="color: green;">Prêt pour un nouveau déplacement !</span>
+        `;
+        actionDiv.style.display = "block";
+      }
+    }
+  } catch (err) {
+    statusDiv.innerHTML = "<p style='color:red;'>Erreur de connexion.</p>";
+  }
+}
+
+function lancerTimer(endTimeMs, statusDiv, actionDiv) {
+  if (timerInterval) clearInterval(timerInterval);
+  actionDiv.style.display = "none"; // Cache les actions
+  
+  timerInterval = setInterval(() => {
+    const now = new Date().getTime();
+    const distanceMs = endTimeMs - now;
+
+    if (distanceMs <= 0) {
+      clearInterval(timerInterval);
+      chargerRecherche(); // Recharger quand le temps est écoulé
+      return;
+    }
+
+    const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
+
+    statusDiv.innerHTML = `
+      <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position : ${currentPosition}</div>
+      <p style="color: #666;">En cours de fouille...</p>
+      <div style="font-size: 20px; font-weight: bold; color: #d93025; margin-top: 10px;">
+        ⏳ Prochaine action dans : ${h}h ${m}m ${s}s
+      </div>
+    `;
+  }, 1000);
+}
+
+async function deplacerRecherche() {
+  const joueur = sessionStorage.getItem("joueur_connecte");
+  const target = document.getElementById("target-cell").value;
+  const msgLabel = document.getElementById("recherche-msg");
+  
+  if (!target) {
+    msgLabel.innerText = "Veuillez entrer une case.";
+    return;
+  }
+  
+  msgLabel.innerText = "Calcul en cours...";
+  
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "move_recherche", username: joueur, currentCell: currentPosition, targetCell: target })
+    });
+    const result = await response.json();
+    
+    if (result.status === "success") {
+      msgLabel.innerText = "";
+      document.getElementById("target-cell").value = "";
+      chargerRecherche(); // Recharger toute l'interface
+    } else {
+      msgLabel.innerText = result.message;
+    }
+  } catch (err) {
+    msgLabel.innerText = "Erreur de communication serveur.";
+  }
+}
+    
   </script>
 </body>
 </html>
