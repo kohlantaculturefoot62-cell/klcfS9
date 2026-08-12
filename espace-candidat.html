@@ -218,18 +218,22 @@
       const card = document.createElement("div");
       card.className = "candidate-card";
       
-      // Style spécifique si c'est le capitaine ou si c'est le joueur lui-même
       const isCap = member.estCapitaine;
       const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
       
       card.style.border = isCap ? "2px solid #ffcc00" : "1px solid #ddd";
       card.style.background = isMe ? "#fffde7" : "white";
 
+      // On affiche le binôme SEULEMENT si c'est la carte du joueur connecté
+      const binomeDisplay = isMe 
+        ? `Binôme : <strong>${member.binome}</strong>` 
+        : `Binôme : <em>🔒 Secret</em>`;
+
       card.innerHTML = `
         ${isCap ? '<div style="font-size: 24px; margin-bottom: 5px;">👑</div>' : '<div style="font-size: 24px; margin-bottom: 5px;">👤</div>'}
         <h3 style="margin-bottom: 5px;">${member.nom} ${isMe ? '(Vous)' : ''}</h3>
         ${isCap ? '<span style="color: #d93025; font-weight: bold; font-size: 13px;">CAPITAINE</span><br>' : ''}
-        <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">Binôme : <strong>${member.binome}</strong></span>
+        <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">${binomeDisplay}</span>
       `;
       
       gridCoequipiers.appendChild(card);
