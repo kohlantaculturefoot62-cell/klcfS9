@@ -101,6 +101,7 @@
       <button class="tab-btn active" onclick="afficherOnglet('boutique', this)">Boutique</button>
       <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
       <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
+      <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
     </div>
 
     <!-- ONGLET 1 : BOUTIQUE -->
@@ -178,22 +179,63 @@
 
   </div>
 </div>
+    <!-- ONGLET : MON ÉQUIPE -->
+<div id="tab-equipe" class="tab-content">
+  <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
+  <p style="margin-bottom: 20px;">Voici les candidats qui composent votre équipe pour cette phase :</p>
+  
+  <div class="candidates-grid" id="grid-coequipiers">
+    <!-- Rempli dynamiquement en JS -->
+  </div>
+</div>
   </main>
 
   <script>
     // Vérification de la session au chargement de la page
     document.addEventListener("DOMContentLoaded", () => {
-      const joueur = sessionStorage.getItem("joueur_connecte");
+  const joueur = sessionStorage.getItem("joueur_connecte");
+  if (!joueur) { window.location.href = "index.html"; return; }
+
+  const nomEquipe = sessionStorage.getItem("equipe_joueur") || "Sans équipe";
+  document.getElementById("info-nom").innerText = joueur;
+  document.getElementById("info-equipe").innerText = nomEquipe;
+  document.getElementById("nom-equipe-titre").innerText = nomEquipe;
+  document.getElementById("info-binome").innerText = sessionStorage.getItem("binome_joueur") || "Aucun";
+
+  if (sessionStorage.getItem("est_capitaine") === "true") {
+    document.getElementById("badge-capitaine").style.display = "block";
+  }
+
+  // --- Charger l'affichage des Coéquipiers ---
+  const coequipiers = JSON.parse(sessionStorage.getItem("liste_coequipiers") || "[]");
+  const gridCoequipiers = document.getElementById("grid-coequipiers");
+  gridCoequipiers.innerHTML = "";
+
+  if (coequipiers.length === 0) {
+    gridCoequipiers.innerHTML = "<p>Aucun coéquipier trouvé.</p>";
+  } else {
+    coequipiers.forEach(member => {
+      const card = document.createElement("div");
+      card.className = "candidate-card";
       
-      // Si aucun joueur n'est connecté, on le redirige vers l'accueil
-      if (!joueur) {
-        window.location.href = "index.html";
-        return;
-      }
+      // Style spécifique si c'est le capitaine ou si c'est le joueur lui-même
+      const isCap = member.estCapitaine;
+      const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
       
-      // Affichage du nom du joueur connecté
-      document.getElementById("player-name").innerText = joueur;
+      card.style.border = isCap ? "2px solid #ffcc00" : "1px solid #ddd";
+      card.style.background = isMe ? "#fffde7" : "white";
+
+      card.innerHTML = `
+        ${isCap ? '<div style="font-size: 24px; margin-bottom: 5px;">👑</div>' : '<div style="font-size: 24px; margin-bottom: 5px;">👤</div>'}
+        <h3 style="margin-bottom: 5px;">${member.nom} ${isMe ? '(Vous)' : ''}</h3>
+        ${isCap ? '<span style="color: #d93025; font-weight: bold; font-size: 13px;">CAPITAINE</span><br>' : ''}
+        <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">Binôme : <strong>${member.binome}</strong></span>
+      `;
+      
+      gridCoequipiers.appendChild(card);
     });
+  }
+});
 
     // Fonction pour changer d'onglet (Boutique / Agenda)
     function afficherOnglet(nomOnglet, btnElement) {
