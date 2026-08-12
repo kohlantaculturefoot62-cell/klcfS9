@@ -50,6 +50,8 @@
   sessionStorage.setItem("equipe_joueur", result.equipe);
   sessionStorage.setItem("binome_joueur", result.binome);
   sessionStorage.setItem("est_capitaine", result.estCapitaine);
+  // Sauvegarde des coéquipiers
+  sessionStorage.setItem("liste_coequipiers", JSON.stringify(result.coequipiers || []));
   
   window.location.href = "espace-candidat.html";
 } else {
