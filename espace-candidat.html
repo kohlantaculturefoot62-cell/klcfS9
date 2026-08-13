@@ -99,14 +99,13 @@
       👑 Capitaine d'équipe
     </p>
   </div>
-    <!-- Boutons de navigation entre la Boutique et l'Agenda -->
-    <div class="tabs-nav">
-      <button class="tab-btn active" onclick="afficherOnglet('boutique', this)">Boutique</button>
-      <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
-      <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
-      <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
-    </div>
 
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="afficherOnglet('boutique', this)">Boutique</button>
+    <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
+    <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
+    <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
+  </div>
     <!-- ONGLET 1 : BOUTIQUE -->
     <div id="tab-boutique" class="tab-content active">
       <h2>Boutique KLCF</h2>
@@ -196,48 +195,52 @@
   <script>
     // Vérification de la session au chargement de la page
     document.addEventListener("DOMContentLoaded", () => {
-  const joueur = sessionStorage.getItem("joueur_connecte");
-  if (!joueur) { window.location.href = "index.html"; return; }
+      const joueur = sessionStorage.getItem("joueur_connecte");
+      if (!joueur) { window.location.href = "index.html"; return; }
 
-  const nomEquipe = sessionStorage.getItem("equipe_joueur") || "Sans équipe";
-  document.getElementById("info-nom").innerText = joueur;
-  document.getElementById("info-equipe").innerText = nomEquipe;
-  document.getElementById("nom-equipe-titre").innerText = nomEquipe;
-  document.getElementById("info-binome").innerText = sessionStorage.getItem("binome_joueur") || "Aucun";
+      // 1. Remplissage des Kohrocqs
+      document.getElementById("solde-binome").innerText = sessionStorage.getItem("solde_binome") || "0";
+      document.getElementById("solde-equipe").innerText = sessionStorage.getItem("solde_equipe") || "0";
 
-  if (sessionStorage.getItem("est_capitaine") === "true") {
-    document.getElementById("badge-capitaine").style.display = "block";
-  }
+      // 2. Remplissage du Profil
+      const nomEquipe = sessionStorage.getItem("equipe_joueur") || "Sans équipe";
+      document.getElementById("info-nom").innerText = joueur;
+      document.getElementById("info-equipe").innerText = nomEquipe;
+      document.getElementById("nom-equipe-titre").innerText = nomEquipe;
+      document.getElementById("info-binome").innerText = sessionStorage.getItem("binome_joueur") || "Aucun";
 
-  // --- Charger l'affichage des Coéquipiers ---
-  const coequipiers = JSON.parse(sessionStorage.getItem("liste_coequipiers") || "[]");
-  const gridCoequipiers = document.getElementById("grid-coequipiers");
-  gridCoequipiers.innerHTML = "";
+      if (sessionStorage.getItem("est_capitaine") === "true") {
+        document.getElementById("badge-capitaine").style.display = "block";
+      }
 
-  if (coequipiers.length === 0) {
-    gridCoequipiers.innerHTML = "<p>Aucun coéquipier trouvé.</p>";
-  } else {
-    coequipiers.forEach(member => {
-    const card = document.createElement("div");
-    card.className = "candidate-card";
-    
-    const isCap = member.estCapitaine;
-    const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
-    
-    card.style.border = isCap ? "2px solid #ffcc00" : "1px solid #ddd";
-    card.style.background = isMe ? "#fffde7" : "white";
+      // 3. Remplissage de la grille "Mon Équipe"
+      const coequipiers = JSON.parse(sessionStorage.getItem("liste_coequipiers") || "[]");
+      const gridCoequipiers = document.getElementById("grid-coequipiers");
+      gridCoequipiers.innerHTML = "";
 
-    card.innerHTML = `
-      ${isCap ? '<div style="font-size: 24px; margin-bottom: 5px;">👑</div>' : '<div style="font-size: 24px; margin-bottom: 5px;">👤</div>'}
-      <h3 style="margin-bottom: 5px;">${member.nom} ${isMe ? '(Vous)' : ''}</h3>
-      ${isCap ? '<span style="color: #d93025; font-weight: bold; font-size: 13px;">CAPITAINE</span><br>' : ''}
-      <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">Binôme : <strong>${member.binome}</strong></span>
-    `;
-    
-    gridCoequipiers.appendChild(card);
-  });
-  }
-});
+      if (coequipiers.length === 0) {
+        gridCoequipiers.innerHTML = "<p>Aucun coéquipier trouvé.</p>";
+      } else {
+        coequipiers.forEach(member => {
+          const card = document.createElement("div");
+          card.className = "candidate-card";
+          
+          const isCap = member.estCapitaine;
+          const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
+          
+          card.style.border = isCap ? "2px solid #ffcc00" : "1px solid #ddd";
+          card.style.background = isMe ? "#fffde7" : "white";
+
+          card.innerHTML = `
+            ${isCap ? '<div style="font-size: 24px; margin-bottom: 5px;">👑</div>' : '<div style="font-size: 24px; margin-bottom: 5px;">👤</div>'}
+            <h3 style="margin-bottom: 5px;">${member.nom} ${isMe ? '(Vous)' : ''}</h3>
+            ${isCap ? '<span style="color: #d93025; font-weight: bold; font-size: 13px;">CAPITAINE</span><br>' : ''}
+            <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">Binôme : <strong>${member.binome}</strong></span>
+          `;
+          gridCoequipiers.appendChild(card);
+        });
+      }
+    });
 
     // Fonction pour changer d'onglet (Boutique / Agenda)
     function afficherOnglet(nomOnglet, btnElement) {
