@@ -105,30 +105,33 @@
     <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
     <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
     <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
+    <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">Inventaire</button>
   </div>
-    <!-- ONGLET 1 : BOUTIQUE -->
-    <div id="tab-boutique" class="tab-content active">
-      <h2>Boutique KLCF</h2>
-      <p>Achetez des avantages ou des objets pour le jeu grâce à vos Kohrocks.</p>
-      
-      <div class="candidates-grid" style="margin-top: 20px;">
-        <!-- Objet 1 de test -->
-        <div class="candidate-card">
-          <h3>Immunité Conseil</h3>
-          <p class="candidate-desc">Annule les voix contre vous lors du prochain conseil.</p>
-          <strong style="color: #d9a700; margin: 10px 0; display: block;">100 Kohrocks</strong>
-          <button class="login-btn" onclick="alert('Fonctionnalité d\'achat à venir !')">Acheter</button>
-        </div>
+    <!-- ONGLET : BOUTIQUE -->
+  <div id="tab-boutique" class="tab-content" style="display: block;">
+    <h2>Boutique Normale (Cagnotte Binôme)</h2>
+    <div class="candidates-grid" id="grid-boutique-normale"></div>
+    
+    <h2 style="margin-top: 40px;">Boutique d'Équipe (Réservée au Capitaine)</h2>
+    <div class="candidates-grid" id="grid-boutique-equipe"></div>
+  </div>
 
-        <!-- Objet 2 de test -->
-        <div class="candidate-card">
-          <h3>Indice Épreuve</h3>
-          <p class="candidate-desc">Obtenez un indice exclusif pour la prochaine épreuve.</p>
-          <strong style="color: #d9a700; margin: 10px 0; display: block;">50 Kohrocks</strong>
-          <button class="login-btn" onclick="alert('Fonctionnalité d\'achat à venir !')">Acheter</button>
-        </div>
-      </div>
-    </div>
+  <!-- ONGLET : INVENTAIRE -->
+  <div id="tab-inventaire" class="tab-content">
+    <h2>Mon Inventaire</h2>
+    <p>Voici les objets possédés par votre Binôme et votre Équipe.</p>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left;">
+      <thead style="background: #f8f9fa;">
+        <tr>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Objet</th>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Propriétaire</th>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Qté</th>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Source</th>
+        </tr>
+      </thead>
+      <tbody id="table-inventaire"></tbody>
+    </table>
+  </div>
 
     <!-- ONGLET 2 : AGENDA -->
     <div id="tab-agenda" class="tab-content">
@@ -412,6 +415,115 @@ async function deplacerRecherche() {
     document.getElementById("badge-capitaine").style.display = "block";
   }
 });
+
+    async function chargerBoutiqueEtInventaire() {
+  const joueur = sessionStorage.getItem("joueur_connecte");
+  const binome = sessionStorage.getItem("binome_joueur");
+  const equipe = sessionStorage.getItem("equipe_joueur");
+  const estCap = sessionStorage.getItem("est_capitaine") === "true";
+
+  document.getElementById("grid-boutique-normale").innerHTML = "<p>Chargement...</p>";
+  document.getElementById("grid-boutique-equipe").innerHTML = "<p>Chargement...</p>";
+  
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_shop_data", binome: binome, equipe: equipe })
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      // 1. BOUTIQUE NORMALE
+      document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
+        const outOfStock = item.stock <= 0;
+        let actionHTML = "";
+        
+        if (item.type.toLowerCase() === "enchere") {
+          actionHTML = `<input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
+                        <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00;">Placer Mise</button>`;
+        } else {
+          actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '${binome}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white;">Acheter (${item.prix} K)</button>`;
+        }
+
+        return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5; filter: grayscale(1);' : ''}">
+          <h3 style="font-size: 16px;">${item.nom}</h3>
+          <p style="font-size: 12px; color: #666; height: 40px; overflow: hidden;">${item.desc}</p>
+          <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
+          <div style="margin-top: 10px;">${outOfStock ? '<strong>RUPTURE</strong>' : actionHTML}</div>
+        </div>`;
+      }).join('');
+
+      // 2. BOUTIQUE ÉQUIPE
+      document.getElementById("grid-boutique-equipe").innerHTML = result.boutiqueEquipe.map(item => {
+        const outOfStock = item.stock <= 0;
+        const btnColor = estCap ? "#28a745" : "#ccc";
+        return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5;' : ''}">
+          <h3 style="font-size: 16px;">${item.nom}</h3>
+          <p style="font-size: 12px; color: #666; height: 40px;">${item.desc}</p>
+          <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
+          <button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" 
+            ${!estCap || outOfStock ? 'disabled title="Seul le capitaine peut acheter"' : ''} 
+            style="margin-top: 10px; width: 100%; padding: 8px; background: ${btnColor}; color: white;">
+            ${!estCap ? 'Réservé Capitaine' : `Acheter (${item.prix} K)`}
+          </button>
+        </div>`;
+      }).join('');
+
+      // 3. INVENTAIRE
+      const tbody = document.getElementById("table-inventaire");
+      if (result.inventaire.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
+      } else {
+        tbody.innerHTML = result.inventaire.map(inv => `
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
+          </tr>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function acheterDirect(itemName, price, shopType, target) {
+  if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocqs ?`)) return;
+  const username = sessionStorage.getItem("joueur_connecte");
+  
+  const response = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target })
+  });
+  const res = await response.json();
+  alert(res.message);
+  if(res.status === "success") chargerBoutiqueEtInventaire(); // Recharge les données
+}
+
+async function placerEnchere(itemName) {
+  const input = document.getElementById(`bid-${itemName}`);
+  const bidAmount = parseInt(input.value, 10);
+  const minPrice = parseInt(input.min, 10);
+  
+  if (!bidAmount || bidAmount < minPrice) {
+    alert(`Votre mise doit être d'au moins ${minPrice} Kohrocqs.`);
+    return;
+  }
+  if (!confirm(`Geler ${bidAmount} Kohrocqs pour miser sur "${itemName}" ?`)) return;
+  
+  const username = sessionStorage.getItem("joueur_connecte");
+  const binome = sessionStorage.getItem("binome_joueur");
+
+  const response = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount, binome })
+  });
+  const res = await response.json();
+  alert(res.message);
+  input.value = ""; // Reset champ
+}
   </script>
 </body>
 </html>
