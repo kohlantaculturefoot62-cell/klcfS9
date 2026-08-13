@@ -220,12 +220,32 @@
 
         if (result.status === "success") {
           // 1. Boutique Normale
+          const mesMises = result.mesMises || {};
+          
           document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
             const outOfStock = item.stock <= 0;
             let actionHTML = "";
+            
             if (item.type.toLowerCase() === "enchere") {
-              actionHTML = `<input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
-                            <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00; cursor:pointer;">Placer Mise</button>`;
+              const currentBid = mesMises[item.nom];
+              
+              if (currentBid) {
+                // Le binôme a déjà une mise active
+                actionHTML = `
+                  <div style="background: #e8f0fe; padding: 8px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; border: 1px solid #b6d4fe;">
+                    Votre mise actuelle : <strong>${currentBid} K</strong>
+                  </div>
+                  <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" placeholder="Nouvelle mise" style="width: 100%; padding: 5px; margin-bottom: 5px;">
+                  <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 6px; background: #ffcc00; font-weight:bold; cursor:pointer; margin-bottom: 5px;">Modifier la mise</button>
+                  <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 5px; background: #dc3545; color: white; cursor:pointer; border:none; border-radius:3px; font-size:12px;">Retirer la mise</button>
+                `;
+              } else {
+                // Pas encore de mise
+                actionHTML = `
+                  <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
+                  <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00; font-weight:bold; cursor:pointer;">Placer Mise</button>
+                `;
+              }
             } else {
               actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '${binome}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white; cursor:pointer;">Acheter (${item.prix} K)</button>`;
             }
@@ -307,6 +327,24 @@
       const res = await response.json();
       alert(res.message);
       input.value = "";
+    }
+    async function annulerEnchere(itemName) {
+      if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocqs ?`)) return;
+      
+      const username = sessionStorage.getItem("joueur_connecte");
+      const binome = sessionStorage.getItem("binome_joueur");
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "cancel_bid", username, itemName, binome })
+      });
+      const res = await response.json();
+      alert(res.message);
+      
+      if (res.status === "success") {
+        // Recharger la boutique et l'en-tête (pour rafraîchir le solde à jour)
+        chargerBoutiqueEtInventaire();
+      }
     }
 
     // -------------------------------------------------------------
