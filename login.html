@@ -46,15 +46,19 @@
     const result = await response.json();
     
     if (result.status === "success") {
-  sessionStorage.setItem("joueur_connecte", result.candidat);
-  sessionStorage.setItem("equipe_joueur", result.equipe);
-  sessionStorage.setItem("binome_joueur", result.binome);
-  sessionStorage.setItem("est_capitaine", result.estCapitaine);
-  // Sauvegarde des coéquipiers
-  sessionStorage.setItem("liste_coequipiers", JSON.stringify(result.coequipiers || []));
-  
-  window.location.href = "espace-candidat.html";
-} else {
+      // Sauvegarde des infos de profil
+      sessionStorage.setItem("joueur_connecte", result.candidat);
+      sessionStorage.setItem("equipe_joueur", result.equipe);
+      sessionStorage.setItem("binome_joueur", result.binome);
+      sessionStorage.setItem("est_capitaine", result.estCapitaine);
+      
+      // Sauvegarde de l'équipe et des soldes
+      sessionStorage.setItem("liste_coequipiers", JSON.stringify(result.coequipiers || []));
+      sessionStorage.setItem("solde_binome", result.soldeBinome);
+      sessionStorage.setItem("solde_equipe", result.soldeEquipe);
+      
+      window.location.href = "espace-candidat.html";
+    } else {
       errorMsg.innerText = result.message;
     }
   } catch (error) {
