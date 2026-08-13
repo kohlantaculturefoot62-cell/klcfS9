@@ -306,18 +306,6 @@
       }
     }
 
-    async function acheterDirect(itemName, price, shopType, target) {
-      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
-      const username = sessionStorage.getItem("joueur_connecte");
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target })
-      });
-      const res = await response.json();
-      alert(res.message);
-      if(res.status === "success") chargerBoutiqueEtInventaire();
-    }
-
     async function placerEnchere(itemName) {
       const input = document.getElementById(`bid-${itemName}`);
       const bidAmount = parseInt(input.value, 10);
@@ -341,9 +329,14 @@
       alert(res.message);
       
       if (res.status === "success") {
-        chargerBoutiqueEtInventaire(); // Rafraîchit l'affichage et les soldes
+        if (res.soldeBinome !== undefined) {
+          sessionStorage.setItem("solde_binome", res.soldeBinome);
+          document.getElementById("solde-binome").innerText = res.soldeBinome;
+        }
+        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
     }
+
     async function annulerEnchere(itemName) {
       if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
       
@@ -358,8 +351,33 @@
       alert(res.message);
       
       if (res.status === "success") {
-        // Recharger la boutique et l'en-tête (pour rafraîchir le solde à jour)
-        chargerBoutiqueEtInventaire();
+        if (res.soldeBinome !== undefined) {
+          sessionStorage.setItem("solde_binome", res.soldeBinome);
+          document.getElementById("solde-binome").innerText = res.soldeBinome;
+        }
+        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
+      }
+    }
+
+    async function acheterDirect(itemName, price, shopType, target) {
+      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
+      const username = sessionStorage.getItem("joueur_connecte");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if(res.status === "success") {
+        if (res.soldeBinome !== undefined) {
+          sessionStorage.setItem("solde_binome", res.soldeBinome);
+          document.getElementById("solde-binome").innerText = res.soldeBinome;
+        }
+        if (res.soldeEquipe !== undefined) {
+          sessionStorage.setItem("solde_equipe", res.soldeEquipe);
+          document.getElementById("solde-equipe").innerText = res.soldeEquipe;
+        }
+        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
     }
 
