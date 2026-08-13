@@ -213,7 +213,8 @@
       try {
         const response = await fetch(API_URL, {
           method: "POST",
-          body: JSON.stringify({ action: "get_shop_data", binome: binome, equipe: equipe })
+          // ✅ NOUVELLE LIGNE (Ajout de username)
+          body: JSON.stringify({ action: "get_shop_data", username: sessionStorage.getItem("joueur_connecte"), binome: binome, equipe: equipe })
         });
         const result = await response.json();
 
