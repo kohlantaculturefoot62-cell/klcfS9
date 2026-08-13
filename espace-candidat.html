@@ -7,67 +7,18 @@
   <link rel="stylesheet" href="style.css">
   <style>
     /* Styles spécifiques à l'espace candidat */
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
+    .user-info { display: flex; align-items: center; gap: 15px; }
+    .solde-box { background-color: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+    .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+    .logout-btn:hover { background-color: #bd2130; }
+
+    /* Menu d'onglets */
+    .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 20px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px; font-weight: bold; transition: background 0.3s; }
+    .tab-btn.active { background: #ffcc00; color: #1a1a1a; }
     
-    .solde-box {
-      background-color: #ffcc00;
-      color: #1a1a1a;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .logout-btn {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .logout-btn:hover {
-      background-color: #bd2130;
-    }
-
-    /* Menu d'onglets (Boutique / Agenda) */
-    .tabs-nav {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 10px;
-    }
-
-    .tab-btn {
-      padding: 10px 20px;
-      border: none;
-      background: #e0e0e0;
-      cursor: pointer;
-      border-radius: 5px;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    .tab-btn.active {
-      background: #ffcc00;
-      color: #1a1a1a;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
 <body>
@@ -76,136 +27,125 @@
   <header class="banner">
     <div class="banner-content">
       <h1 class="logo">KLCF S9</h1>
-      
-      <!-- Infos Joueur & Déconnexion à droite -->
       <div class="user-info" style="display: flex; gap: 10px; align-items: center;">
         <div class="solde-box" style="background: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Cagnotte Binôme : <span id="solde-binome">0</span> Kohrocq
+          Cagnotte Binôme : <span id="solde-binome">0</span> Kohrocqs
         </div>
         <div class="solde-box" style="background: #d93025; color: white; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Cagnotte Équipe : <span id="solde-equipe">0</span> Kohrocq
+          Cagnotte Équipe : <span id="solde-equipe">0</span> Kohrocqs
         </div>
         <button class="logout-btn" onclick="deconnexion()">Déconnexion</button>
       </div>
+    </div>
   </header>
 
   <main class="section-container">
-    <!-- BLOC PROFIL À RAJOUTER ICI -->
-  <div class="user-profile-summary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-    <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
-    <p>Équipe : <strong id="info-equipe">---</strong></p>
-    <p>Binôme : <strong id="info-binome">---</strong></p>
-    <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">
-      👑 Capitaine d'équipe
-    </p>
-  </div>
-
-  <div class="tabs-nav">
-    <button class="tab-btn active" onclick="afficherOnglet('boutique', this)">Boutique</button>
-    <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
-    <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
-    <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
-    <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">Inventaire</button>
-  </div>
-    <!-- ONGLET : BOUTIQUE -->
-  <div id="tab-boutique" class="tab-content" style="display: block;">
-    <h2>Boutique Normale (Cagnotte Binôme)</h2>
-    <div class="candidates-grid" id="grid-boutique-normale"></div>
     
-    <h2 style="margin-top: 40px;">Boutique d'Équipe (Réservée au Capitaine)</h2>
-    <div class="candidates-grid" id="grid-boutique-equipe"></div>
-  </div>
+    <!-- BLOC PROFIL -->
+    <div class="user-profile-summary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
+      <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
+      <p>Équipe : <strong id="info-equipe">---</strong></p>
+      <p>Binôme : <strong id="info-binome">---</strong></p>
+      <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">👑 Capitaine d'équipe</p>
+    </div>
 
-  <!-- ONGLET : INVENTAIRE -->
-  <div id="tab-inventaire" class="tab-content">
-    <h2>Mon Inventaire</h2>
-    <p>Voici les objets possédés par votre Binôme et votre Équipe.</p>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left;">
-      <thead style="background: #f8f9fa;">
-        <tr>
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Objet</th>
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Propriétaire</th>
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Qté</th>
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Source</th>
-        </tr>
-      </thead>
-      <tbody id="table-inventaire"></tbody>
-    </table>
-  </div>
+    <!-- NAVIGATION DES ONGLETS -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="afficherOnglet('boutique', this); chargerBoutiqueEtInventaire();">Boutique</button>
+      <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">Mon Inventaire</button>
+      <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
+      <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
+      <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
+    </div>
 
-    <!-- ONGLET 2 : AGENDA -->
+    <!-- ONGLET 1 : BOUTIQUE -->
+    <div id="tab-boutique" class="tab-content active">
+      <h2>Boutique Normale (Cagnotte Binôme)</h2>
+      <div class="candidates-grid" id="grid-boutique-normale" style="margin-top: 20px;">
+        <p>Chargement de la boutique...</p>
+      </div>
+      
+      <h2 style="margin-top: 40px;">Boutique d'Équipe (Réservée au Capitaine)</h2>
+      <div class="candidates-grid" id="grid-boutique-equipe" style="margin-top: 20px;">
+        <p>Chargement de la boutique...</p>
+      </div>
+    </div>
+
+    <!-- ONGLET 2 : INVENTAIRE -->
+    <div id="tab-inventaire" class="tab-content">
+      <h2>Mon Inventaire</h2>
+      <p>Voici les objets possédés par votre Binôme et votre Équipe.</p>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <thead style="background: #f8f9fa;">
+          <tr>
+            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Objet</th>
+            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Propriétaire</th>
+            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Qté</th>
+            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Source</th>
+          </tr>
+        </thead>
+        <tbody id="table-inventaire">
+          <tr><td colspan="4" style="padding: 10px;">Chargement de l'inventaire...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ONGLET 3 : MON ÉQUIPE -->
+    <div id="tab-equipe" class="tab-content">
+      <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
+      <p style="margin-bottom: 20px;">Voici les candidats qui composent votre équipe pour cette phase :</p>
+      <div class="candidates-grid" id="grid-coequipiers"></div>
+    </div>
+
+    <!-- ONGLET 4 : AGENDA -->
     <div id="tab-agenda" class="tab-content">
       <h2>Agenda des Événements</h2>
       <p>Consultez le calendrier officiel de la saison (Heure de Paris).</p>
-      
       <div class="calendar-wrapper">
-        <iframe 
-          src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" 
-          style="border: 0" 
-          width="100%" 
-          height="500" 
-          frameborder="0" 
-          scrolling="no">
-        </iframe>
-      </div>
-    </div>
-  <!-- ONGLET 3 : RECHERCHE COLLIER -->
-<div id="tab-recherche" class="tab-content">
-  <h2>Chasse au Collier (Grille A1 à Z300)</h2>
-  
-  <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-    
-    <!-- Zone de gauche : Actions -->
-    <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-      <h3 style="margin-bottom: 15px;">Votre Position</h3>
-      
-      <div id="recherche-status">
-        <p>Chargement de votre position...</p>
-      </div>
-
-      <div id="recherche-actions" style="display: none; margin-top: 20px;">
-        <h4 style="margin-bottom: 10px;">Fouiller une nouvelle case</h4>
-        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Le temps d'attente sera de 1 heure par case de distance parcourue.</p>
-        
-        <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
-        
-        <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider le déplacement</button>
-        <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
+        <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border: 0" width="100%" height="500" frameborder="0" scrolling="no"></iframe>
       </div>
     </div>
 
-    <!-- Zone de droite : Historique -->
-    <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-      <h3>Votre Historique</h3>
-      <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;">
-        <!-- Sera rempli en JS -->
-      </ul>
+    <!-- ONGLET 5 : RECHERCHE COLLIER -->
+    <div id="tab-recherche" class="tab-content">
+      <h2>Chasse au Collier (Grille A1 à Z300)</h2>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+        <!-- Zone Actions -->
+        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          <h3 style="margin-bottom: 15px;">Votre Position</h3>
+          <div id="recherche-status"><p>Chargement de votre position...</p></div>
+          <div id="recherche-actions" style="display: none; margin-top: 20px;">
+            <h4 style="margin-bottom: 10px;">Fouiller une nouvelle case</h4>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Attente : 1 heure par case de distance.</p>
+            <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
+            <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider le déplacement</button>
+            <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
+          </div>
+        </div>
+        <!-- Zone Historique -->
+        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          <h3>Votre Historique</h3>
+          <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;"></ul>
+        </div>
+      </div>
     </div>
-
-  </div>
-</div>
-    <!-- ONGLET : MON ÉQUIPE -->
-<div id="tab-equipe" class="tab-content">
-  <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
-  <p style="margin-bottom: 20px;">Voici les candidats qui composent votre équipe pour cette phase :</p>
-  
-  <div class="candidates-grid" id="grid-coequipiers">
-    <!-- Rempli dynamiquement en JS -->
-  </div>
-</div>
   </main>
 
   <script>
-    // Vérification de la session au chargement de la page
+    const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
+
+    // -------------------------------------------------------------
+    // INITIALISATION DE LA PAGE
+    // -------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = sessionStorage.getItem("joueur_connecte");
       if (!joueur) { window.location.href = "index.html"; return; }
 
-      // 1. Remplissage des Kohrocqs
+      // Affichage des Kohrocqs
       document.getElementById("solde-binome").innerText = sessionStorage.getItem("solde_binome") || "0";
       document.getElementById("solde-equipe").innerText = sessionStorage.getItem("solde_equipe") || "0";
 
-      // 2. Remplissage du Profil
+      // Affichage du Profil
       const nomEquipe = sessionStorage.getItem("equipe_joueur") || "Sans équipe";
       document.getElementById("info-nom").innerText = joueur;
       document.getElementById("info-equipe").innerText = nomEquipe;
@@ -216,7 +156,7 @@
         document.getElementById("badge-capitaine").style.display = "block";
       }
 
-      // 3. Remplissage de la grille "Mon Équipe"
+      // Remplissage de l'équipe
       const coequipiers = JSON.parse(sessionStorage.getItem("liste_coequipiers") || "[]");
       const gridCoequipiers = document.getElementById("grid-coequipiers");
       gridCoequipiers.innerHTML = "";
@@ -227,7 +167,6 @@
         coequipiers.forEach(member => {
           const card = document.createElement("div");
           card.className = "candidate-card";
-          
           const isCap = member.estCapitaine;
           const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
           
@@ -243,287 +182,247 @@
           gridCoequipiers.appendChild(card);
         });
       }
+
+      // Charger la boutique par défaut au démarrage
+      chargerBoutiqueEtInventaire();
     });
 
-    // Fonction pour changer d'onglet (Boutique / Agenda)
+    // -------------------------------------------------------------
+    // GESTION DES ONGLETS ET DECONNEXION
+    // -------------------------------------------------------------
     function afficherOnglet(nomOnglet, btnElement) {
-      // Masquer tous les contenus
       document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-      // Désactiver tous les boutons
       document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
-      
-      // Activer l'onglet sélectionné
       document.getElementById("tab-" + nomOnglet).classList.add("active");
       btnElement.classList.add("active");
     }
 
-    // Fonction de déconnexion
     function deconnexion() {
-      sessionStorage.removeItem("joueur_connecte");
+      sessionStorage.clear();
       window.location.href = "index.html";
     }
-  let currentPosition = null;
-let timerInterval = null;
-const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec"; // A REMPLACER !
 
-async function chargerRecherche() {
-  const joueur = sessionStorage.getItem("joueur_connecte");
-  const statusDiv = document.getElementById("recherche-status");
-  const actionDiv = document.getElementById("recherche-actions");
-  const histList = document.getElementById("recherche-historique");
-  
-  statusDiv.innerHTML = "<p>Actualisation...</p>";
-  actionDiv.style.display = "none";
-  histList.innerHTML = "";
+    // -------------------------------------------------------------
+    // LOGIQUE BOUTIQUE ET INVENTAIRE
+    // -------------------------------------------------------------
+    async function chargerBoutiqueEtInventaire() {
+      const binome = sessionStorage.getItem("binome_joueur");
+      const equipe = sessionStorage.getItem("equipe_joueur");
+      const estCap = sessionStorage.getItem("est_capitaine") === "true";
 
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "get_recherche", username: joueur })
-    });
-    const result = await response.json();
-    
-    if(result.status === "success") {
-      currentPosition = result.position;
-      
-      // Affichage de l'historique
-      if(result.historique.length === 0) {
-        histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment.</li>";
-      } else {
-        result.historique.forEach(h => {
-          const color = h.resultat.includes("TROUVÉ") ? "green" : "red";
-          histList.innerHTML += `<li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-            <strong>${h.case}</strong> à ${h.date.split(" ")[1]} <br>
-            <span style="color: ${color};">${h.resultat}</span>
-          </li>`;
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "get_shop_data", binome: binome, equipe: equipe })
         });
-      }
+        const result = await response.json();
 
-      // VÉRIFICATION FERMETURE NOCTURNE (00h00 - 08h00)
-      if (!result.isOpen) {
-        statusDiv.innerHTML = `
-          <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; text-align: center;">
-            🌙 <strong>Recherche fermée pour la nuit</strong><br>
-            Les recherches rouvrent chaque jour à <strong>08h00</strong> du matin. Vous pourrez alors choisir une nouvelle case de départ !
-          </div>
-        `;
-        actionDiv.style.display = "none";
+        if (result.status === "success") {
+          // Boutique Normale
+          document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
+            const outOfStock = item.stock <= 0;
+            let actionHTML = "";
+            if (item.type.toLowerCase() === "enchere") {
+              actionHTML = `<input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
+                            <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00; cursor:pointer;">Placer Mise</button>`;
+            } else {
+              actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '${binome}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white; cursor:pointer;">Acheter (${item.prix} K)</button>`;
+            }
+
+            return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5; filter: grayscale(1);' : ''}">
+              <h3 style="font-size: 16px;">${item.nom}</h3>
+              <p style="font-size: 12px; color: #666; height: 40px; overflow: hidden;">${item.desc}</p>
+              <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
+              <div style="margin-top: 10px;">${outOfStock ? '<strong>RUPTURE</strong>' : actionHTML}</div>
+            </div>`;
+          }).join('');
+
+          // Boutique Équipe
+          document.getElementById("grid-boutique-equipe").innerHTML = result.boutiqueEquipe.map(item => {
+            const outOfStock = item.stock <= 0;
+            const btnColor = estCap ? "#28a745" : "#ccc";
+            return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5;' : ''}">
+              <h3 style="font-size: 16px;">${item.nom}</h3>
+              <p style="font-size: 12px; color: #666; height: 40px;">${item.desc}</p>
+              <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
+              <button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" 
+                ${!estCap || outOfStock ? 'disabled title="Seul le capitaine peut acheter"' : ''} 
+                style="margin-top: 10px; width: 100%; padding: 8px; background: ${btnColor}; color: white; cursor:pointer;">
+                ${!estCap ? 'Réservé Capitaine' : `Acheter (${item.prix} K)`}
+              </button>
+            </div>`;
+          }).join('');
+
+          // Inventaire
+          const tbody = document.getElementById("table-inventaire");
+          if (result.inventaire.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='4' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
+          } else {
+            tbody.innerHTML = result.inventaire.map(inv => `
+              <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
+              </tr>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        console.error("Erreur chargement boutique", err);
+      }
+    }
+
+    async function acheterDirect(itemName, price, shopType, target) {
+      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocqs ?`)) return;
+      const username = sessionStorage.getItem("joueur_connecte");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if(res.status === "success") chargerBoutiqueEtInventaire();
+    }
+
+    async function placerEnchere(itemName) {
+      const input = document.getElementById(`bid-${itemName}`);
+      const bidAmount = parseInt(input.value, 10);
+      const minPrice = parseInt(input.min, 10);
+      if (!bidAmount || bidAmount < minPrice) {
+        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocqs.`);
         return;
       }
+      if (!confirm(`Geler ${bidAmount} Kohrocqs pour miser sur "${itemName}" ?`)) return;
+      
+      const username = sessionStorage.getItem("joueur_connecte");
+      const binome = sessionStorage.getItem("binome_joueur");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount, binome })
+      });
+      const res = await response.json();
+      alert(res.message);
+      input.value = "";
+    }
 
-      // Gérer la position et le Timer
-      const nextAction = result.prochaineAction;
-      const now = result.maintenant;
+    // -------------------------------------------------------------
+    // LOGIQUE RECHERCHE
+    // -------------------------------------------------------------
+    let currentPosition = null;
+    let timerInterval = null;
 
-      if (!currentPosition) {
-        // Nouveau jour (ou premier coup) : Proposition du point de départ
-        statusDiv.innerHTML = `<p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z300).</p>`;
-        actionDiv.style.display = "block";
-      } else if (now < nextAction) {
-        // En attente du délai de déplacement
-        lancerTimer(nextAction, statusDiv, actionDiv);
-      } else {
-        // Prêt à bouger
-        statusDiv.innerHTML = `
-          <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position actuelle : ${currentPosition}</div>
-          <span style="color: green;">Prêt pour un nouveau déplacement !</span>
-        `;
-        actionDiv.style.display = "block";
+    async function chargerRecherche() {
+      const joueur = sessionStorage.getItem("joueur_connecte");
+      const statusDiv = document.getElementById("recherche-status");
+      const actionDiv = document.getElementById("recherche-actions");
+      const histList = document.getElementById("recherche-historique");
+      
+      statusDiv.innerHTML = "<p>Actualisation...</p>";
+      actionDiv.style.display = "none";
+      histList.innerHTML = "";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "get_recherche", username: joueur })
+        });
+        const result = await response.json();
+        
+        if(result.status === "success") {
+          currentPosition = result.position;
+          
+          if(result.historique.length === 0) {
+            histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment.</li>";
+          } else {
+            result.historique.forEach(h => {
+              const color = h.resultat.includes("TROUVÉ") ? "green" : "red";
+              histList.innerHTML += `<li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                <strong>${h.case}</strong> à ${h.date.split(" ")[1]} <br>
+                <span style="color: ${color};">${h.resultat}</span>
+              </li>`;
+            });
+          }
+
+          if (!result.isOpen) {
+            statusDiv.innerHTML = `<div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; text-align: center;">🌙 <strong>Recherche fermée pour la nuit</strong><br>Les recherches rouvrent chaque jour à <strong>08h00</strong>.</div>`;
+            return;
+          }
+
+          const nextAction = result.prochaineAction;
+          const now = result.maintenant;
+
+          if (!currentPosition) {
+            statusDiv.innerHTML = `<p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z300).</p>`;
+            actionDiv.style.display = "block";
+          } else if (now < nextAction) {
+            lancerTimer(nextAction, statusDiv, actionDiv);
+          } else {
+            statusDiv.innerHTML = `<div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position actuelle : ${currentPosition}</div><span style="color: green;">Prêt pour un nouveau déplacement !</span>`;
+            actionDiv.style.display = "block";
+          }
+        }
+      } catch (err) {
+        statusDiv.innerHTML = "<p style='color:red;'>Erreur de connexion.</p>";
       }
     }
-  } catch (err) {
-    statusDiv.innerHTML = "<p style='color:red;'>Erreur de connexion.</p>";
-  }
-}
 
-function lancerTimer(endTimeMs, statusDiv, actionDiv) {
-  if (timerInterval) clearInterval(timerInterval);
-  actionDiv.style.display = "none"; // Cache les actions
-  
-  timerInterval = setInterval(() => {
-    const now = new Date().getTime();
-    const distanceMs = endTimeMs - now;
+    function lancerTimer(endTimeMs, statusDiv, actionDiv) {
+      if (timerInterval) clearInterval(timerInterval);
+      actionDiv.style.display = "none";
+      
+      timerInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const distanceMs = endTimeMs - now;
 
-    if (distanceMs <= 0) {
-      clearInterval(timerInterval);
-      chargerRecherche(); // Recharger quand le temps est écoulé
-      return;
-    }
-
-    const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
-
-    statusDiv.innerHTML = `
-      <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position : ${currentPosition}</div>
-      <p style="color: #666;">En cours de fouille...</p>
-      <div style="font-size: 20px; font-weight: bold; color: #d93025; margin-top: 10px;">
-        ⏳ Prochaine action dans : ${h}h ${m}m ${s}s
-      </div>
-    `;
-  }, 1000);
-}
-
-async function deplacerRecherche() {
-  const joueur = sessionStorage.getItem("joueur_connecte");
-  const target = document.getElementById("target-cell").value;
-  const msgLabel = document.getElementById("recherche-msg");
-  
-  if (!target) {
-    msgLabel.innerText = "Veuillez entrer une case.";
-    return;
-  }
-  
-  msgLabel.innerText = "Calcul en cours...";
-  
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "move_recherche", username: joueur, currentCell: currentPosition, targetCell: target })
-    });
-    const result = await response.json();
-    
-    if (result.status === "success") {
-      msgLabel.innerText = "";
-      document.getElementById("target-cell").value = "";
-      chargerRecherche(); // Recharger toute l'interface
-    } else {
-      msgLabel.innerText = result.message;
-    }
-  } catch (err) {
-    msgLabel.innerText = "Erreur de communication serveur.";
-  }
-}
-    document.addEventListener("DOMContentLoaded", () => {
-  const joueur = sessionStorage.getItem("joueur_connecte");
-  
-  if (!joueur) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  // Remplissage des données dans l'en-tête et le bloc profil
-  document.getElementById("player-name").innerText = joueur;
-  document.getElementById("info-nom").innerText = joueur;
-  document.getElementById("info-equipe").innerText = sessionStorage.getItem("equipe_joueur") || "Non assigné";
-  document.getElementById("info-binome").innerText = sessionStorage.getItem("binome_joueur") || "Aucun";
-
-  // Affichage du badge si le joueur est capitaine
-  if (sessionStorage.getItem("est_capitaine") === "true") {
-    document.getElementById("badge-capitaine").style.display = "block";
-  }
-});
-
-    async function chargerBoutiqueEtInventaire() {
-  const joueur = sessionStorage.getItem("joueur_connecte");
-  const binome = sessionStorage.getItem("binome_joueur");
-  const equipe = sessionStorage.getItem("equipe_joueur");
-  const estCap = sessionStorage.getItem("est_capitaine") === "true";
-
-  document.getElementById("grid-boutique-normale").innerHTML = "<p>Chargement...</p>";
-  document.getElementById("grid-boutique-equipe").innerHTML = "<p>Chargement...</p>";
-  
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "get_shop_data", binome: binome, equipe: equipe })
-    });
-    const result = await response.json();
-
-    if (result.status === "success") {
-      // 1. BOUTIQUE NORMALE
-      document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
-        const outOfStock = item.stock <= 0;
-        let actionHTML = "";
-        
-        if (item.type.toLowerCase() === "enchere") {
-          actionHTML = `<input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
-                        <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00;">Placer Mise</button>`;
-        } else {
-          actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '${binome}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white;">Acheter (${item.prix} K)</button>`;
+        if (distanceMs <= 0) {
+          clearInterval(timerInterval);
+          chargerRecherche();
+          return;
         }
 
-        return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5; filter: grayscale(1);' : ''}">
-          <h3 style="font-size: 16px;">${item.nom}</h3>
-          <p style="font-size: 12px; color: #666; height: 40px; overflow: hidden;">${item.desc}</p>
-          <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
-          <div style="margin-top: 10px;">${outOfStock ? '<strong>RUPTURE</strong>' : actionHTML}</div>
-        </div>`;
-      }).join('');
+        const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
 
-      // 2. BOUTIQUE ÉQUIPE
-      document.getElementById("grid-boutique-equipe").innerHTML = result.boutiqueEquipe.map(item => {
-        const outOfStock = item.stock <= 0;
-        const btnColor = estCap ? "#28a745" : "#ccc";
-        return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5;' : ''}">
-          <h3 style="font-size: 16px;">${item.nom}</h3>
-          <p style="font-size: 12px; color: #666; height: 40px;">${item.desc}</p>
-          <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
-          <button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" 
-            ${!estCap || outOfStock ? 'disabled title="Seul le capitaine peut acheter"' : ''} 
-            style="margin-top: 10px; width: 100%; padding: 8px; background: ${btnColor}; color: white;">
-            ${!estCap ? 'Réservé Capitaine' : `Acheter (${item.prix} K)`}
-          </button>
-        </div>`;
-      }).join('');
+        statusDiv.innerHTML = `
+          <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position : ${currentPosition}</div>
+          <p style="color: #666;">En cours de fouille...</p>
+          <div style="font-size: 20px; font-weight: bold; color: #d93025; margin-top: 10px;">
+            ⏳ Prochaine action dans : ${h}h ${m}m ${s}s
+          </div>
+        `;
+      }, 1000);
+    }
 
-      // 3. INVENTAIRE
-      const tbody = document.getElementById("table-inventaire");
-      if (result.inventaire.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
-      } else {
-        tbody.innerHTML = result.inventaire.map(inv => `
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
-          </tr>
-        `).join('');
+    async function deplacerRecherche() {
+      const joueur = sessionStorage.getItem("joueur_connecte");
+      const target = document.getElementById("target-cell").value;
+      const msgLabel = document.getElementById("recherche-msg");
+      
+      if (!target) { msgLabel.innerText = "Veuillez entrer une case."; return; }
+      msgLabel.innerText = "Calcul en cours...";
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "move_recherche", username: joueur, currentCell: currentPosition, targetCell: target })
+        });
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          msgLabel.innerText = "";
+          document.getElementById("target-cell").value = "";
+          chargerRecherche();
+        } else {
+          msgLabel.innerText = result.message;
+        }
+      } catch (err) {
+        msgLabel.innerText = "Erreur de communication serveur.";
       }
     }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function acheterDirect(itemName, price, shopType, target) {
-  if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocqs ?`)) return;
-  const username = sessionStorage.getItem("joueur_connecte");
-  
-  const response = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target })
-  });
-  const res = await response.json();
-  alert(res.message);
-  if(res.status === "success") chargerBoutiqueEtInventaire(); // Recharge les données
-}
-
-async function placerEnchere(itemName) {
-  const input = document.getElementById(`bid-${itemName}`);
-  const bidAmount = parseInt(input.value, 10);
-  const minPrice = parseInt(input.min, 10);
-  
-  if (!bidAmount || bidAmount < minPrice) {
-    alert(`Votre mise doit être d'au moins ${minPrice} Kohrocqs.`);
-    return;
-  }
-  if (!confirm(`Geler ${bidAmount} Kohrocqs pour miser sur "${itemName}" ?`)) return;
-  
-  const username = sessionStorage.getItem("joueur_connecte");
-  const binome = sessionStorage.getItem("binome_joueur");
-
-  const response = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount, binome })
-  });
-  const res = await response.json();
-  alert(res.message);
-  input.value = ""; // Reset champ
-}
   </script>
 </body>
 </html>
