@@ -141,7 +141,7 @@
       const joueur = sessionStorage.getItem("joueur_connecte");
       if (!joueur) { window.location.href = "index.html"; return; }
 
-      // Affichage des Kohrocqs
+      // Affichage des 
       document.getElementById("solde-binome").innerText = sessionStorage.getItem("solde_binome") || "0";
       document.getElementById("solde-equipe").innerText = sessionStorage.getItem("solde_equipe") || "0";
 
@@ -314,11 +314,11 @@
       const minPrice = parseInt(input.min, 10);
       
       if (isNaN(bidAmount) || bidAmount < minPrice) {
-        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocqs.`);
+        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocq.`);
         return;
       }
       
-      if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocqs sur "${itemName}" ?`)) return;
+      if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocq sur "${itemName}" ?`)) return;
       
       const username = sessionStorage.getItem("joueur_connecte");
       const binome = sessionStorage.getItem("binome_joueur");
