@@ -29,10 +29,10 @@
       <h1 class="logo">KLCF S9</h1>
       <div class="user-info" style="display: flex; gap: 10px; align-items: center;">
         <div class="solde-box" style="background: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Cagnotte Binôme : <span id="solde-binome">0</span> Kohrocqs
+          Cagnotte Binôme : <span id="solde-binome">0</span> Kohrocq
         </div>
         <div class="solde-box" style="background: #d93025; color: white; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Cagnotte Équipe : <span id="solde-equipe">0</span> Kohrocqs
+          Cagnotte Équipe : <span id="solde-equipe">0</span> Kohrocq
         </div>
         <button class="logout-btn" onclick="deconnexion()">Déconnexion</button>
       </div>
@@ -277,7 +277,7 @@
     }
 
     async function acheterDirect(itemName, price, shopType, target) {
-      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocqs ?`)) return;
+      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
       const username = sessionStorage.getItem("joueur_connecte");
       const response = await fetch(API_URL, {
         method: "POST",
@@ -293,10 +293,10 @@
       const bidAmount = parseInt(input.value, 10);
       const minPrice = parseInt(input.min, 10);
       if (!bidAmount || bidAmount < minPrice) {
-        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocqs.`);
+        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocq.`);
         return;
       }
-      if (!confirm(`Geler ${bidAmount} Kohrocqs pour miser sur "${itemName}" ?`)) return;
+      if (!confirm(`Geler ${bidAmount} Kohrocq pour miser sur "${itemName}" ?`)) return;
       
       const username = sessionStorage.getItem("joueur_connecte");
       const binome = sessionStorage.getItem("binome_joueur");
