@@ -219,8 +219,18 @@
         const result = await response.json();
 
         if (result.status === "success") {
+          // Mise à jour automatique des cagnottes dans l'en-tête et en session
+          if (result.soldeBinome !== undefined) {
+          sessionStorage.setItem("solde_binome", result.soldeBinome);
+          document.getElementById("solde-binome").innerText = result.soldeBinome;
+          }
+          if (result.soldeEquipe !== undefined) {
+          sessionStorage.setItem("solde_equipe", result.soldeEquipe);
+          document.getElementById("solde-equipe").innerText = result.soldeEquipe;
+          }
           // 1. Boutique Normale
           const mesMises = result.mesMises || {};
+          
           
           document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
             const outOfStock = item.stock <= 0;
