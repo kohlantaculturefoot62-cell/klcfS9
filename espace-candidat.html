@@ -312,21 +312,27 @@
       const input = document.getElementById(`bid-${itemName}`);
       const bidAmount = parseInt(input.value, 10);
       const minPrice = parseInt(input.min, 10);
-      if (!bidAmount || bidAmount < minPrice) {
-        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocq.`);
+      
+      if (isNaN(bidAmount) || bidAmount < minPrice) {
+        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocqs.`);
         return;
       }
-      if (!confirm(`Geler ${bidAmount} Kohrocq pour miser sur "${itemName}" ?`)) return;
+      
+      if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocqs sur "${itemName}" ?`)) return;
       
       const username = sessionStorage.getItem("joueur_connecte");
       const binome = sessionStorage.getItem("binome_joueur");
+
       const response = await fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount, binome })
       });
       const res = await response.json();
       alert(res.message);
-      input.value = "";
+      
+      if (res.status === "success") {
+        chargerBoutiqueEtInventaire(); // Rafraîchit l'affichage et les soldes
+      }
     }
     async function annulerEnchere(itemName) {
       if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
