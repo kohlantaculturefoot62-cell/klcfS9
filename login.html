@@ -55,6 +55,7 @@
           localStorage.setItem("equipe_joueur", result.equipe);
           localStorage.setItem("binome_joueur", result.binome);
           localStorage.setItem("est_capitaine", result.estCapitaine);
+          localStorage.setItem("niveau_recherche", result.niveauRecherche || 1);
           localStorage.setItem("liste_coequipiers", JSON.stringify(result.coequipiers || []));
           localStorage.setItem("solde_individuel", result.soldeIndividuel);
           localStorage.setItem("solde_equipe", result.soldeEquipe);
