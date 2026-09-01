@@ -24,10 +24,9 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec"; 
 
-    // Vérification de la connexion automatique dès le chargement de la page
     document.addEventListener("DOMContentLoaded", () => {
       if (localStorage.getItem("joueur_connecte")) {
-        window.location.href = "espace_candidat.html";
+        window.location.href = "espace-candidat.html";
       }
     });
 
@@ -52,7 +51,6 @@
         const result = await response.json();
         
         if (result.status === "success") {
-          // Sauvegarde persistante dans localStorage
           localStorage.setItem("joueur_connecte", result.candidat);
           localStorage.setItem("equipe_joueur", result.equipe);
           localStorage.setItem("binome_joueur", result.binome);
@@ -61,7 +59,7 @@
           localStorage.setItem("solde_binome", result.soldeBinome);
           localStorage.setItem("solde_equipe", result.soldeEquipe);
           
-          window.location.href = "espace_candidat.html";
+          window.location.href = "espace-candidat.html";
         } else {
           errorMsg.innerText = result.message;
         }
