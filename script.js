@@ -3,11 +3,10 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79e
 document.addEventListener("DOMContentLoaded", () => {
   chargerCandidats();
 
-  // Si le joueur est déjà connecté, on adapte le bouton de la bannière
   const loginBtn = document.querySelector(".login-btn");
   if (loginBtn && localStorage.getItem("joueur_connecte")) {
     loginBtn.innerText = "Mon Espace";
-    loginBtn.onclick = () => { window.location.href = "espace_candidat.html"; };
+    loginBtn.onclick = () => { window.location.href = "espace-candidat.html"; };
   }
 });
 
@@ -19,12 +18,11 @@ async function chargerCandidats() {
     const result = await response.json();
     
     if (result.status === "success") {
-      grid.innerHTML = ""; // On vide le texte "Chargement..."
+      grid.innerHTML = "";
       
       result.data.forEach(candidat => {
         let photoUrl = candidat.photo;
         
-        // Extraction de l'ID de l'image Drive et utilisation du meilleur format d'URL
         if (photoUrl.includes("file/d/")) {
           const fileId = photoUrl.split("file/d/")[1].split("/")[0];
           photoUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
