@@ -52,11 +52,11 @@
     </div>
   </div>
 
-  <!-- Modal Multi-Cibles Dynamique (1, 2 ou 3 Cibles) -->
+  <!-- Modal Multi-Cibles Dynamique (Uniquement Coéquipiers) -->
   <div id="target-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin-bottom: 10px;">🎯 CHOISIR LES CIBLES</h2>
-      <p style="font-size: 14px; margin-bottom: 15px;">Sélectionnez les candidats ciblés par <strong id="target-modal-item">---</strong> :</p>
+      <p style="font-size: 14px; margin-bottom: 15px;">Sélectionnez parmi vos coéquipiers pour <strong id="target-modal-item">---</strong> :</p>
       <div id="target-dropdowns-container" style="text-align: left; margin-bottom: 20px;"></div>
       <div style="display: flex; gap: 10px;">
         <button class="login-btn" style="flex: 1; background: #28a745;" onclick="validerUtilisationAvecCible()">Confirmer</button>
@@ -311,6 +311,10 @@
             localStorage.setItem("solde_equipe", result.soldeEquipe);
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
+          if (result.niveauRecherche !== undefined) {
+            localStorage.setItem("niveau_recherche", result.niveauRecherche);
+            document.getElementById("info-niveau-recherche").innerText = `Niveau ${result.niveauRecherche} (${result.niveauRecherche} action(s)/série)`;
+          }
 
           const mesMises = result.mesMises || {};
           const tousNormale = result.boutiqueNormale || [];
@@ -421,7 +425,7 @@
     }
 
     // -------------------------------------------------------------
-    // MODAL MULTI-CIBLES & UTILISATION
+    // MODAL MULTI-CIBLES (RESTRICTION EXCLUSIVE AUX COÉQUIPIERS)
     // -------------------------------------------------------------
     function demarrerUtilisation(itemName, owner, cibleRequise) {
       pendingUseItem = { itemName, owner, cibleRequise };
@@ -435,19 +439,31 @@
       if (nbCibles > 0) {
         const modal = document.getElementById("target-modal");
         const container = document.getElementById("target-dropdowns-container");
+        const userEquipe = localStorage.getItem("equipe_joueur") || "";
         const joueur = localStorage.getItem("joueur_connecte");
 
         document.getElementById("target-modal-item").innerText = itemName;
         container.innerHTML = "";
 
+        // Récupération exclusive des membres de sa propre tribu (hors soi-même)
+        const coequipiersDisponibles = listeCandidatsGlobale.filter(c => 
+          c.equipe.toLowerCase() === userEquipe.toLowerCase() && 
+          c.nom.toLowerCase() !== joueur.toLowerCase()
+        );
+
+        if (coequipiersDisponibles.length < nbCibles) {
+          alert(`Action impossible : Vous avez besoin de ${nbCibles} coéquipier(s) distinct(s), mais votre équipe n'en compte que ${coequipiersDisponibles.length}.`);
+          return;
+        }
+
         for (let i = 1; i <= nbCibles; i++) {
-          let label = nbCibles > 1 ? `<label style="display:block; font-weight:bold; margin-top:8px; font-size:13px;">Cible N°${i} :</label>` : '';
-          let options = `<option value="">-- Choisir un aventurier --</option>`;
-          listeCandidatsGlobale.forEach(c => {
-            if (c.nom.toLowerCase() !== joueur.toLowerCase()) {
-              options += `<option value="${c.nom}">${c.nom} (${c.equipe})</option>`;
-            }
+          let label = nbCibles > 1 ? `<label style="display:block; font-weight:bold; margin-top:8px; font-size:13px;">Coéquipier N°${i} :</label>` : '';
+          let options = `<option value="">-- Choisir un membre de l'équipe --</option>`;
+          
+          coequipiersDisponibles.forEach(c => {
+            options += `<option value="${c.nom}">${c.nom}</option>`;
           });
+
           container.innerHTML += `${label}<select class="target-select-field" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:5px; font-size:14px;">${options}</select>`;
         }
 
@@ -468,14 +484,13 @@
       let ciblesChoisies = [];
 
       for (let sel of selects) {
-        if (!sel.value) { alert("Veuillez sélectionner toutes les cibles requises."); return; }
+        if (!sel.value) { alert("Veuillez sélectionner tous les coéquipiers requis."); return; }
         ciblesChoisies.push(sel.value);
       }
 
-      // Vérifier les doublons
       let uniques = new Set(ciblesChoisies);
       if (uniques.size !== ciblesChoisies.length) {
-        alert("Vous ne pouvez pas sélectionner deux fois le même aventurier !");
+        alert("Vous ne pouvez pas sélectionner deux fois le même coéquipier !");
         return;
       }
 
