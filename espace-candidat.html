@@ -49,7 +49,7 @@
       background: #218838;
     }
 
-    /* Modal / Pop-ups */
+    /* Modals / Pop-ups */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -146,6 +146,7 @@
     <div class="tabs-nav">
       <button class="tab-btn active" onclick="afficherOnglet('boutique', this); chargerBoutiqueEtInventaire();">Boutique</button>
       <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">Mon Inventaire</button>
+      <button class="tab-btn" onclick="afficherOnglet('conseil', this); chargerConseil();">🗳️ Conseil & Vote</button>
       <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
       <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
       <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
@@ -184,14 +185,33 @@
       </table>
     </div>
 
-    <!-- ONGLET 3 : MON ÉQUIPE -->
+    <!-- ONGLET 3 : CONSEIL & VOTE -->
+    <div id="tab-conseil" class="tab-content">
+      <h2>Le Conseil Tribal</h2>
+      <div style="max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+        <div id="conseil-status">
+          <p>Chargement du conseil...</p>
+        </div>
+
+        <div id="conseil-form" style="display: none; margin-top: 20px; text-align: left;">
+          <label style="font-weight: bold; display: block; margin-bottom: 8px;">Choisissez le candidat contre qui vous votez :</label>
+          <select id="vote-candidate-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
+            <option value="">-- Sélectionner un aventurier --</option>
+          </select>
+          <p style="font-size: 12px; color: #d93025; margin-bottom: 15px;">⚠️ Attention : Votre vote est définitif et sera immédiatement scellé dans l'urne.</p>
+          <button class="login-btn" style="width: 100%; background: #d93025;" onclick="soumettreVote()">Déposer mon bulletin dans l'urne</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONGLET 4 : MON ÉQUIPE -->
     <div id="tab-equipe" class="tab-content">
       <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
       <p style="margin-bottom: 20px;">Voici les candidats qui composent votre équipe pour cette phase :</p>
       <div class="candidates-grid" id="grid-coequipiers"></div>
     </div>
 
-    <!-- ONGLET 4 : AGENDA -->
+    <!-- ONGLET 5 : AGENDA -->
     <div id="tab-agenda" class="tab-content">
       <h2>Agenda des Événements</h2>
       <p>Consultez le calendrier officiel de la saison (Heure de Paris).</p>
@@ -200,7 +220,7 @@
       </div>
     </div>
 
-    <!-- ONGLET 5 : RECHERCHE COLLIER -->
+    <!-- ONGLET 6 : RECHERCHE COLLIER -->
     <div id="tab-recherche" class="tab-content">
       <h2>Chasse au Collier (Grille A1 à Z400)</h2>
       <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
@@ -302,6 +322,121 @@
     }
 
     // -------------------------------------------------------------
+    // LOGIQUE CONSEIL ET VOTE
+    // -------------------------------------------------------------
+    async function chargerConseil() {
+      const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
+      const statusDiv = document.getElementById("conseil-status");
+      const formDiv = document.getElementById("conseil-form");
+      const select = document.getElementById("vote-candidate-select");
+
+      statusDiv.innerHTML = "<p>Actualisation de l'état du conseil...</p>";
+      formDiv.style.display = "none";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "get_conseil_data",
+            username: joueur,
+            equipe: equipe
+          })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          if (res.monStatut.elimine) {
+            statusDiv.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px;">💀 <strong>Vous avez été éliminé de l'aventure.</strong><br>Vous ne participez plus aux votes du conseil.</div>`;
+            return;
+          }
+
+          if (!res.isConseilOuvert) {
+            statusDiv.innerHTML = `
+              <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
+              <h3 style="color: #1a1a1a; margin-bottom: 8px;">Aucun conseil en cours pour la tribu ${equipe}</h3>
+              <p style="font-size: 13px; color: #666;">Les urnes sont fermées pour le moment.</p>
+            `;
+            return;
+          }
+
+          if (res.aDejaVote) {
+            statusDiv.innerHTML = `
+              <div style="font-size: 40px; margin-bottom: 10px;">🗳️</div>
+              <h3 style="color: #28a745; margin-bottom: 8px;">Votre vote a bien été enregistré !</h3>
+              <p style="font-size: 14px; color: #555;">Vous avez voté contre : <strong>${res.monVote}</strong></p>
+              <p style="font-size: 12px; color: #888; margin-top: 5px;">Rendez-vous au dépouillement !</p>
+            `;
+            return;
+          }
+
+          // Le conseil est ouvert et le joueur doit voter
+          let extraMsg = "";
+          if (res.monStatut.immunise) {
+            extraMsg = `<p style="color: #28a745; font-weight: bold; margin-bottom: 10px;">🛡️ Vous possédez l'immunité pour ce conseil !</p>`;
+          }
+
+          statusDiv.innerHTML = `
+            <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
+            <h3 style="color: #d93025; margin-bottom: 8px;">Le Conseil de la tribu ${equipe} est OUVERT !</h3>
+            ${extraMsg}
+            <p style="font-size: 14px; color: #555;">Faites votre choix en votre âme et conscience.</p>
+          `;
+
+          // Remplissage du select avec les candidats votables
+          select.innerHTML = `<option value="">-- Sélectionner un aventurier --</option>`;
+          res.candidatsVotables.forEach(cand => {
+            select.innerHTML += `<option value="${cand}">${cand}</option>`;
+          });
+
+          formDiv.style.display = "block";
+        } else {
+          statusDiv.innerHTML = `<p style="color: red;">${res.message}</p>`;
+        }
+      } catch (err) {
+        statusDiv.innerHTML = `<p style="color: red;">Erreur de connexion au conseil.</p>`;
+      }
+    }
+
+    async function soumettreVote() {
+      const select = document.getElementById("vote-candidate-select");
+      const target = select.value;
+      const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
+
+      if (!target) {
+        alert("Veuillez sélectionner un aventurier contre qui voter.");
+        return;
+      }
+
+      if (!confirm(`Confirmez-vous solennellement votre vote contre "${target}" ?\n\nCe vote est définitif et ne pourra plus être modifié.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "submit_vote",
+            username: joueur,
+            equipe: equipe,
+            targetCandidate: target
+          })
+        });
+        const res = await response.json();
+        alert(res.message);
+
+        if (res.status === "success") {
+          chargerConseil();
+        }
+      } catch (err) {
+        alert("Erreur lors de l'enregistrement de votre vote.");
+      }
+    }
+
+    // -------------------------------------------------------------
     // VIREMENT DE FONDS
     // -------------------------------------------------------------
     async function transfererKohrocq() {
@@ -348,7 +483,7 @@
     }
 
     // -------------------------------------------------------------
-    // BOUTIQUE ET INVENTAIRE (AVEC UTILISATION D'OBJET)
+    // BOUTIQUE ET INVENTAIRE
     // -------------------------------------------------------------
     async function chargerBoutiqueEtInventaire() {
       const joueur = localStorage.getItem("joueur_connecte");
