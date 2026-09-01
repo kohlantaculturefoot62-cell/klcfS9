@@ -11,12 +11,75 @@
     .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
     .logout-btn:hover { background-color: #bd2130; }
 
-    .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; }
-    .tab-btn { padding: 10px 20px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px; font-weight: bold; transition: background 0.3s; }
-    .tab-btn.active { background: #ffcc00; color: #1a1a1a; }
+    .tabs-nav { display: flex; gap: 8px; margin-bottom: 25px; border-bottom: 2px solid #ddd; padding-bottom: 12px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 18px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 14px; transition: all 0.2s ease; }
+    .tab-btn:hover { background: #d0d0d0; }
+    .tab-btn.active { background: #ffcc00; color: #1a1a1a; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
     
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+
+    /* Grille et cartes d'objets agrandies */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .shop-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .shop-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+
+    .shop-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #f5f5f5;
+    }
+
+    .shop-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin: 0 0 8px 0;
+    }
+
+    .shop-desc {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5;
+      background: #f9f9f9;
+      padding: 10px 12px;
+      border-radius: 8px;
+      min-height: 75px;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      border: 1px solid #eee;
+    }
+
+    .shop-badge-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
 
     .adjacent-btn {
       background: #e8f0fe;
@@ -142,30 +205,54 @@
       </div>
     </div>
 
-    <!-- NAVIGATION DES ONGLETS -->
+    <!-- NAVIGATION DES ONGLETS (3 BOUTIQUES SÉPARÉES) -->
     <div class="tabs-nav">
-      <button class="tab-btn active" onclick="afficherOnglet('boutique', this); chargerBoutiqueEtInventaire();">Boutique</button>
-      <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">Mon Inventaire</button>
+      <button class="tab-btn active" onclick="afficherOnglet('boutique-standard', this); chargerBoutiqueEtInventaire();">🛍️ Boutique Standard</button>
+      <button class="tab-btn" onclick="afficherOnglet('boutique-encheres', this); chargerBoutiqueEtInventaire();">🔨 Enchères</button>
+      <button id="nav-btn-boutique-equipe" class="tab-btn" style="display: none; background: #ffebee; color: #c62828;" onclick="afficherOnglet('boutique-equipe', this); chargerBoutiqueEtInventaire();">👑 Boutique Équipe</button>
+      <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">🎒 Mon Inventaire</button>
       <button class="tab-btn" onclick="afficherOnglet('conseil', this); chargerConseil();">🗳️ Conseil & Vote</button>
-      <button class="tab-btn" onclick="afficherOnglet('equipe', this)">Mon Équipe</button>
-      <button class="tab-btn" onclick="afficherOnglet('agenda', this)">Agenda</button>
-      <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">Recherche</button>
+      <button class="tab-btn" onclick="afficherOnglet('equipe', this)">👥 Mon Équipe</button>
+      <button class="tab-btn" onclick="afficherOnglet('agenda', this)">📅 Agenda</button>
+      <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">🧭 Recherche</button>
     </div>
 
-    <!-- ONGLET 1 : BOUTIQUE -->
-    <div id="tab-boutique" class="tab-content active">
-      <h2>Boutique Individuelle</h2>
-      <div class="candidates-grid" id="grid-boutique-normale" style="margin-top: 20px;">
-        <p>Chargement de la boutique...</p>
+    <!-- ONGLET 1 : BOUTIQUE STANDARD -->
+    <div id="tab-boutique-standard" class="tab-content active">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Boutique Standard (Achats Directs)</h2>
+        <span style="font-size: 13px; color: #666;">Payable avec votre Solde Individuel</span>
       </div>
-      
-      <h2 style="margin-top: 40px;">Boutique d'Équipe (Réservée au Capitaine)</h2>
-      <div class="candidates-grid" id="grid-boutique-equipe" style="margin-top: 20px;">
-        <p>Chargement de la boutique...</p>
+      <p style="color: #666; font-size: 14px; margin-top: 5px;">Achetez immédiatement des avantages personnels pour votre aventure.</p>
+      <div class="shop-grid" id="grid-boutique-standard">
+        <p>Chargement des objets...</p>
       </div>
     </div>
 
-    <!-- ONGLET 2 : INVENTAIRE -->
+    <!-- ONGLET 2 : BOUTIQUE ENCHÈRES -->
+    <div id="tab-boutique-encheres" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Boutique aux Enchères</h2>
+        <span style="font-size: 13px; color: #d93025; font-weight: bold;">Clôture chaque dimanche</span>
+      </div>
+      <p style="color: #666; font-size: 14px; margin-top: 5px;">Placez vos mises en Kohrocq. Le plus offrant remporte l'objet à la clôture !</p>
+      <div class="shop-grid" id="grid-boutique-encheres">
+        <p>Chargement des enchères...</p>
+      </div>
+    </div>
+
+    <!-- ONGLET 3 : BOUTIQUE ÉQUIPE (RÉSERVÉE CAPITAINE) -->
+    <div id="tab-boutique-equipe" class="tab-content">
+      <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 5px 0; color: #b38600;">👑 Espace Réservé au Capitaine d'Équipe</h3>
+        <p style="margin: 0; font-size: 13px; color: #555;">Les achats dans cette boutique sont débités de la <strong>Cagnotte d'Équipe</strong> et profitent à toute la tribu.</p>
+      </div>
+      <div class="shop-grid" id="grid-boutique-equipe">
+        <p>Chargement de la boutique d'équipe...</p>
+      </div>
+    </div>
+
+    <!-- ONGLET 4 : MON INVENTAIRE -->
     <div id="tab-inventaire" class="tab-content">
       <h2>Mon Inventaire</h2>
       <p>Voici les objets possédés personnellement et par votre équipe.</p>
@@ -185,7 +272,7 @@
       </table>
     </div>
 
-    <!-- ONGLET 3 : CONSEIL & VOTE -->
+    <!-- ONGLET 5 : CONSEIL & VOTE -->
     <div id="tab-conseil" class="tab-content">
       <h2>Le Conseil Tribal</h2>
       <div style="max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
@@ -204,14 +291,14 @@
       </div>
     </div>
 
-    <!-- ONGLET 4 : MON ÉQUIPE -->
+    <!-- ONGLET 6 : MON ÉQUIPE -->
     <div id="tab-equipe" class="tab-content">
       <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
       <p style="margin-bottom: 20px;">Voici les candidats qui composent votre équipe pour cette phase :</p>
       <div class="candidates-grid" id="grid-coequipiers"></div>
     </div>
 
-    <!-- ONGLET 5 : AGENDA -->
+    <!-- ONGLET 7 : AGENDA -->
     <div id="tab-agenda" class="tab-content">
       <h2>Agenda des Événements</h2>
       <p>Consultez le calendrier officiel de la saison (Heure de Paris).</p>
@@ -220,7 +307,7 @@
       </div>
     </div>
 
-    <!-- ONGLET 6 : RECHERCHE COLLIER -->
+    <!-- ONGLET 8 : RECHERCHE COLLIER -->
     <div id="tab-recherche" class="tab-content">
       <h2>Chasse au Collier (Grille A1 à Z400)</h2>
       <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
@@ -265,6 +352,7 @@
       const nomEquipe = localStorage.getItem("equipe_joueur") || "Sans équipe";
       const binome = localStorage.getItem("binome_joueur") || "Aucun";
       const niveauChercheur = localStorage.getItem("niveau_recherche") || 1;
+      const estCapitaine = localStorage.getItem("est_capitaine") === "true";
 
       document.getElementById("info-nom").innerText = joueur;
       document.getElementById("info-equipe").innerText = nomEquipe;
@@ -273,8 +361,10 @@
       document.getElementById("virement-nom-binome").innerText = binome;
       document.getElementById("info-niveau-recherche").innerText = `Niveau ${niveauChercheur} (${niveauChercheur} action(s)/série)`;
 
-      if (localStorage.getItem("est_capitaine") === "true") {
+      // Affichage du badge et du bouton de Boutique Équipe uniquement pour le Capitaine
+      if (estCapitaine) {
         document.getElementById("badge-capitaine").style.display = "block";
+        document.getElementById("nav-btn-boutique-equipe").style.display = "inline-block";
       }
 
       const coequipiers = JSON.parse(localStorage.getItem("liste_coequipiers") || "[]");
@@ -319,6 +409,330 @@
     function deconnexion() {
       localStorage.clear();
       window.location.href = "login.html";
+    }
+
+    // -------------------------------------------------------------
+    // CHARGEMENT BOUTIQUES & INVENTAIRE (3 BOUTIQUES SÉPARÉES)
+    // -------------------------------------------------------------
+    async function chargerBoutiqueEtInventaire() {
+      const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
+      const estCap = localStorage.getItem("est_capitaine") === "true";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ 
+            action: "get_shop_data", 
+            username: joueur, 
+            equipe: equipe 
+          })
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+          if (result.soldeIndividuel !== undefined) {
+            localStorage.setItem("solde_individuel", result.soldeIndividuel);
+            document.getElementById("solde-individuel").innerText = result.soldeIndividuel;
+          }
+          if (result.soldeEquipe !== undefined) {
+            localStorage.setItem("solde_equipe", result.soldeEquipe);
+            document.getElementById("solde-equipe").innerText = result.soldeEquipe;
+          }
+          if (result.niveauRecherche !== undefined) {
+            localStorage.setItem("niveau_recherche", result.niveauRecherche);
+            document.getElementById("info-niveau-recherche").innerText = `Niveau ${result.niveauRecherche} (${result.niveauRecherche} action(s)/série)`;
+          }
+
+          const mesMises = result.mesMises || {};
+          const tousNormale = result.boutiqueNormale || [];
+
+          // Séparation des objets Standard vs Enchères
+          const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
+          const itemsEncheres = tousNormale.filter(item => item.type.toLowerCase() === "enchere");
+
+          // 1. RENDU BOUTIQUE STANDARD
+          const gridStandard = document.getElementById("grid-boutique-standard");
+          if (itemsStandard.length === 0) {
+            gridStandard.innerHTML = "<p style='color:#666;'>Aucun objet disponible dans la boutique standard actuellement.</p>";
+          } else {
+            gridStandard.innerHTML = itemsStandard.map(item => {
+              const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
+
+              let imgUrl = item.img;
+              if (imgUrl && imgUrl.includes("file/d/")) {
+                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
+                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+              }
+
+              let stockDisplay = "";
+              if (item.stockType === "illimite") {
+                stockDisplay = `<span style="color: #28a745; font-weight: bold;">Stock : Illimité ♾️</span>`;
+              } else if (item.stockType === "equipe") {
+                stockDisplay = `<span style="color: #17a2b8; font-weight: bold;">Tribu : ${item.stock} restant(s)</span>`;
+              } else {
+                stockDisplay = `<span style="color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</span>`;
+              }
+
+              return `
+                <div class="shop-card" style="${outOfStock ? 'opacity: 0.55; filter: grayscale(0.8);' : ''}">
+                  <div>
+                    ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
+                    <h3 class="shop-title">${item.nom}</h3>
+                    <div class="shop-badge-container">
+                      <span style="font-weight: bold; color: #007bff; font-size: 14px;">💰 ${item.prix} Kohrocq</span>
+                      ${stockDisplay}
+                    </div>
+                    <div class="shop-desc">${item.desc}</div>
+                  </div>
+                  <div>
+                    ${outOfStock 
+                      ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">RUPTURE DE STOCK</button>'
+                      : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '')" class="login-btn" style="width:100%; padding:10px;">Acheter (${item.prix} K)</button>`
+                    }
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          // 2. RENDU BOUTIQUE ENCHÈRES
+          const gridEncheres = document.getElementById("grid-boutique-encheres");
+          if (itemsEncheres.length === 0) {
+            gridEncheres.innerHTML = "<p style='color:#666;'>Aucune enchère active pour le moment.</p>";
+          } else {
+            gridEncheres.innerHTML = itemsEncheres.map(item => {
+              const currentBid = mesMises[item.nom];
+
+              let imgUrl = item.img;
+              if (imgUrl && imgUrl.includes("file/d/")) {
+                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
+                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+              }
+
+              let actionHTML = "";
+              if (currentBid) {
+                actionHTML = `
+                  <div style="background: #e8f0fe; padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; border: 1px solid #b6d4fe; text-align: center;">
+                    Votre mise actuelle : <strong>${currentBid} K</strong>
+                  </div>
+                  <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" placeholder="Nouvelle mise" style="width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                  <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 8px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-bottom: 6px;">Modifier la mise</button>
+                  <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 6px; background: #dc3545; color: white; cursor: pointer; border: none; border-radius: 4px; font-size: 12px;">Retirer ma mise</button>
+                `;
+              } else {
+                actionHTML = `
+                  <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                  <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 10px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 6px;">Placer ma mise</button>
+                `;
+              }
+
+              return `
+                <div class="shop-card">
+                  <div>
+                    ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
+                    <h3 class="shop-title">${item.nom}</h3>
+                    <div class="shop-badge-container">
+                      <span style="font-weight: bold; color: #b38600; font-size: 14px;">🔨 Mise de départ : ${item.prix} K</span>
+                      <span style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; font-weight: bold;">Enchère</span>
+                    </div>
+                    <div class="shop-desc">${item.desc}</div>
+                  </div>
+                  <div>
+                    ${actionHTML}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          // 3. RENDU BOUTIQUE ÉQUIPE
+          if (estCap) {
+            const gridEquipe = document.getElementById("grid-boutique-equipe");
+            const itemsEquipe = result.boutiqueEquipe || [];
+
+            if (itemsEquipe.length === 0) {
+              gridEquipe.innerHTML = "<p style='color:#666;'>Aucun objet d'équipe disponible actuellement.</p>";
+            } else {
+              gridEquipe.innerHTML = itemsEquipe.map(item => {
+                const outOfStock = item.stock <= 0;
+
+                let imgUrl = item.img;
+                if (imgUrl && imgUrl.includes("file/d/")) {
+                  const fileId = imgUrl.split("file/d/")[1].split("/")[0];
+                  imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                }
+
+                return `
+                  <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
+                    <div>
+                      ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
+                      <h3 class="shop-title">${item.nom}</h3>
+                      <div class="shop-badge-container">
+                        <span style="font-weight: bold; color: #d93025; font-size: 14px;">👥 ${item.prix} K (Cagnotte Tribu)</span>
+                        <span style="color: #666; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</span>
+                      </div>
+                      <div class="shop-desc">${item.desc}</div>
+                    </div>
+                    <div>
+                      ${outOfStock 
+                        ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">RUPTURE</button>'
+                        : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`
+                      }
+                    </div>
+                  </div>
+                `;
+              }).join('');
+            }
+          }
+
+          // 4. RENDU INVENTAIRE
+          const tbody = document.getElementById("table-inventaire");
+          if (result.inventaire.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='padding: 15px; text-align: center; color: #666;'>Votre inventaire est vide.</td></tr>";
+          } else {
+            tbody.innerHTML = result.inventaire.map(inv => {
+              const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
+              const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
+              const canUse = isOwner || (isTeamItem && estCap);
+
+              const btnAction = canUse 
+                ? `<button class="use-btn" onclick="utiliserObjet('${inv.objet}', '${inv.proprietaire}')">Utiliser</button>`
+                : `<span style="font-size: 11px; color: #999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
+
+              return `
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${btnAction}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        console.error("Erreur chargement boutique", err);
+      }
+    }
+
+    async function utiliserObjet(itemName, owner) {
+      if (!confirm(`Voulez-vous vraiment utiliser "${itemName}" ?\n\nCet objet sera immédiatement consommé et retiré de votre inventaire.`)) return;
+
+      const joueur = localStorage.getItem("joueur_connecte");
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "use_item",
+            username: joueur,
+            itemName: itemName,
+            owner: owner
+          })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          document.getElementById("use-modal-title").innerText = res.itemName;
+          document.getElementById("use-modal-desc").innerText = res.message;
+          document.getElementById("use-modal").style.display = "flex";
+          chargerBoutiqueEtInventaire();
+        } else {
+          alert(res.message);
+        }
+      } catch (err) {
+        alert("Erreur lors de l'utilisation de l'objet.");
+      }
+    }
+
+    function fermerModalUtilisation() {
+      document.getElementById("use-modal").style.display = "none";
+    }
+
+    async function placerEnchere(itemName) {
+      const input = document.getElementById(`bid-${itemName}`);
+      const bidAmount = parseInt(input.value, 10);
+      const minPrice = parseInt(input.min, 10);
+      
+      if (isNaN(bidAmount) || bidAmount < minPrice) {
+        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocq.`);
+        return;
+      }
+      
+      if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocq sur "${itemName}" ?`)) return;
+      
+      const username = localStorage.getItem("joueur_connecte");
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount })
+      });
+      const res = await response.json();
+      alert(res.message);
+      
+      if (res.status === "success") {
+        if (res.soldeIndividuel !== undefined) {
+          localStorage.setItem("solde_individuel", res.soldeIndividuel);
+          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
+        }
+        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
+      }
+    }
+
+    async function annulerEnchere(itemName) {
+      if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
+      
+      const username = localStorage.getItem("joueur_connecte");
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "cancel_bid", username, itemName })
+      });
+      const res = await response.json();
+      alert(res.message);
+      
+      if (res.status === "success") {
+        if (res.soldeIndividuel !== undefined) {
+          localStorage.setItem("solde_individuel", res.soldeIndividuel);
+          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
+        }
+        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
+      }
+    }
+
+    async function acheterDirect(itemName, price, shopType, target) {
+      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
+      const username = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target, equipe })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if(res.status === "success") {
+        if (res.soldeIndividuel !== undefined) {
+          localStorage.setItem("solde_individuel", res.soldeIndividuel);
+          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
+        }
+        if (res.soldeEquipe !== undefined) {
+          localStorage.setItem("solde_equipe", res.soldeEquipe);
+          document.getElementById("solde-equipe").innerText = res.soldeEquipe;
+        }
+        if (res.nouveauNiveau !== undefined) {
+          localStorage.setItem("niveau_recherche", res.nouveauNiveau);
+          document.getElementById("info-niveau-recherche").innerText = `Niveau ${res.nouveauNiveau} (${res.nouveauNiveau} action(s)/série)`;
+        }
+        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
+      }
     }
 
     // -------------------------------------------------------------
@@ -487,262 +901,6 @@
         }
       } catch (err) {
         alert("Erreur lors du virement.");
-      }
-    }
-
-    // -------------------------------------------------------------
-    // BOUTIQUE ET INVENTAIRE
-    // -------------------------------------------------------------
-    async function chargerBoutiqueEtInventaire() {
-      const joueur = localStorage.getItem("joueur_connecte");
-      const equipe = localStorage.getItem("equipe_joueur");
-      const estCap = localStorage.getItem("est_capitaine") === "true";
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ 
-            action: "get_shop_data", 
-            username: joueur, 
-            equipe: equipe 
-          })
-        });
-        const result = await response.json();
-
-        if (result.status === "success") {
-          if (result.soldeIndividuel !== undefined) {
-            localStorage.setItem("solde_individuel", result.soldeIndividuel);
-            document.getElementById("solde-individuel").innerText = result.soldeIndividuel;
-          }
-          if (result.soldeEquipe !== undefined) {
-            localStorage.setItem("solde_equipe", result.soldeEquipe);
-            document.getElementById("solde-equipe").innerText = result.soldeEquipe;
-          }
-          if (result.niveauRecherche !== undefined) {
-            localStorage.setItem("niveau_recherche", result.niveauRecherche);
-            document.getElementById("info-niveau-recherche").innerText = `Niveau ${result.niveauRecherche} (${result.niveauRecherche} action(s)/série)`;
-          }
-
-          const mesMises = result.mesMises || {};
-          
-          document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
-            const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
-            let actionHTML = "";
-
-            let imgUrl = item.img;
-            if (imgUrl && imgUrl.includes("file/d/")) {
-              const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-              imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-            }
-
-            let stockDisplay = "";
-            if (item.stockType === "illimite") {
-              stockDisplay = `<p style="font-size: 12px; color: #28a745; font-weight: bold;">Stock : Illimité ♾️</p>`;
-            } else if (item.stockType === "equipe") {
-              stockDisplay = `<p style="font-size: 12px; color: #17a2b8; font-weight: bold;">Stock Tribu : ${item.stock} restant(s) (${item.stockMax})</p>`;
-            } else {
-              stockDisplay = `<p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock Restant : ${item.stock} / ${item.stockMax}</p>`;
-            }
-            
-            if (item.type.toLowerCase() === "enchere") {
-              const currentBid = mesMises[item.nom];
-              
-              if (currentBid) {
-                actionHTML = `
-                  <div style="background: #e8f0fe; padding: 8px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; border: 1px solid #b6d4fe;">
-                    Votre mise actuelle : <strong>${currentBid} K</strong>
-                  </div>
-                  <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" placeholder="Nouvelle mise" style="width: 100%; padding: 5px; margin-bottom: 5px;">
-                  <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 6px; background: #ffcc00; font-weight:bold; cursor:pointer; margin-bottom: 5px;">Modifier la mise</button>
-                  <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 5px; background: #dc3545; color: white; cursor:pointer; border:none; border-radius:3px; font-size:12px;">Retirer la mise</button>
-                `;
-              } else {
-                actionHTML = `
-                  <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
-                  <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00; font-weight:bold; cursor:pointer;">Placer Mise</button>
-                `;
-              }
-            } else {
-              actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white; cursor:pointer;">Acheter (${item.prix} K)</button>`;
-            }
-
-            return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5; filter: grayscale(1);' : ''}">
-              ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" style="width: 100%; height: 130px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;">` : ''}
-              <h3 style="font-size: 16px;">${item.nom}</h3>
-              <p style="font-size: 12px; color: #666; height: 40px; overflow: hidden;">${item.desc}</p>
-              ${stockDisplay}
-              <div style="margin-top: 10px;">${outOfStock ? '<strong>RUPTURE</strong>' : actionHTML}</div>
-            </div>`;
-          }).join('');
-
-          document.getElementById("grid-boutique-equipe").innerHTML = result.boutiqueEquipe.map(item => {
-            const outOfStock = item.stock <= 0;
-            const btnColor = estCap ? "#28a745" : "#ccc";
-
-            let imgUrl = item.img;
-            if (imgUrl && imgUrl.includes("file/d/")) {
-              const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-              imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-            }
-
-            return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5;' : ''}">
-              ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" style="width: 100%; height: 130px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;">` : ''}
-              <h3 style="font-size: 16px;">${item.nom}</h3>
-              <p style="font-size: 12px; color: #666; height: 40px;">${item.desc}</p>
-              <p style="font-size: 12px; color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</p>
-              <button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" 
-                ${!estCap || outOfStock ? 'disabled title="Seul le capitaine peut acheter"' : ''} 
-                style="margin-top: 10px; width: 100%; padding: 8px; background: ${btnColor}; color: white; cursor:pointer;">
-                ${!estCap ? 'Réservé Capitaine' : `Acheter (${item.prix} K)`}
-              </button>
-            </div>`;
-          }).join('');
-
-          const tbody = document.getElementById("table-inventaire");
-          if (result.inventaire.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
-          } else {
-            tbody.innerHTML = result.inventaire.map(inv => {
-              const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
-              const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
-              const canUse = isOwner || (isTeamItem && estCap);
-
-              const btnAction = canUse 
-                ? `<button class="use-btn" onclick="utiliserObjet('${inv.objet}', '${inv.proprietaire}')">Utiliser</button>`
-                : `<span style="font-size: 11px; color: #999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
-
-              return `
-                <tr>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${btnAction}</td>
-                </tr>
-              `;
-            }).join('');
-          }
-        }
-      } catch (err) {
-        console.error("Erreur chargement boutique", err);
-      }
-    }
-
-    async function utiliserObjet(itemName, owner) {
-      if (!confirm(`Voulez-vous vraiment utiliser "${itemName}" ?\n\nCet objet sera immédiatement consommé et retiré de votre inventaire.`)) return;
-
-      const joueur = localStorage.getItem("joueur_connecte");
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "use_item",
-            username: joueur,
-            itemName: itemName,
-            owner: owner
-          })
-        });
-        const res = await response.json();
-
-        if (res.status === "success") {
-          document.getElementById("use-modal-title").innerText = res.itemName;
-          document.getElementById("use-modal-desc").innerText = res.message;
-          document.getElementById("use-modal").style.display = "flex";
-          chargerBoutiqueEtInventaire();
-        } else {
-          alert(res.message);
-        }
-      } catch (err) {
-        alert("Erreur lors de l'utilisation de l'objet.");
-      }
-    }
-
-    function fermerModalUtilisation() {
-      document.getElementById("use-modal").style.display = "none";
-    }
-
-    async function placerEnchere(itemName) {
-      const input = document.getElementById(`bid-${itemName}`);
-      const bidAmount = parseInt(input.value, 10);
-      const minPrice = parseInt(input.min, 10);
-      
-      if (isNaN(bidAmount) || bidAmount < minPrice) {
-        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocq.`);
-        return;
-      }
-      
-      if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocq sur "${itemName}" ?`)) return;
-      
-      const username = localStorage.getItem("joueur_connecte");
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount })
-      });
-      const res = await response.json();
-      alert(res.message);
-      
-      if (res.status === "success") {
-        if (res.soldeIndividuel !== undefined) {
-          localStorage.setItem("solde_individuel", res.soldeIndividuel);
-          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
-        }
-        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
-      }
-    }
-
-    async function annulerEnchere(itemName) {
-      if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
-      
-      const username = localStorage.getItem("joueur_connecte");
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "cancel_bid", username, itemName })
-      });
-      const res = await response.json();
-      alert(res.message);
-      
-      if (res.status === "success") {
-        if (res.soldeIndividuel !== undefined) {
-          localStorage.setItem("solde_individuel", res.soldeIndividuel);
-          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
-        }
-        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
-      }
-    }
-
-    async function acheterDirect(itemName, price, shopType, target) {
-      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
-      const username = localStorage.getItem("joueur_connecte");
-      const equipe = localStorage.getItem("equipe_joueur");
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target, equipe })
-      });
-      const res = await response.json();
-      alert(res.message);
-      if(res.status === "success") {
-        if (res.soldeIndividuel !== undefined) {
-          localStorage.setItem("solde_individuel", res.soldeIndividuel);
-          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
-        }
-        if (res.soldeEquipe !== undefined) {
-          localStorage.setItem("solde_equipe", res.soldeEquipe);
-          document.getElementById("solde-equipe").innerText = res.soldeEquipe;
-        }
-        if (res.nouveauNiveau !== undefined) {
-          localStorage.setItem("niveau_recherche", res.nouveauNiveau);
-          document.getElementById("info-niveau-recherche").innerText = `Niveau ${res.nouveauNiveau} (${res.nouveauNiveau} action(s)/série)`;
-        }
-        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
     }
 
