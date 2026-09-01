@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace Organisation - KLCF S9</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; color: #333; }
     .admin-container { max-width: 1400px; margin: 30px auto; padding: 20px; }
@@ -28,6 +27,7 @@
     .badge-primary { background: #cce5ff; color: #004085; }
 
     .search-input { padding: 10px 15px; width: 300px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+    .login-input { width: 100%; padding: 10px; margin: 10px 0 20px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 15px; }
   </style>
 </head>
 <body>
@@ -42,17 +42,15 @@
 
   <main class="admin-container">
     
-    <!-- ÉCRAN DE CONNEXION GOOGLE SI NON AUTHENTIFIÉ -->
-    <div id="login-gate" class="card" style="max-width: 480px; margin: 80px auto; text-align: center;">
+    <!-- ÉCRAN DE CONNEXION PAR MOT DE PASSE ORGA -->
+    <div id="login-gate" class="card" style="max-width: 420px; margin: 80px auto; text-align: center;">
       <h2 style="color: #1a1a1a; margin-bottom: 10px;">Accès Réservé Orga</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Veuillez vous connecter avec le compte officiel :<br><strong>kohlantaculturefoot62@gmail.com</strong></p>
+      <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Entrez la clé secrète administrateur :</p>
       
-      <div id="g_id_onload"
-           data-client_id="845214040905-24e5a95t9hvv0q63l500d07m2b6l48a1.apps.googleusercontent.com"
-           data-callback="onGoogleSignIn"
-           data-auto_prompt="false">
-      </div>
-      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left" style="display: flex; justify-content: center;"></div>
+      <form onsubmit="seConnecterAdmin(event)">
+        <input type="password" id="admin-password-input" class="login-input" placeholder="Mot de passe secret" required autofocus>
+        <button type="submit" class="login-btn" style="width: 100%; padding: 10px;">Déverrouiller l'Espace Orga</button>
+      </form>
       
       <p id="auth-error" style="color: red; margin-top: 15px; font-weight: bold;"></p>
     </div>
@@ -154,55 +152,23 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
-    const REQUIRED_ADMIN_EMAIL = "kohlantaculturefoot62@gmail.com";
 
     let allCandidatsData = [];
 
-    function parseJwt(token) {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-      return JSON.parse(jsonPayload);
-    }
-
-    function onGoogleSignIn(response) {
-      try {
-        const payload = parseJwt(response.credential);
-        const email = payload.email.toLowerCase();
-
-        if (email === REQUIRED_ADMIN_EMAIL) {
-          localStorage.setItem("admin_email", email);
-          document.getElementById("auth-error").innerText = "";
-          afficherInterfaceAdmin(payload);
-          chargerDonneesOrga();
-        } else {
-          document.getElementById("auth-error").innerText = `Accès refusé : ${email} n'a pas les droits organisateur.`;
-        }
-      } catch (e) {
-        document.getElementById("auth-error").innerText = "Erreur lors de l'authentification.";
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedPass = sessionStorage.getItem("admin_password");
+      if (savedPass) {
+        afficherInterfaceAdmin();
+        chargerDonneesOrga();
       }
-    }
+    });
 
-    function afficherInterfaceAdmin(userProfile) {
-      document.getElementById("login-gate").style.display = "none";
-      document.getElementById("admin-dashboard").style.display = "block";
-      document.getElementById("auth-box").innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; color:white;">
-          <img src="${userProfile.picture || ''}" style="width:30px; height:30px; border-radius:50%;" alt="Admin">
-          <span>${userProfile.email}</span>
-          <button onclick="deconnexionAdmin()" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Quitter</button>
-        </div>
-      `;
-    }
+    async function seConnecterAdmin(e) {
+      e.preventDefault();
+      const pass = document.getElementById("admin-password-input").value;
+      const errorMsg = document.getElementById("auth-error");
 
-    function deconnexionAdmin() {
-      localStorage.removeItem("admin_email");
-      location.reload();
-    }
-
-    async function chargerDonneesOrga() {
-      const authEmail = localStorage.getItem("admin_email");
-      if (!authEmail) return;
+      errorMsg.innerText = "Vérification en cours...";
 
       try {
         const response = await fetch(API_URL, {
@@ -210,7 +176,54 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "get_admin_data",
-            authEmail: authEmail
+            adminPassword: pass
+          })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          sessionStorage.setItem("admin_password", pass);
+          errorMsg.innerText = "";
+          afficherInterfaceAdmin();
+          allCandidatsData = res.candidats;
+          rendreEncheres(res.encheresActives || []);
+          rendreSyntheseConseil(res.votesSummary, res.votesDetails);
+          rendreTableauCandidats(res.candidats);
+        } else {
+          errorMsg.innerText = res.message;
+        }
+      } catch (err) {
+        errorMsg.innerText = "Erreur de connexion au serveur.";
+      }
+    }
+
+    function afficherInterfaceAdmin() {
+      document.getElementById("login-gate").style.display = "none";
+      document.getElementById("admin-dashboard").style.display = "block";
+      document.getElementById("auth-box").innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; color:white;">
+          <span style="font-size:13px; color:#ffcc00;">🔑 Session Orga Active</span>
+          <button onclick="deconnexionAdmin()" style="background:#dc3545; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">Déconnexion</button>
+        </div>
+      `;
+    }
+
+    function deconnexionAdmin() {
+      sessionStorage.removeItem("admin_password");
+      location.reload();
+    }
+
+    async function chargerDonneesOrga() {
+      const pass = sessionStorage.getItem("admin_password");
+      if (!pass) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "get_admin_data",
+            adminPassword: pass
           })
         });
         const res = await response.json();
@@ -222,13 +235,13 @@
           rendreTableauCandidats(res.candidats);
         } else {
           alert(res.message);
+          deconnexionAdmin();
         }
       } catch (err) {
         console.error("Erreur admin:", err);
       }
     }
 
-    // Rendu des enchères actives
     function rendreEncheres(encheres) {
       const container = document.getElementById("grid-encheres-admin");
 
@@ -280,7 +293,6 @@
       }).join('');
     }
 
-    // Rendu du dépouillement du conseil
     function rendreSyntheseConseil(summary, details) {
       const summaryTbody = document.getElementById("table-votes-summary");
       const detailsTbody = document.getElementById("table-votes-details");
@@ -291,7 +303,7 @@
         summaryTbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">Aucun bulletin dans l'urne.</td></tr>`;
       } else {
         const maxVotes = summary[sortedCandidates[0]];
-        summaryTbody.innerHTML = sortedCandidates.map((nom, index) => {
+        summaryTbody.innerHTML = sortedCandidates.map(nom => {
           const count = summary[nom];
           const isLeader = (count === maxVotes && count > 0);
           return `
@@ -318,7 +330,6 @@
       }
     }
 
-    // Rendu du tableau principal des candidats
     function rendreTableauCandidats(candidats) {
       const tbody = document.getElementById("table-candidates-body");
       
