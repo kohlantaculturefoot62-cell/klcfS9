@@ -194,12 +194,12 @@
         </div>
 
         <div id="conseil-form" style="display: none; margin-top: 20px; text-align: left;">
-          <label style="font-weight: bold; display: block; margin-bottom: 8px;">Choisissez le candidat contre qui vous votez :</label>
+          <label id="vote-label" style="font-weight: bold; display: block; margin-bottom: 8px;">Choisissez le candidat contre qui vous votez :</label>
           <select id="vote-candidate-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
             <option value="">-- Sélectionner un aventurier --</option>
           </select>
-          <p style="font-size: 12px; color: #d93025; margin-bottom: 15px;">⚠️ Attention : Votre vote est définitif et sera immédiatement scellé dans l'urne.</p>
-          <button class="login-btn" style="width: 100%; background: #d93025;" onclick="soumettreVote()">Déposer mon bulletin dans l'urne</button>
+          <p style="font-size: 12px; color: #666; margin-bottom: 15px;">ℹ️ Vous pouvez modifier votre vote à tout moment tant que le conseil reste ouvert.</p>
+          <button id="vote-submit-btn" class="login-btn" style="width: 100%; background: #d93025;" onclick="soumettreVote()">Déposer mon bulletin dans l'urne</button>
         </div>
       </div>
     </div>
@@ -322,7 +322,7 @@
     }
 
     // -------------------------------------------------------------
-    // LOGIQUE CONSEIL ET VOTE
+    // LOGIQUE CONSEIL ET VOTE MODIFIABLE
     // -------------------------------------------------------------
     async function chargerConseil() {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -330,6 +330,8 @@
       const statusDiv = document.getElementById("conseil-status");
       const formDiv = document.getElementById("conseil-form");
       const select = document.getElementById("vote-candidate-select");
+      const submitBtn = document.getElementById("vote-submit-btn");
+      const voteLabel = document.getElementById("vote-label");
 
       statusDiv.innerHTML = "<p>Actualisation de l'état du conseil...</p>";
       formDiv.style.display = "none";
@@ -361,33 +363,40 @@
             return;
           }
 
-          if (res.aDejaVote) {
-            statusDiv.innerHTML = `
-              <div style="font-size: 40px; margin-bottom: 10px;">🗳️</div>
-              <h3 style="color: #28a745; margin-bottom: 8px;">Votre vote a bien été enregistré !</h3>
-              <p style="font-size: 14px; color: #555;">Vous avez voté contre : <strong>${res.monVote}</strong></p>
-              <p style="font-size: 12px; color: #888; margin-top: 5px;">Rendez-vous au dépouillement !</p>
-            `;
-            return;
-          }
-
-          // Le conseil est ouvert et le joueur doit voter
           let extraMsg = "";
           if (res.monStatut.immunise) {
             extraMsg = `<p style="color: #28a745; font-weight: bold; margin-bottom: 10px;">🛡️ Vous possédez l'immunité pour ce conseil !</p>`;
+          }
+
+          let voteActuelHTML = "";
+          if (res.aDejaVote) {
+            voteActuelHTML = `
+              <div style="background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                🗳️ Bulletin actuellement dans l'urne : <strong>${res.monVote}</strong>
+                <div style="font-size: 12px; color: #555; margin-top: 4px;">Vous pouvez modifier votre choix ci-dessous :</div>
+              </div>
+            `;
+            submitBtn.innerText = "Modifier mon vote";
+            submitBtn.style.background = "#ff9800";
+            voteLabel.innerText = "Changer votre vote contre :";
+          } else {
+            submitBtn.innerText = "Déposer mon bulletin dans l'urne";
+            submitBtn.style.background = "#d93025";
+            voteLabel.innerText = "Choisissez le candidat contre qui vous votez :";
           }
 
           statusDiv.innerHTML = `
             <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
             <h3 style="color: #d93025; margin-bottom: 8px;">Le Conseil de la tribu ${equipe} est OUVERT !</h3>
             ${extraMsg}
-            <p style="font-size: 14px; color: #555;">Faites votre choix en votre âme et conscience.</p>
+            ${voteActuelHTML}
           `;
 
-          // Remplissage du select avec les candidats votables
+          // Remplissage du menu déroulant
           select.innerHTML = `<option value="">-- Sélectionner un aventurier --</option>`;
           res.candidatsVotables.forEach(cand => {
-            select.innerHTML += `<option value="${cand}">${cand}</option>`;
+            const isSelected = (res.monVote === cand) ? "selected" : "";
+            select.innerHTML += `<option value="${cand}" ${isSelected}>${cand}</option>`;
           });
 
           formDiv.style.display = "block";
@@ -410,7 +419,7 @@
         return;
       }
 
-      if (!confirm(`Confirmez-vous solennellement votre vote contre "${target}" ?\n\nCe vote est définitif et ne pourra plus être modifié.`)) {
+      if (!confirm(`Confirmez-vous votre vote contre "${target}" ?`)) {
         return;
       }
 
