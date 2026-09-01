@@ -46,6 +46,7 @@
         <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
         <p>Équipe : <strong id="info-equipe">---</strong></p>
         <p>Binôme : <strong id="info-binome">---</strong></p>
+        <p>Niveau Chercheur : <strong id="info-niveau-recherche" style="color: #007bff;">Niveau 1</strong></p>
         <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">👑 Capitaine d'équipe</p>
       </div>
 
@@ -122,11 +123,11 @@
       <h2>Chasse au Collier (Grille A1 à Z300)</h2>
       <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
         <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          <h3 style="margin-bottom: 15px;">Votre Position</h3>
-          <div id="recherche-status"><p>Chargement de votre position...</p></div>
+          <h3 style="margin-bottom: 15px;">Votre Position & Compétence</h3>
+          <div id="recherche-status"><p>Chargement de votre statut...</p></div>
           <div id="recherche-actions" style="display: none; margin-top: 20px;">
             <h4 style="margin-bottom: 10px;">Fouiller une nouvelle case</h4>
-            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Attente : 1 heure par case de distance.</p>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Attente : 1 heure par case de distance après épuisement de votre série de déplacements.</p>
             <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
             <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider le déplacement</button>
             <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
@@ -158,12 +159,14 @@
 
       const nomEquipe = localStorage.getItem("equipe_joueur") || "Sans équipe";
       const binome = localStorage.getItem("binome_joueur") || "Aucun";
+      const niveauChercheur = localStorage.getItem("niveau_recherche") || 1;
 
       document.getElementById("info-nom").innerText = joueur;
       document.getElementById("info-equipe").innerText = nomEquipe;
       document.getElementById("nom-equipe-titre").innerText = nomEquipe;
       document.getElementById("info-binome").innerText = binome;
       document.getElementById("virement-nom-binome").innerText = binome;
+      document.getElementById("info-niveau-recherche").innerText = `Niveau ${niveauChercheur} (${niveauChercheur} action(s)/série)`;
 
       if (localStorage.getItem("est_capitaine") === "true") {
         document.getElementById("badge-capitaine").style.display = "block";
@@ -288,7 +291,6 @@
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
 
-          // 1. Boutique Normale (Individuelle)
           const mesMises = result.mesMises || {};
           
           document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
@@ -332,7 +334,6 @@
             </div>`;
           }).join('');
 
-          // 2. Boutique Équipe
           document.getElementById("grid-boutique-equipe").innerHTML = result.boutiqueEquipe.map(item => {
             const outOfStock = item.stock <= 0;
             const btnColor = estCap ? "#28a745" : "#ccc";
@@ -356,7 +357,6 @@
             </div>`;
           }).join('');
 
-          // 3. Inventaire
           const tbody = document.getElementById("table-inventaire");
           if (result.inventaire.length === 0) {
             tbody.innerHTML = "<tr><td colspan='4' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
@@ -453,7 +453,7 @@
     }
 
     // -------------------------------------------------------------
-    // LOGIQUE RECHERCHE
+    // LOGIQUE RECHERCHE (GESTION DES NIVEAUX DE CHERCHEUR)
     // -------------------------------------------------------------
     let currentPosition = null;
     let timerInterval = null;
@@ -478,6 +478,12 @@
         
         if(result.status === "success") {
           currentPosition = result.position;
+          const niveau = result.niveauRecherche || 1;
+          const actionsFaite = result.actionsSerie || 0;
+          const actionsRestantes = Math.max(0, niveau - actionsFaite);
+
+          localStorage.setItem("niveau_recherche", niveau);
+          document.getElementById("info-niveau-recherche").innerText = `Niveau ${niveau} (${niveau} action(s)/série)`;
           
           if(result.historique.length === 0) {
             histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment.</li>";
@@ -500,12 +506,21 @@
           const now = result.maintenant;
 
           if (!currentPosition) {
-            statusDiv.innerHTML = `<p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z300).</p>`;
+            statusDiv.innerHTML = `
+              <p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z300).</p>
+              <div style="margin-top: 8px; font-size: 13px; color: #007bff;">Compétence : <strong>Niveau ${niveau}</strong> (${niveau} déplacement(s) consécutif(s) disponible(s)).</div>
+            `;
             actionDiv.style.display = "block";
           } else if (now < nextAction) {
-            lancerTimer(nextAction, statusDiv, actionDiv);
+            lancerTimer(nextAction, statusDiv, actionDiv, niveau);
           } else {
-            statusDiv.innerHTML = `<div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position actuelle : ${currentPosition}</div><span style="color: green;">Prêt pour un nouveau déplacement !</span>`;
+            statusDiv.innerHTML = `
+              <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 5px;">Position actuelle : ${currentPosition}</div>
+              <div style="background: #e3f2fd; color: #0d47a1; padding: 8px 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 14px;">
+                ⚡ Actions consécutives restantes dans cette série : ${actionsRestantes} / ${niveau}
+              </div>
+              <span style="color: green; font-weight: bold;">Prêt pour un déplacement !</span>
+            `;
             actionDiv.style.display = "block";
           }
         }
@@ -514,7 +529,7 @@
       }
     }
 
-    function lancerTimer(endTimeMs, statusDiv, actionDiv) {
+    function lancerTimer(endTimeMs, statusDiv, actionDiv, niveau) {
       if (timerInterval) clearInterval(timerInterval);
       actionDiv.style.display = "none";
       
@@ -534,9 +549,11 @@
 
         statusDiv.innerHTML = `
           <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position : ${currentPosition}</div>
-          <p style="color: #666;">En cours de fouille...</p>
+          <div style="background: #ffebee; color: #c62828; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-bottom: 10px;">
+            💤 Série de ${niveau} action(s) terminée. Temps de repos en cours.
+          </div>
           <div style="font-size: 20px; font-weight: bold; color: #d93025; margin-top: 10px;">
-            ⏳ Prochaine action dans : ${h}h ${m}m ${s}s
+            ⏳ Prochaine série disponible dans : ${h}h ${m}m ${s}s
           </div>
         `;
       }, 1000);
@@ -561,6 +578,7 @@
         if (result.status === "success") {
           msgLabel.innerText = "";
           document.getElementById("target-cell").value = "";
+          alert(result.message);
           chargerRecherche();
         } else {
           msgLabel.innerText = result.message;
