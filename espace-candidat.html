@@ -17,6 +17,22 @@
     
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+
+    .adjacent-btn {
+      background: #e8f0fe;
+      border: 1px solid #1a73e8;
+      color: #1a73e8;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    .adjacent-btn:hover {
+      background: #1a73e8;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -120,21 +136,24 @@
 
     <!-- ONGLET 5 : RECHERCHE COLLIER -->
     <div id="tab-recherche" class="tab-content">
-      <h2>Chasse au Collier (Grille A1 à Z300)</h2>
+      <h2>Chasse au Collier (Grille A1 à Z400)</h2>
       <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
         <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
           <h3 style="margin-bottom: 15px;">Votre Position & Compétence</h3>
           <div id="recherche-status"><p>Chargement de votre statut...</p></div>
           <div id="recherche-actions" style="display: none; margin-top: 20px;">
-            <h4 style="margin-bottom: 10px;">Fouiller une nouvelle case</h4>
-            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Attente : 1 heure par case de distance après épuisement de votre série de déplacements.</p>
+            <h4 id="titre-fouille" style="margin-bottom: 10px;">Fouiller une case</h4>
+            <div id="zone-cases-adjacentes" style="margin-bottom: 12px; display: none;">
+              <span style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">Cases adjacentes accessibles :</span>
+              <div id="btn-container-adjacentes"></div>
+            </div>
             <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
             <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider le déplacement</button>
             <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
           </div>
         </div>
         <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          <h3>Votre Historique</h3>
+          <h3>Votre Historique de Fouille</h3>
           <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;"></ul>
         </div>
       </div>
@@ -453,7 +472,7 @@
     }
 
     // -------------------------------------------------------------
-    // LOGIQUE RECHERCHE (GESTION DES NIVEAUX DE CHERCHEUR)
+    // LOGIQUE RECHERCHE
     // -------------------------------------------------------------
     let currentPosition = null;
     let timerInterval = null;
@@ -463,10 +482,15 @@
       const statusDiv = document.getElementById("recherche-status");
       const actionDiv = document.getElementById("recherche-actions");
       const histList = document.getElementById("recherche-historique");
+      const adjacentZone = document.getElementById("zone-cases-adjacentes");
+      const adjacentBtnContainer = document.getElementById("btn-container-adjacentes");
+      const titreFouille = document.getElementById("titre-fouille");
       
       statusDiv.innerHTML = "<p>Actualisation...</p>";
       actionDiv.style.display = "none";
       histList.innerHTML = "";
+      adjacentZone.style.display = "none";
+      adjacentBtnContainer.innerHTML = "";
 
       try {
         const response = await fetch(API_URL, {
@@ -506,18 +530,32 @@
           const now = result.maintenant;
 
           if (!currentPosition) {
+            // Début de journée : choix libre
+            titreFouille.innerText = "Choisir votre point de départ";
+            document.getElementById("target-cell").placeholder = "Ex: B50 (libre de A1 à Z400)";
             statusDiv.innerHTML = `
-              <p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z300).</p>
+              <p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z400).</p>
               <div style="margin-top: 8px; font-size: 13px; color: #007bff;">Compétence : <strong>Niveau ${niveau}</strong> (${niveau} déplacement(s) consécutif(s) disponible(s)).</div>
             `;
             actionDiv.style.display = "block";
           } else if (now < nextAction) {
             lancerTimer(nextAction, statusDiv, actionDiv, niveau);
           } else {
+            // En cours de journée : choix restreint aux cases adjacentes
+            titreFouille.innerText = "Fouiller une case adjacente";
+            document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B51");
+            
+            if (result.adjacentChoices && result.adjacentChoices.length > 0) {
+              adjacentZone.style.display = "block";
+              adjacentBtnContainer.innerHTML = result.adjacentChoices.map(c => 
+                `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`
+              ).join('');
+            }
+
             statusDiv.innerHTML = `
               <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 5px;">Position actuelle : ${currentPosition}</div>
               <div style="background: #e3f2fd; color: #0d47a1; padding: 8px 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 14px;">
-                ⚡ Actions consécutives restantes dans cette série : ${actionsRestantes} / ${niveau}
+                ⚡ Actions consécutives restantes : ${actionsRestantes} / ${niveau}
               </div>
               <span style="color: green; font-weight: bold;">Prêt pour un déplacement !</span>
             `;
@@ -578,7 +616,14 @@
         if (result.status === "success") {
           msgLabel.innerText = "";
           document.getElementById("target-cell").value = "";
-          alert(result.message);
+          
+          if (result.foundItem) {
+            alert("🎉 INCROYABLE !\n\nVous avez trouvé : " + result.foundItem + " !\nL'objet a été ajouté automatiquement à votre inventaire personnel.");
+            chargerBoutiqueEtInventaire();
+          } else {
+            alert(result.message);
+          }
+          
           chargerRecherche();
         } else {
           msgLabel.innerText = result.message;
