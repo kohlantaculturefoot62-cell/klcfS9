@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Organisation - KLCF S9</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; color: #333; }
+    .admin-container { max-width: 1400px; margin: 30px auto; padding: 20px; }
+    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .stat-card { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #ffcc00; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .stat-card h4 { margin: 0 0 8px 0; color: #666; font-size: 13px; text-transform: uppercase; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
+    th { background: #f8f9fa; padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: bold; }
+    td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+    tr:hover { background: #fdfdfe; }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    .badge-primary { background: #cce5ff; color: #004085; }
+
+    .search-input { padding: 10px 15px; width: 300px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <!-- Banderole -->
+  <header class="banner" style="background: #1a1a1a;">
+    <div class="banner-content" style="display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: auto; padding: 10px 20px;">
+      <h1 class="logo" style="color: #ffcc00; margin: 0;">👑 KLCF S9 - Console Organisation</h1>
+      <div id="auth-box"></div>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    
+    <!-- ÉCRAN DE CONNEXION GOOGLE SI NON AUTHENTIFIÉ -->
+    <div id="login-gate" class="card" style="max-width: 480px; margin: 80px auto; text-align: center;">
+      <h2 style="color: #1a1a1a; margin-bottom: 10px;">Accès Réservé Orga</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Veuillez vous connecter avec le compte officiel :<br><strong>kohlantaculturefoot62@gmail.com</strong></p>
+      
+      <div id="g_id_onload"
+           data-client_id="845214040905-24e5a95t9hvv0q63l500d07m2b6l48a1.apps.googleusercontent.com"
+           data-callback="onGoogleSignIn"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left" style="display: flex; justify-content: center;"></div>
+      
+      <p id="auth-error" style="color: red; margin-top: 15px; font-weight: bold;"></p>
+    </div>
+
+    <!-- TABLEAU DE BORD ORGANISATION -->
+    <div id="admin-dashboard" style="display: none;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">Tableau de Bord en Direct</h2>
+        <button class="login-btn" onclick="chargerDonneesOrga()" style="padding: 8px 16px;">🔄 Rafraîchir les données</button>
+      </div>
+
+      <!-- SECTION 1 : ENCHÈRES EN COURS & CLASSEMENT DES MISES -->
+      <div class="card" style="border-top: 4px solid #ffcc00;">
+        <h3 style="margin-top: 0; color: #b38600;">🏷️ Enchères Actives & Mises en Cours</h3>
+        <p style="color: #666; font-size: 13px;">Voici les objets actuellement aux enchères avec le classement détaillé des offres (de la plus haute à la plus basse) :</p>
+        
+        <div id="grid-encheres-admin" class="stats-grid" style="margin-top: 15px;">
+          <p>Chargement des enchères...</p>
+        </div>
+      </div>
+
+      <!-- SECTION 2 : SYNTHÈSE DU CONSEIL & DÉPOUILLEMENT -->
+      <div class="card" style="border-top: 4px solid #d93025;">
+        <h3 style="margin-top: 0; color: #d93025;">🗳️ Synthèse des Votes du Conseil</h3>
+        <p style="color: #666; font-size: 13px;">Dépouillement des bulletins actuellement dans l'urne :</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="conseil-grid">
+          <div>
+            <h4>Répartition des votes contre chaque joueur</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Candidat Ciblé</th>
+                  <th style="text-align: center;">Nombre de Votes</th>
+                  <th>Statut Risque</th>
+                </tr>
+              </thead>
+              <tbody id="table-votes-summary">
+                <tr><td colspan="3">Aucun vote enregistré.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <h4>Détail de l'urne (Secret Orga)</h4>
+            <div style="max-height: 250px; overflow-y: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date / Heure</th>
+                    <th>Votant</th>
+                    <th>Tribu</th>
+                    <th>A voté contre</th>
+                  </tr>
+                </thead>
+                <tbody id="table-votes-details">
+                  <tr><td colspan="4">Urne vide.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 : MONITORING GLOBAL DES CANDIDATS -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin: 0;">👥 Suivi Détaillé des Candidats</h3>
+          <input type="text" id="search-candidate" class="search-input" placeholder="🔍 Rechercher un candidat..." onkeyup="filtrerTableau()">
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table id="table-candidates-main">
+            <thead>
+              <tr>
+                <th>Candidat</th>
+                <th>Tribu</th>
+                <th>Binôme</th>
+                <th>Solde Indiv.</th>
+                <th>Cagnotte Tribu</th>
+                <th>Inventaire Actuel</th>
+                <th>Objets Utilisés</th>
+                <th>Statut Conseil</th>
+                <th>Vote Déposé</th>
+                <th>Position Grille</th>
+                <th>Fouilles / Trouvailles</th>
+              </tr>
+            </thead>
+            <tbody id="table-candidates-body">
+              <tr><td colspan="11" style="text-align:center;">Chargement des candidats...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
+    const REQUIRED_ADMIN_EMAIL = "kohlantaculturefoot62@gmail.com";
+
+    let allCandidatsData = [];
+
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    function onGoogleSignIn(response) {
+      try {
+        const payload = parseJwt(response.credential);
+        const email = payload.email.toLowerCase();
+
+        if (email === REQUIRED_ADMIN_EMAIL) {
+          localStorage.setItem("admin_email", email);
+          document.getElementById("auth-error").innerText = "";
+          afficherInterfaceAdmin(payload);
+          chargerDonneesOrga();
+        } else {
+          document.getElementById("auth-error").innerText = `Accès refusé : ${email} n'a pas les droits organisateur.`;
+        }
+      } catch (e) {
+        document.getElementById("auth-error").innerText = "Erreur lors de l'authentification.";
+      }
+    }
+
+    function afficherInterfaceAdmin(userProfile) {
+      document.getElementById("login-gate").style.display = "none";
+      document.getElementById("admin-dashboard").style.display = "block";
+      document.getElementById("auth-box").innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; color:white;">
+          <img src="${userProfile.picture || ''}" style="width:30px; height:30px; border-radius:50%;" alt="Admin">
+          <span>${userProfile.email}</span>
+          <button onclick="deconnexionAdmin()" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Quitter</button>
+        </div>
+      `;
+    }
+
+    function deconnexionAdmin() {
+      localStorage.removeItem("admin_email");
+      location.reload();
+    }
+
+    async function chargerDonneesOrga() {
+      const authEmail = localStorage.getItem("admin_email");
+      if (!authEmail) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "get_admin_data",
+            authEmail: authEmail
+          })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          allCandidatsData = res.candidats;
+          rendreEncheres(res.encheresActives || []);
+          rendreSyntheseConseil(res.votesSummary, res.votesDetails);
+          rendreTableauCandidats(res.candidats);
+        } else {
+          alert(res.message);
+        }
+      } catch (err) {
+        console.error("Erreur admin:", err);
+      }
+    }
+
+    // Rendu des enchères actives
+    function rendreEncheres(encheres) {
+      const container = document.getElementById("grid-encheres-admin");
+
+      if (encheres.length === 0) {
+        container.innerHTML = "<p style='color:#888;'>Aucune enchère en cours pour le moment.</p>";
+        return;
+      }
+
+      container.innerHTML = encheres.map(ench => {
+        let rankHTML = "";
+
+        if (ench.mises.length === 0) {
+          rankHTML = "<p style='font-size:12px; color:#888;'>Aucune offre déposée.</p>";
+        } else {
+          rankHTML = `
+            <table style="font-size: 12px; margin-top: 8px;">
+              <thead>
+                <tr>
+                  <th>Rang</th>
+                  <th>Candidat</th>
+                  <th>Montant</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${ench.mises.map((m, idx) => `
+                  <tr style="${idx === 0 ? 'background:#fff8e1; font-weight:bold;' : ''}">
+                    <td>${idx === 0 ? '🥇 1er' : (idx === 1 ? '🥈 2e' : (idx === 2 ? '🥉 3e' : `${idx + 1}e`))}</td>
+                    <td>${m.bidder}</td>
+                    <td><span class="badge ${idx === 0 ? 'badge-success' : 'badge-primary'}">${m.amount} K</span></td>
+                    <td style="font-size:10px; color:#666;">${m.date}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+
+        return `
+          <div class="stat-card" style="border-left-color: #ffcc00;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="font-size:15px; color:#1a1a1a; margin:0;">${ench.objet}</h4>
+              <span class="badge badge-warning">${ench.totalEncherisseurs} mise(s)</span>
+            </div>
+            <p style="font-size:13px; margin: 6px 0;">Actuel Vainqueur : <strong>${ench.leader}</strong> (${ench.topMise} K)</p>
+            ${rankHTML}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Rendu du dépouillement du conseil
+    function rendreSyntheseConseil(summary, details) {
+      const summaryTbody = document.getElementById("table-votes-summary");
+      const detailsTbody = document.getElementById("table-votes-details");
+
+      const sortedCandidates = Object.keys(summary).sort((a, b) => summary[b] - summary[a]);
+
+      if (sortedCandidates.length === 0) {
+        summaryTbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">Aucun bulletin dans l'urne.</td></tr>`;
+      } else {
+        const maxVotes = summary[sortedCandidates[0]];
+        summaryTbody.innerHTML = sortedCandidates.map((nom, index) => {
+          const count = summary[nom];
+          const isLeader = (count === maxVotes && count > 0);
+          return `
+            <tr style="${isLeader ? 'background:#fff3f3; font-weight:bold;' : ''}">
+              <td>${isLeader ? '⚠️ ' : ''}${nom}</td>
+              <td style="text-align: center;"><span class="badge ${isLeader ? 'badge-danger' : 'badge-warning'}">${count} vote(s)</span></td>
+              <td>${isLeader ? '<span class="badge badge-danger">En tête des votes</span>' : '<span class="badge badge-info">En sécurité relative</span>'}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (details.length === 0) {
+        detailsTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">Urne vide.</td></tr>`;
+      } else {
+        detailsTbody.innerHTML = details.map(d => `
+          <tr>
+            <td style="font-size:11px; color:#666;">${d.date}</td>
+            <td><strong>${d.votant}</strong></td>
+            <td><span class="badge badge-primary">${d.equipe}</span></td>
+            <td><strong style="color:#d93025;">${d.cible}</strong></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Rendu du tableau principal des candidats
+    function rendreTableauCandidats(candidats) {
+      const tbody = document.getElementById("table-candidates-body");
+      
+      tbody.innerHTML = candidats.map(c => {
+        let roleBadge = c.estCapitaine ? '<span class="badge badge-warning">👑 Capitaine</span>' : '';
+        let statutBadge = c.elimine 
+          ? '<span class="badge badge-danger">💀 Éliminé</span>' 
+          : (c.immunise ? '<span class="badge badge-success">🛡️ Immunisé</span>' : '<span class="badge badge-info">En jeu</span>');
+
+        let invText = c.inventaire.length > 0 ? c.inventaire.join(', ') : '<span style="color:#999;">Vide</span>';
+        let usedText = c.objetsUtilises.length > 0 ? c.objetsUtilises.join(', ') : '<span style="color:#999;">Aucun</span>';
+        let itemsFoundText = c.objetsTrouves.length > 0 ? c.objetsTrouves.join('<br>') : '<span style="color:#999;">Aucun</span>';
+
+        return `
+          <tr>
+            <td><strong>${c.nom}</strong> ${roleBadge}</td>
+            <td><span class="badge badge-primary">${c.equipe}</span></td>
+            <td>${c.binome}</td>
+            <td><strong>${c.soldeIndiv} K</strong></td>
+            <td>${c.soldeEquipe} K</td>
+            <td>${invText}</td>
+            <td style="color:#666;">${usedText}</td>
+            <td>${statutBadge}</td>
+            <td><strong style="color:${c.aVoteContre === 'Non voté' ? '#999' : '#d93025'};">${c.aVoteContre}</strong></td>
+            <td><span class="badge badge-warning">${c.positionActuelle}</span></td>
+            <td><strong>${c.nbPropositions} fouille(s)</strong><br><small style="color:#28a745;">${itemsFoundText}</small></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filtrerTableau() {
+      const input = document.getElementById("search-candidate").value.toLowerCase();
+      const filtered = allCandidatsData.filter(c => 
+        c.nom.toLowerCase().includes(input) || 
+        c.equipe.toLowerCase().includes(input) || 
+        c.binome.toLowerCase().includes(input)
+      );
+      rendreTableauCandidats(filtered);
+    }
+  </script>
+</body>
+</html>
