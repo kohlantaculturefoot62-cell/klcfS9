@@ -138,26 +138,29 @@
     // INITIALISATION DE LA PAGE
     // -------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
-      const joueur = sessionStorage.getItem("joueur_connecte");
-      if (!joueur) { window.location.href = "index.html"; return; }
+      const joueur = localStorage.getItem("joueur_connecte");
+      if (!joueur) { 
+        window.location.href = "login.html"; 
+        return; 
+      }
 
-      // Affichage des 
-      document.getElementById("solde-binome").innerText = sessionStorage.getItem("solde_binome") || "0";
-      document.getElementById("solde-equipe").innerText = sessionStorage.getItem("solde_equipe") || "0";
+      // Affichage des soldes
+      document.getElementById("solde-binome").innerText = localStorage.getItem("solde_binome") || "0";
+      document.getElementById("solde-equipe").innerText = localStorage.getItem("solde_equipe") || "0";
 
       // Affichage du Profil
-      const nomEquipe = sessionStorage.getItem("equipe_joueur") || "Sans équipe";
+      const nomEquipe = localStorage.getItem("equipe_joueur") || "Sans équipe";
       document.getElementById("info-nom").innerText = joueur;
       document.getElementById("info-equipe").innerText = nomEquipe;
       document.getElementById("nom-equipe-titre").innerText = nomEquipe;
-      document.getElementById("info-binome").innerText = sessionStorage.getItem("binome_joueur") || "Aucun";
+      document.getElementById("info-binome").innerText = localStorage.getItem("binome_joueur") || "Aucun";
 
-      if (sessionStorage.getItem("est_capitaine") === "true") {
+      if (localStorage.getItem("est_capitaine") === "true") {
         document.getElementById("badge-capitaine").style.display = "block";
       }
 
       // Remplissage de l'équipe
-      const coequipiers = JSON.parse(sessionStorage.getItem("liste_coequipiers") || "[]");
+      const coequipiers = JSON.parse(localStorage.getItem("liste_coequipiers") || "[]");
       const gridCoequipiers = document.getElementById("grid-coequipiers");
       gridCoequipiers.innerHTML = "";
 
@@ -198,36 +201,42 @@
     }
 
     function deconnexion() {
-      sessionStorage.clear();
-      window.location.href = "index.html";
+      localStorage.clear();
+      window.location.href = "login.html";
     }
 
     // -------------------------------------------------------------
     // LOGIQUE BOUTIQUE ET INVENTAIRE
     // -------------------------------------------------------------
     async function chargerBoutiqueEtInventaire() {
-      const binome = sessionStorage.getItem("binome_joueur");
-      const equipe = sessionStorage.getItem("equipe_joueur");
-      const estCap = sessionStorage.getItem("est_capitaine") === "true";
+      const binome = localStorage.getItem("binome_joueur");
+      const equipe = localStorage.getItem("equipe_joueur");
+      const estCap = localStorage.getItem("est_capitaine") === "true";
 
       try {
         const response = await fetch(API_URL, {
           method: "POST",
-          // ✅ NOUVELLE LIGNE (Ajout de username)
-          body: JSON.stringify({ action: "get_shop_data", username: sessionStorage.getItem("joueur_connecte"), binome: binome, equipe: equipe })
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ 
+            action: "get_shop_data", 
+            username: localStorage.getItem("joueur_connecte"), 
+            binome: binome, 
+            equipe: equipe 
+          })
         });
         const result = await response.json();
 
         if (result.status === "success") {
-          // Mise à jour automatique des cagnottes dans l'en-tête et en session
+          // Mise à jour automatique des cagnottes
           if (result.soldeBinome !== undefined) {
-          sessionStorage.setItem("solde_binome", result.soldeBinome);
-          document.getElementById("solde-binome").innerText = result.soldeBinome;
+            localStorage.setItem("solde_binome", result.soldeBinome);
+            document.getElementById("solde-binome").innerText = result.soldeBinome;
           }
           if (result.soldeEquipe !== undefined) {
-          sessionStorage.setItem("solde_equipe", result.soldeEquipe);
-          document.getElementById("solde-equipe").innerText = result.soldeEquipe;
+            localStorage.setItem("solde_equipe", result.soldeEquipe);
+            document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
+
           // 1. Boutique Normale
           const mesMises = result.mesMises || {};
           
@@ -235,7 +244,6 @@
             const outOfStock = item.stock <= 0;
             let actionHTML = "";
 
-            // --- CONVERSION AUTOMATIQUE DU LIEN DRIVE ---
             let imgUrl = item.img;
             if (imgUrl && imgUrl.includes("file/d/")) {
               const fileId = imgUrl.split("file/d/")[1].split("/")[0];
@@ -246,7 +254,6 @@
               const currentBid = mesMises[item.nom];
               
               if (currentBid) {
-                // Le binôme a déjà une mise active
                 actionHTML = `
                   <div style="background: #e8f0fe; padding: 8px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; border: 1px solid #b6d4fe;">
                     Votre mise actuelle : <strong>${currentBid} K</strong>
@@ -256,7 +263,6 @@
                   <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 5px; background: #dc3545; color: white; cursor:pointer; border:none; border-radius:3px; font-size:12px;">Retirer la mise</button>
                 `;
               } else {
-                // Pas encore de mise
                 actionHTML = `
                   <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix}" style="width: 100%; padding: 5px; margin-bottom: 10px;">
                   <button onclick="placerEnchere('${item.nom}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #ffcc00; font-weight:bold; cursor:pointer;">Placer Mise</button>
@@ -280,7 +286,6 @@
             const outOfStock = item.stock <= 0;
             const btnColor = estCap ? "#28a745" : "#ccc";
 
-            // --- CONVERSION AUTOMATIQUE DU LIEN DRIVE ---
             let imgUrl = item.img;
             if (imgUrl && imgUrl.includes("file/d/")) {
               const fileId = imgUrl.split("file/d/")[1].split("/")[0];
@@ -300,7 +305,7 @@
             </div>`;
           }).join('');
 
-          // Inventaire
+          // 3. Inventaire
           const tbody = document.getElementById("table-inventaire");
           if (result.inventaire.length === 0) {
             tbody.innerHTML = "<tr><td colspan='4' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
@@ -332,11 +337,12 @@
       
       if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocq sur "${itemName}" ?`)) return;
       
-      const username = sessionStorage.getItem("joueur_connecte");
-      const binome = sessionStorage.getItem("binome_joueur");
+      const username = localStorage.getItem("joueur_connecte");
+      const binome = localStorage.getItem("binome_joueur");
 
       const response = await fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount, binome })
       });
       const res = await response.json();
@@ -344,7 +350,7 @@
       
       if (res.status === "success") {
         if (res.soldeBinome !== undefined) {
-          sessionStorage.setItem("solde_binome", res.soldeBinome);
+          localStorage.setItem("solde_binome", res.soldeBinome);
           document.getElementById("solde-binome").innerText = res.soldeBinome;
         }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
@@ -354,11 +360,12 @@
     async function annulerEnchere(itemName) {
       if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
       
-      const username = sessionStorage.getItem("joueur_connecte");
-      const binome = sessionStorage.getItem("binome_joueur");
+      const username = localStorage.getItem("joueur_connecte");
+      const binome = localStorage.getItem("binome_joueur");
 
       const response = await fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "cancel_bid", username, itemName, binome })
       });
       const res = await response.json();
@@ -366,7 +373,7 @@
       
       if (res.status === "success") {
         if (res.soldeBinome !== undefined) {
-          sessionStorage.setItem("solde_binome", res.soldeBinome);
+          localStorage.setItem("solde_binome", res.soldeBinome);
           document.getElementById("solde-binome").innerText = res.soldeBinome;
         }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
@@ -375,20 +382,21 @@
 
     async function acheterDirect(itemName, price, shopType, target) {
       if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
-      const username = sessionStorage.getItem("joueur_connecte");
+      const username = localStorage.getItem("joueur_connecte");
       const response = await fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target })
       });
       const res = await response.json();
       alert(res.message);
       if(res.status === "success") {
         if (res.soldeBinome !== undefined) {
-          sessionStorage.setItem("solde_binome", res.soldeBinome);
+          localStorage.setItem("solde_binome", res.soldeBinome);
           document.getElementById("solde-binome").innerText = res.soldeBinome;
         }
         if (res.soldeEquipe !== undefined) {
-          sessionStorage.setItem("solde_equipe", res.soldeEquipe);
+          localStorage.setItem("solde_equipe", res.soldeEquipe);
           document.getElementById("solde-equipe").innerText = res.soldeEquipe;
         }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
@@ -402,7 +410,7 @@
     let timerInterval = null;
 
     async function chargerRecherche() {
-      const joueur = sessionStorage.getItem("joueur_connecte");
+      const joueur = localStorage.getItem("joueur_connecte");
       const statusDiv = document.getElementById("recherche-status");
       const actionDiv = document.getElementById("recherche-actions");
       const histList = document.getElementById("recherche-historique");
@@ -486,7 +494,7 @@
     }
 
     async function deplacerRecherche() {
-      const joueur = sessionStorage.getItem("joueur_connecte");
+      const joueur = localStorage.getItem("joueur_connecte");
       const target = document.getElementById("target-cell").value;
       const msgLabel = document.getElementById("recherche-msg");
       
