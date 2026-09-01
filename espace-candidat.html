@@ -33,9 +33,47 @@
       background: #1a73e8;
       color: white;
     }
+
+    /* Modal / Pop-up de trouvaille */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-box {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Modal Pop-up Objet Trouvé -->
+  <div id="found-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h2 style="color: #28a745; margin-bottom: 10px;">🎉 DÉCOUVERTE !</h2>
+      <p style="font-size: 15px; margin-bottom: 15px;">Vous venez de mettre la main sur :</p>
+      <img id="modal-img" src="" alt="Objet trouvé" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; display: none;">
+      <h3 id="modal-title" style="font-size: 20px; color: #ffcc00; margin-bottom: 10px;">---</h3>
+      <p style="font-size: 13px; color: #666; margin-bottom: 20px;">L'objet a été automatiquement transféré dans votre inventaire personnel.</p>
+      <button class="login-btn" style="width: 100%;" onclick="fermerModalTrouvaille()">Génial !</button>
+    </div>
+  </div>
 
   <!-- Banderole Espace Candidat -->
   <header class="banner">
@@ -477,6 +515,11 @@
     let currentPosition = null;
     let timerInterval = null;
 
+    function fermerModalTrouvaille() {
+      document.getElementById("found-modal").style.display = "none";
+      chargerRecherche();
+    }
+
     async function chargerRecherche() {
       const joueur = localStorage.getItem("joueur_connecte");
       const statusDiv = document.getElementById("recherche-status");
@@ -530,7 +573,6 @@
           const now = result.maintenant;
 
           if (!currentPosition) {
-            // Début de journée : choix libre
             titreFouille.innerText = "Choisir votre point de départ";
             document.getElementById("target-cell").placeholder = "Ex: B50 (libre de A1 à Z400)";
             statusDiv.innerHTML = `
@@ -541,7 +583,6 @@
           } else if (now < nextAction) {
             lancerTimer(nextAction, statusDiv, actionDiv, niveau);
           } else {
-            // En cours de journée : choix restreint aux cases adjacentes
             titreFouille.innerText = "Fouiller une case adjacente";
             document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B51");
             
@@ -618,13 +659,27 @@
           document.getElementById("target-cell").value = "";
           
           if (result.foundItem) {
-            alert("🎉 INCROYABLE !\n\nVous avez trouvé : " + result.foundItem + " !\nL'objet a été ajouté automatiquement à votre inventaire personnel.");
+            document.getElementById("modal-title").innerText = result.foundItem;
+            
+            const modalImg = document.getElementById("modal-img");
+            let imgUrl = result.foundImage;
+            if (imgUrl) {
+              if (imgUrl.includes("file/d/")) {
+                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
+                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+              }
+              modalImg.src = imgUrl;
+              modalImg.style.display = "block";
+            } else {
+              modalImg.style.display = "none";
+            }
+
+            document.getElementById("found-modal").style.display = "flex";
             chargerBoutiqueEtInventaire();
           } else {
             alert(result.message);
+            chargerRecherche();
           }
-          
-          chargerRecherche();
         } else {
           msgLabel.innerText = result.message;
         }
