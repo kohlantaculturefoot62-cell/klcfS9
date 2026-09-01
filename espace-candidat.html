@@ -361,7 +361,6 @@
       document.getElementById("virement-nom-binome").innerText = binome;
       document.getElementById("info-niveau-recherche").innerText = `Niveau ${niveauChercheur} (${niveauChercheur} action(s)/série)`;
 
-      // Affichage du badge et du bouton de Boutique Équipe uniquement pour le Capitaine
       if (estCapitaine) {
         document.getElementById("badge-capitaine").style.display = "block";
         document.getElementById("nav-btn-boutique-equipe").style.display = "inline-block";
@@ -412,7 +411,7 @@
     }
 
     // -------------------------------------------------------------
-    // CHARGEMENT BOUTIQUES & INVENTAIRE (3 BOUTIQUES SÉPARÉES)
+    // CHARGEMENT BOUTIQUES & INVENTAIRE
     // -------------------------------------------------------------
     async function chargerBoutiqueEtInventaire() {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -448,11 +447,10 @@
           const mesMises = result.mesMises || {};
           const tousNormale = result.boutiqueNormale || [];
 
-          // Séparation des objets Standard vs Enchères
           const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
           const itemsEncheres = tousNormale.filter(item => item.type.toLowerCase() === "enchere");
 
-          // 1. RENDU BOUTIQUE STANDARD
+          // 1. BOUTIQUE STANDARD
           const gridStandard = document.getElementById("grid-boutique-standard");
           if (itemsStandard.length === 0) {
             gridStandard.innerHTML = "<p style='color:#666;'>Aucun objet disponible dans la boutique standard actuellement.</p>";
@@ -497,7 +495,7 @@
             }).join('');
           }
 
-          // 2. RENDU BOUTIQUE ENCHÈRES
+          // 2. BOUTIQUE ENCHÈRES
           const gridEncheres = document.getElementById("grid-boutique-encheres");
           if (itemsEncheres.length === 0) {
             gridEncheres.innerHTML = "<p style='color:#666;'>Aucune enchère active pour le moment.</p>";
@@ -547,7 +545,7 @@
             }).join('');
           }
 
-          // 3. RENDU BOUTIQUE ÉQUIPE
+          // 3. BOUTIQUE ÉQUIPE (AVEC SUPPORT 1/EQUIPE & ILLIMITÉ)
           if (estCap) {
             const gridEquipe = document.getElementById("grid-boutique-equipe");
             const itemsEquipe = result.boutiqueEquipe || [];
@@ -556,12 +554,21 @@
               gridEquipe.innerHTML = "<p style='color:#666;'>Aucun objet d'équipe disponible actuellement.</p>";
             } else {
               gridEquipe.innerHTML = itemsEquipe.map(item => {
-                const outOfStock = item.stock <= 0;
+                const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
 
                 let imgUrl = item.img;
                 if (imgUrl && imgUrl.includes("file/d/")) {
                   const fileId = imgUrl.split("file/d/")[1].split("/")[0];
                   imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                }
+
+                let stockDisplay = "";
+                if (item.stockType === "illimite") {
+                  stockDisplay = `<span style="color: #28a745; font-weight: bold;">Stock : Illimité ♾️</span>`;
+                } else if (item.stockType === "equipe") {
+                  stockDisplay = `<span style="color: #17a2b8; font-weight: bold;">Stock Tribu : ${item.stock} restant(s)</span>`;
+                } else {
+                  stockDisplay = `<span style="color: #d93025; font-weight: bold;">Stock Global : ${item.stock} / ${item.stockMax}</span>`;
                 }
 
                 return `
@@ -571,13 +578,13 @@
                       <h3 class="shop-title">${item.nom}</h3>
                       <div class="shop-badge-container">
                         <span style="font-weight: bold; color: #d93025; font-size: 14px;">👥 ${item.prix} K (Cagnotte Tribu)</span>
-                        <span style="color: #666; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</span>
+                        ${stockDisplay}
                       </div>
                       <div class="shop-desc">${item.desc}</div>
                     </div>
                     <div>
                       ${outOfStock 
-                        ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">RUPTURE</button>'
+                        ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">RUPTURE POUR VOTRE ÉQUIPE</button>'
                         : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`
                       }
                     </div>
@@ -587,7 +594,7 @@
             }
           }
 
-          // 4. RENDU INVENTAIRE
+          // 4. INVENTAIRE
           const tbody = document.getElementById("table-inventaire");
           if (result.inventaire.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5' style='padding: 15px; text-align: center; color: #666;'>Votre inventaire est vide.</td></tr>";
@@ -1018,7 +1025,7 @@
         }
 
         const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
+        const m = Math.floor((distanceMs % (1000 * 60)) / (1000 * 60));
         const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
 
         statusDiv.innerHTML = `
