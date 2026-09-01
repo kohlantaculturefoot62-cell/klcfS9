@@ -6,13 +6,11 @@
   <title>Espace Candidat - KLCF S9</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Styles spécifiques à l'espace candidat */
     .user-info { display: flex; align-items: center; gap: 15px; }
     .solde-box { background-color: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
     .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
     .logout-btn:hover { background-color: #bd2130; }
 
-    /* Menu d'onglets */
     .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; }
     .tab-btn { padding: 10px 20px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px; font-weight: bold; transition: background 0.3s; }
     .tab-btn.active { background: #ffcc00; color: #1a1a1a; }
@@ -29,7 +27,7 @@
       <h1 class="logo">KLCF S9</h1>
       <div class="user-info" style="display: flex; gap: 10px; align-items: center;">
         <div class="solde-box" style="background: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Cagnotte Binôme : <span id="solde-binome">0</span> Kohrocq
+          Solde Individuel : <span id="solde-individuel">0</span> Kohrocq
         </div>
         <div class="solde-box" style="background: #d93025; color: white; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
           Cagnotte Équipe : <span id="solde-equipe">0</span> Kohrocq
@@ -41,12 +39,25 @@
 
   <main class="section-container">
     
-    <!-- BLOC PROFIL -->
-    <div class="user-profile-summary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-      <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
-      <p>Équipe : <strong id="info-equipe">---</strong></p>
-      <p>Binôme : <strong id="info-binome">---</strong></p>
-      <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">👑 Capitaine d'équipe</p>
+    <!-- BLOC PROFIL & VIREMENT -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;" class="profile-grid">
+      <!-- Info Profil -->
+      <div class="user-profile-summary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+        <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
+        <p>Équipe : <strong id="info-equipe">---</strong></p>
+        <p>Binôme : <strong id="info-binome">---</strong></p>
+        <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">👑 Capitaine d'équipe</p>
+      </div>
+
+      <!-- Virement Binôme -->
+      <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border: 1px solid #ffe082;">
+        <h3 style="margin-bottom: 8px; font-size: 16px;">💸 Virement à votre Binôme</h3>
+        <p style="font-size: 13px; color: #555; margin-bottom: 10px;">Transférez des Kohrocq directement à <strong id="virement-nom-binome">votre binôme</strong> :</p>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="virement-montant" min="1" placeholder="Montant en K" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+          <button class="login-btn" onclick="transfererKohrocq()" style="padding: 8px 15px;">Envoyer</button>
+        </div>
+      </div>
     </div>
 
     <!-- NAVIGATION DES ONGLETS -->
@@ -60,7 +71,7 @@
 
     <!-- ONGLET 1 : BOUTIQUE -->
     <div id="tab-boutique" class="tab-content active">
-      <h2>Boutique Normale (Cagnotte Binôme)</h2>
+      <h2>Boutique Individuelle</h2>
       <div class="candidates-grid" id="grid-boutique-normale" style="margin-top: 20px;">
         <p>Chargement de la boutique...</p>
       </div>
@@ -74,7 +85,7 @@
     <!-- ONGLET 2 : INVENTAIRE -->
     <div id="tab-inventaire" class="tab-content">
       <h2>Mon Inventaire</h2>
-      <p>Voici les objets possédés par votre Binôme et votre Équipe.</p>
+      <p>Voici les objets possédés personnellement et par votre équipe.</p>
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
         <thead style="background: #f8f9fa;">
           <tr>
@@ -110,7 +121,6 @@
     <div id="tab-recherche" class="tab-content">
       <h2>Chasse au Collier (Grille A1 à Z300)</h2>
       <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-        <!-- Zone Actions -->
         <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
           <h3 style="margin-bottom: 15px;">Votre Position</h3>
           <div id="recherche-status"><p>Chargement de votre position...</p></div>
@@ -122,7 +132,6 @@
             <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
           </div>
         </div>
-        <!-- Zone Historique -->
         <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
           <h3>Votre Historique</h3>
           <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;"></ul>
@@ -144,22 +153,22 @@
         return; 
       }
 
-      // Affichage des soldes
-      document.getElementById("solde-binome").innerText = localStorage.getItem("solde_binome") || "0";
+      document.getElementById("solde-individuel").innerText = localStorage.getItem("solde_individuel") || "0";
       document.getElementById("solde-equipe").innerText = localStorage.getItem("solde_equipe") || "0";
 
-      // Affichage du Profil
       const nomEquipe = localStorage.getItem("equipe_joueur") || "Sans équipe";
+      const binome = localStorage.getItem("binome_joueur") || "Aucun";
+
       document.getElementById("info-nom").innerText = joueur;
       document.getElementById("info-equipe").innerText = nomEquipe;
       document.getElementById("nom-equipe-titre").innerText = nomEquipe;
-      document.getElementById("info-binome").innerText = localStorage.getItem("binome_joueur") || "Aucun";
+      document.getElementById("info-binome").innerText = binome;
+      document.getElementById("virement-nom-binome").innerText = binome;
 
       if (localStorage.getItem("est_capitaine") === "true") {
         document.getElementById("badge-capitaine").style.display = "block";
       }
 
-      // Remplissage de l'équipe
       const coequipiers = JSON.parse(localStorage.getItem("liste_coequipiers") || "[]");
       const gridCoequipiers = document.getElementById("grid-coequipiers");
       gridCoequipiers.innerHTML = "";
@@ -186,12 +195,11 @@
         });
       }
 
-      // Charger la boutique par défaut au démarrage
       chargerBoutiqueEtInventaire();
     });
 
     // -------------------------------------------------------------
-    // GESTION DES ONGLETS ET DECONNEXION
+    // ONGLETS ET DÉCONNEXION
     // -------------------------------------------------------------
     function afficherOnglet(nomOnglet, btnElement) {
       document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
@@ -206,10 +214,55 @@
     }
 
     // -------------------------------------------------------------
-    // LOGIQUE BOUTIQUE ET INVENTAIRE
+    // VIREMENT DE FONDS
+    // -------------------------------------------------------------
+    async function transfererKohrocq() {
+      const montantInput = document.getElementById("virement-montant");
+      const montant = parseInt(montantInput.value, 10);
+      const binome = localStorage.getItem("binome_joueur");
+
+      if (isNaN(montant) || montant <= 0) {
+        alert("Veuillez saisir un montant valide (supérieur à 0).");
+        return;
+      }
+
+      if (!binome || binome === "Aucun") {
+        alert("Vous n'avez pas de binôme assigné pour recevoir ce virement.");
+        return;
+      }
+
+      if (!confirm(`Confirmer l'envoi de ${montant} Kohrocq à ${binome} ?`)) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "transfer_funds",
+            username: localStorage.getItem("joueur_connecte"),
+            amount: montant
+          })
+        });
+        const res = await response.json();
+        alert(res.message);
+
+        if (res.status === "success") {
+          montantInput.value = "";
+          if (res.soldeIndividuel !== undefined) {
+            localStorage.setItem("solde_individuel", res.soldeIndividuel);
+            document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
+          }
+          chargerBoutiqueEtInventaire();
+        }
+      } catch (err) {
+        alert("Erreur lors du virement.");
+      }
+    }
+
+    // -------------------------------------------------------------
+    // BOUTIQUE ET INVENTAIRE
     // -------------------------------------------------------------
     async function chargerBoutiqueEtInventaire() {
-      const binome = localStorage.getItem("binome_joueur");
       const equipe = localStorage.getItem("equipe_joueur");
       const estCap = localStorage.getItem("est_capitaine") === "true";
 
@@ -220,24 +273,22 @@
           body: JSON.stringify({ 
             action: "get_shop_data", 
             username: localStorage.getItem("joueur_connecte"), 
-            binome: binome, 
             equipe: equipe 
           })
         });
         const result = await response.json();
 
         if (result.status === "success") {
-          // Mise à jour automatique des cagnottes
-          if (result.soldeBinome !== undefined) {
-            localStorage.setItem("solde_binome", result.soldeBinome);
-            document.getElementById("solde-binome").innerText = result.soldeBinome;
+          if (result.soldeIndividuel !== undefined) {
+            localStorage.setItem("solde_individuel", result.soldeIndividuel);
+            document.getElementById("solde-individuel").innerText = result.soldeIndividuel;
           }
           if (result.soldeEquipe !== undefined) {
             localStorage.setItem("solde_equipe", result.soldeEquipe);
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
 
-          // 1. Boutique Normale
+          // 1. Boutique Normale (Individuelle)
           const mesMises = result.mesMises || {};
           
           document.getElementById("grid-boutique-normale").innerHTML = result.boutiqueNormale.map(item => {
@@ -269,7 +320,7 @@
                 `;
               }
             } else {
-              actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '${binome}')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white; cursor:pointer;">Acheter (${item.prix} K)</button>`;
+              actionHTML = `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '')" ${outOfStock ? 'disabled' : ''} style="width: 100%; padding: 8px; background: #007bff; color: white; cursor:pointer;">Acheter (${item.prix} K)</button>`;
             }
 
             return `<div class="candidate-card" style="${outOfStock ? 'opacity: 0.5; filter: grayscale(1);' : ''}">
@@ -338,20 +389,19 @@
       if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocq sur "${itemName}" ?`)) return;
       
       const username = localStorage.getItem("joueur_connecte");
-      const binome = localStorage.getItem("binome_joueur");
 
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount, binome })
+        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount })
       });
       const res = await response.json();
       alert(res.message);
       
       if (res.status === "success") {
-        if (res.soldeBinome !== undefined) {
-          localStorage.setItem("solde_binome", res.soldeBinome);
-          document.getElementById("solde-binome").innerText = res.soldeBinome;
+        if (res.soldeIndividuel !== undefined) {
+          localStorage.setItem("solde_individuel", res.soldeIndividuel);
+          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
         }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
@@ -361,20 +411,19 @@
       if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
       
       const username = localStorage.getItem("joueur_connecte");
-      const binome = localStorage.getItem("binome_joueur");
 
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "cancel_bid", username, itemName, binome })
+        body: JSON.stringify({ action: "cancel_bid", username, itemName })
       });
       const res = await response.json();
       alert(res.message);
       
       if (res.status === "success") {
-        if (res.soldeBinome !== undefined) {
-          localStorage.setItem("solde_binome", res.soldeBinome);
-          document.getElementById("solde-binome").innerText = res.soldeBinome;
+        if (res.soldeIndividuel !== undefined) {
+          localStorage.setItem("solde_individuel", res.soldeIndividuel);
+          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
         }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
@@ -391,9 +440,9 @@
       const res = await response.json();
       alert(res.message);
       if(res.status === "success") {
-        if (res.soldeBinome !== undefined) {
-          localStorage.setItem("solde_binome", res.soldeBinome);
-          document.getElementById("solde-binome").innerText = res.soldeBinome;
+        if (res.soldeIndividuel !== undefined) {
+          localStorage.setItem("solde_individuel", res.soldeIndividuel);
+          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
         }
         if (res.soldeEquipe !== undefined) {
           localStorage.setItem("solde_equipe", res.soldeEquipe);
