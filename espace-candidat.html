@@ -519,6 +519,10 @@
             localStorage.setItem("solde_equipe", result.soldeEquipe);
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
+          if (result.niveauRecherche !== undefined) {
+            localStorage.setItem("niveau_recherche", result.niveauRecherche);
+            document.getElementById("info-niveau-recherche").innerText = `Niveau ${result.niveauRecherche} (${result.niveauRecherche} action(s)/série)`;
+          }
 
           const mesMises = result.mesMises || {};
           
@@ -733,6 +737,10 @@
         if (res.soldeEquipe !== undefined) {
           localStorage.setItem("solde_equipe", res.soldeEquipe);
           document.getElementById("solde-equipe").innerText = res.soldeEquipe;
+        }
+        if (res.nouveauNiveau !== undefined) {
+          localStorage.setItem("niveau_recherche", res.nouveauNiveau);
+          document.getElementById("info-niveau-recherche").innerText = `Niveau ${res.nouveauNiveau} (${res.nouveauNiveau} action(s)/série)`;
         }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
