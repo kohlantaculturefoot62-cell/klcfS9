@@ -19,129 +19,28 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Grille et cartes d'objets agrandies */
-    .shop-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
-    }
+    .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+    .shop-card { background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+    .shop-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+    .shop-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #f5f5f5; }
+    .shop-title { font-size: 18px; font-weight: bold; color: #1a1a1a; margin: 0 0 8px 0; }
+    .shop-desc { font-size: 13px; color: #444; line-height: 1.5; background: #f9f9f9; padding: 10px 12px; border-radius: 8px; min-height: 75px; max-height: 140px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #eee; }
+    .shop-badge-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 12px; }
 
-    .shop-card {
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
-      padding: 18px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .shop-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    }
+    .adjacent-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px; margin-bottom: 5px; }
+    .adjacent-btn:hover { background: #1a73e8; color: white; }
 
-    .shop-img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      background: #f5f5f5;
-    }
+    .use-btn { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .use-btn:hover { background: #218838; }
 
-    .shop-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #1a1a1a;
-      margin: 0 0 8px 0;
-    }
-
-    .shop-desc {
-      font-size: 13px;
-      color: #444;
-      line-height: 1.5;
-      background: #f9f9f9;
-      padding: 10px 12px;
-      border-radius: 8px;
-      min-height: 75px;
-      max-height: 140px;
-      overflow-y: auto;
-      margin-bottom: 12px;
-      border: 1px solid #eee;
-    }
-
-    .shop-badge-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 12px;
-    }
-
-    .adjacent-btn {
-      background: #e8f0fe;
-      border: 1px solid #1a73e8;
-      color: #1a73e8;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-right: 5px;
-      margin-bottom: 5px;
-    }
-    .adjacent-btn:hover {
-      background: #1a73e8;
-      color: white;
-    }
-
-    .use-btn {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 12px;
-      transition: background 0.2s;
-    }
-    .use-btn:hover {
-      background: #218838;
-    }
-
-    /* Modals / Pop-ups */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-box {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      max-width: 420px;
-      width: 90%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      animation: popIn 0.3s ease;
-    }
-    @keyframes popIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-box { background: white; padding: 25px; border-radius: 12px; text-align: center; max-width: 440px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <!-- Modal Pop-up Objet Trouvé -->
+  <!-- Modal Découverte Fouille -->
   <div id="found-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #28a745; margin-bottom: 10px;">🎉 DÉCOUVERTE !</h2>
@@ -153,19 +52,30 @@
     </div>
   </div>
 
-  <!-- Modal Pop-up Utilisation Objet -->
+  <!-- Modal Multi-Cibles Dynamique (1, 2 ou 3 Cibles) -->
+  <div id="target-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h2 style="color: #007bff; margin-bottom: 10px;">🎯 CHOISIR LES CIBLES</h2>
+      <p style="font-size: 14px; margin-bottom: 15px;">Sélectionnez les candidats ciblés par <strong id="target-modal-item">---</strong> :</p>
+      <div id="target-dropdowns-container" style="text-align: left; margin-bottom: 20px;"></div>
+      <div style="display: flex; gap: 10px;">
+        <button class="login-btn" style="flex: 1; background: #28a745;" onclick="validerUtilisationAvecCible()">Confirmer</button>
+        <button class="logout-btn" style="flex: 1;" onclick="fermerModalCible()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Résultat Utilisation -->
   <div id="use-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin-bottom: 10px;">⚡ OBJET ACTIVÉ</h2>
       <h3 id="use-modal-title" style="font-size: 18px; color: #1a1a1a; margin-bottom: 15px;">---</h3>
-      <div id="use-modal-desc" style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 20px; text-align: left;">
-        ---
-      </div>
+      <div id="use-modal-desc" style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 20px; text-align: left;">---</div>
       <button class="login-btn" style="width: 100%;" onclick="fermerModalUtilisation()">Fermer</button>
     </div>
   </div>
 
-  <!-- Banderole Espace Candidat -->
+  <!-- Banderole -->
   <header class="banner">
     <div class="banner-content">
       <h1 class="logo">KLCF S9</h1>
@@ -183,9 +93,8 @@
 
   <main class="section-container">
     
-    <!-- BLOC PROFIL & VIREMENT -->
+    <!-- Profil & Virement -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;" class="profile-grid">
-      <!-- Info Profil -->
       <div class="user-profile-summary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
         <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
         <p>Équipe : <strong id="info-equipe">---</strong></p>
@@ -194,7 +103,6 @@
         <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">👑 Capitaine d'équipe</p>
       </div>
 
-      <!-- Virement Binôme -->
       <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border: 1px solid #ffe082;">
         <h3 style="margin-bottom: 8px; font-size: 16px;">💸 Virement à votre Binôme</h3>
         <p style="font-size: 13px; color: #555; margin-bottom: 10px;">Transférez des Kohrocq directement à <strong id="virement-nom-binome">votre binôme</strong> :</p>
@@ -205,7 +113,7 @@
       </div>
     </div>
 
-    <!-- NAVIGATION DES ONGLETS (3 BOUTIQUES SÉPARÉES) -->
+    <!-- Navigation -->
     <div class="tabs-nav">
       <button class="tab-btn active" onclick="afficherOnglet('boutique-standard', this); chargerBoutiqueEtInventaire();">🛍️ Boutique Standard</button>
       <button class="tab-btn" onclick="afficherOnglet('boutique-encheres', this); chargerBoutiqueEtInventaire();">🔨 Enchères</button>
@@ -217,46 +125,25 @@
       <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">🧭 Recherche</button>
     </div>
 
-    <!-- ONGLET 1 : BOUTIQUE STANDARD -->
+    <!-- Onglets Boutiques & Inventaire -->
     <div id="tab-boutique-standard" class="tab-content active">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>Boutique Standard (Achats Directs)</h2>
-        <span style="font-size: 13px; color: #666;">Payable avec votre Solde Individuel</span>
-      </div>
-      <p style="color: #666; font-size: 14px; margin-top: 5px;">Achetez immédiatement des avantages personnels pour votre aventure.</p>
-      <div class="shop-grid" id="grid-boutique-standard">
-        <p>Chargement des objets...</p>
-      </div>
+      <h2>Boutique Standard (Achats Directs)</h2>
+      <div class="shop-grid" id="grid-boutique-standard"><p>Chargement des objets...</p></div>
     </div>
 
-    <!-- ONGLET 2 : BOUTIQUE ENCHÈRES -->
     <div id="tab-boutique-encheres" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>Boutique aux Enchères</h2>
-        <span style="font-size: 13px; color: #d93025; font-weight: bold;">Clôture chaque dimanche</span>
-      </div>
-      <p style="color: #666; font-size: 14px; margin-top: 5px;">Placez vos mises en Kohrocq. Le plus offrant remporte l'objet à la clôture !</p>
-      <div class="shop-grid" id="grid-boutique-encheres">
-        <p>Chargement des enchères...</p>
-      </div>
+      <h2>Boutique aux Enchères</h2>
+      <div class="shop-grid" id="grid-boutique-encheres"><p>Chargement des enchères...</p></div>
     </div>
 
-    <!-- ONGLET 3 : BOUTIQUE ÉQUIPE (RÉSERVÉE CAPITAINE) -->
     <div id="tab-boutique-equipe" class="tab-content">
-      <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="margin: 0 0 5px 0; color: #b38600;">👑 Espace Réservé au Capitaine d'Équipe</h3>
-        <p style="margin: 0; font-size: 13px; color: #555;">Les achats dans cette boutique sont débités de la <strong>Cagnotte d'Équipe</strong> et profitent à toute la tribu.</p>
-      </div>
-      <div class="shop-grid" id="grid-boutique-equipe">
-        <p>Chargement de la boutique d'équipe...</p>
-      </div>
+      <h2>Boutique d'Équipe (Réservée Capitaine)</h2>
+      <div class="shop-grid" id="grid-boutique-equipe"><p>Chargement...</p></div>
     </div>
 
-    <!-- ONGLET 4 : MON INVENTAIRE -->
     <div id="tab-inventaire" class="tab-content">
       <h2>Mon Inventaire</h2>
-      <p>Voici les objets possédés personnellement et par votre équipe.</p>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
         <thead style="background: #f8f9fa;">
           <tr>
             <th style="padding: 10px; border-bottom: 2px solid #ddd;">Objet</th>
@@ -266,67 +153,64 @@
             <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Action</th>
           </tr>
         </thead>
-        <tbody id="table-inventaire">
-          <tr><td colspan="5" style="padding: 10px;">Chargement de l'inventaire...</td></tr>
-        </tbody>
+        <tbody id="table-inventaire"><tr><td colspan="5" style="padding: 10px;">Chargement...</td></tr></tbody>
       </table>
     </div>
 
-    <!-- ONGLET 5 : CONSEIL & VOTE -->
+    <!-- Onglet Conseil avec Support Double Vote -->
     <div id="tab-conseil" class="tab-content">
       <h2>Le Conseil Tribal</h2>
       <div style="max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-        <div id="conseil-status">
-          <p>Chargement du conseil...</p>
-        </div>
+        <div id="conseil-status"><p>Chargement du conseil...</p></div>
 
         <div id="conseil-form" style="display: none; margin-top: 20px; text-align: left;">
-          <label id="vote-label" style="font-weight: bold; display: block; margin-bottom: 8px;">Choisissez le candidat contre qui vous votez :</label>
-          <select id="vote-candidate-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
+          <!-- Bulletin 1 -->
+          <label style="font-weight: bold; display: block; margin-bottom: 5px;">Bulletin N°1 :</label>
+          <select id="vote-select-1" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
             <option value="">-- Sélectionner un aventurier --</option>
           </select>
-          <p style="font-size: 12px; color: #666; margin-bottom: 15px;">ℹ️ Vous pouvez modifier votre vote à tout moment tant que le conseil reste ouvert.</p>
-          <button id="vote-submit-btn" class="login-btn" style="width: 100%; background: #d93025;" onclick="soumettreVote()">Déposer mon bulletin dans l'urne</button>
+
+          <!-- Bulletin 2 (Visible si Double/Steal Vote actif) -->
+          <div id="zone-bulletin-2" style="display: none;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #d93025;">🔥 Bulletin N°2 (Avantage Double Vote actif) :</label>
+            <select id="vote-select-2" style="width: 100%; padding: 10px; border: 1px solid #d93025; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
+              <option value="">-- Sélectionner un 2ème aventurier --</option>
+            </select>
+          </div>
+
+          <button id="vote-submit-btn" class="login-btn" style="width: 100%; background: #d93025;" onclick="soumettreVote()">Déposer dans l'urne</button>
         </div>
       </div>
     </div>
 
-    <!-- ONGLET 6 : MON ÉQUIPE -->
     <div id="tab-equipe" class="tab-content">
       <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
-      <p style="margin-bottom: 20px;">Voici les candidats qui composent votre équipe pour cette phase :</p>
       <div class="candidates-grid" id="grid-coequipiers"></div>
     </div>
 
-    <!-- ONGLET 7 : AGENDA -->
     <div id="tab-agenda" class="tab-content">
       <h2>Agenda des Événements</h2>
-      <p>Consultez le calendrier officiel de la saison (Heure de Paris).</p>
-      <div class="calendar-wrapper">
-        <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border: 0" width="100%" height="500" frameborder="0" scrolling="no"></iframe>
-      </div>
+      <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border: 0" width="100%" height="500" frameborder="0"></iframe>
     </div>
 
-    <!-- ONGLET 8 : RECHERCHE COLLIER -->
     <div id="tab-recherche" class="tab-content">
-      <h2>Chasse au Collier (Grille A1 à Z400)</h2>
+      <h2>Chasse au Collier</h2>
       <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          <h3 style="margin-bottom: 15px;">Votre Position & Compétence</h3>
-          <div id="recherche-status"><p>Chargement de votre statut...</p></div>
+        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px;">
+          <h3>Votre Position</h3>
+          <div id="recherche-status"><p>Chargement...</p></div>
           <div id="recherche-actions" style="display: none; margin-top: 20px;">
-            <h4 id="titre-fouille" style="margin-bottom: 10px;">Fouiller une case</h4>
+            <h4 id="titre-fouille">Fouiller une case</h4>
             <div id="zone-cases-adjacentes" style="margin-bottom: 12px; display: none;">
-              <span style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">Cases adjacentes accessibles :</span>
               <div id="btn-container-adjacentes"></div>
             </div>
             <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
-            <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider le déplacement</button>
+            <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider</button>
             <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
           </div>
         </div>
-        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          <h3>Votre Historique de Fouille</h3>
+        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px;">
+          <h3>Historique de Fouille</h3>
           <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;"></ul>
         </div>
       </div>
@@ -336,15 +220,13 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
 
-    // -------------------------------------------------------------
-    // INITIALISATION DE LA PAGE
-    // -------------------------------------------------------------
+    let listeCandidatsGlobale = [];
+    let pendingUseItem = null;
+    let hasDoubleVote = false;
+
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = localStorage.getItem("joueur_connecte");
-      if (!joueur) { 
-        window.location.href = "login.html"; 
-        return; 
-      }
+      if (!joueur) { window.location.href = "login.html"; return; }
 
       document.getElementById("solde-individuel").innerText = localStorage.getItem("solde_individuel") || "0";
       document.getElementById("solde-equipe").innerText = localStorage.getItem("solde_equipe") || "0";
@@ -378,13 +260,11 @@
           card.className = "candidate-card";
           const isCap = member.estCapitaine;
           const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
-          
           card.style.border = isCap ? "2px solid #ffcc00" : "1px solid #ddd";
           card.style.background = isMe ? "#fffde7" : "white";
-
           card.innerHTML = `
-            ${isCap ? '<div style="font-size: 24px; margin-bottom: 5px;">👑</div>' : '<div style="font-size: 24px; margin-bottom: 5px;">👤</div>'}
-            <h3 style="margin-bottom: 5px;">${member.nom} ${isMe ? '(Vous)' : ''}</h3>
+            ${isCap ? '<div style="font-size: 24px;">👑</div>' : '<div style="font-size: 24px;">👤</div>'}
+            <h3>${member.nom} ${isMe ? '(Vous)' : ''}</h3>
             ${isCap ? '<span style="color: #d93025; font-weight: bold; font-size: 13px;">CAPITAINE</span><br>' : ''}
             <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">Binôme : <strong>${member.binome}</strong></span>
           `;
@@ -395,9 +275,6 @@
       chargerBoutiqueEtInventaire();
     });
 
-    // -------------------------------------------------------------
-    // ONGLETS ET DÉCONNEXION
-    // -------------------------------------------------------------
     function afficherOnglet(nomOnglet, btnElement) {
       document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
       document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
@@ -410,9 +287,6 @@
       window.location.href = "login.html";
     }
 
-    // -------------------------------------------------------------
-    // CHARGEMENT BOUTIQUES & INVENTAIRE
-    // -------------------------------------------------------------
     async function chargerBoutiqueEtInventaire() {
       const joueur = localStorage.getItem("joueur_connecte");
       const equipe = localStorage.getItem("equipe_joueur");
@@ -422,15 +296,13 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ 
-            action: "get_shop_data", 
-            username: joueur, 
-            equipe: equipe 
-          })
+          body: JSON.stringify({ action: "get_shop_data", username: joueur, equipe: equipe })
         });
         const result = await response.json();
 
         if (result.status === "success") {
+          listeCandidatsGlobale = result.tousLesCandidats || [];
+
           if (result.soldeIndividuel !== undefined) {
             localStorage.setItem("solde_individuel", result.soldeIndividuel);
             document.getElementById("solde-individuel").innerText = result.soldeIndividuel;
@@ -439,162 +311,90 @@
             localStorage.setItem("solde_equipe", result.soldeEquipe);
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
-          if (result.niveauRecherche !== undefined) {
-            localStorage.setItem("niveau_recherche", result.niveauRecherche);
-            document.getElementById("info-niveau-recherche").innerText = `Niveau ${result.niveauRecherche} (${result.niveauRecherche} action(s)/série)`;
-          }
 
           const mesMises = result.mesMises || {};
           const tousNormale = result.boutiqueNormale || [];
-
           const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
           const itemsEncheres = tousNormale.filter(item => item.type.toLowerCase() === "enchere");
 
-          // 1. BOUTIQUE STANDARD
-          const gridStandard = document.getElementById("grid-boutique-standard");
-          if (itemsStandard.length === 0) {
-            gridStandard.innerHTML = "<p style='color:#666;'>Aucun objet disponible dans la boutique standard actuellement.</p>";
-          } else {
-            gridStandard.innerHTML = itemsStandard.map(item => {
+          // Standard
+          document.getElementById("grid-boutique-standard").innerHTML = itemsStandard.map(item => {
+            const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
+            let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
+            let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Stock : Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">Stock : ${item.stock} / ${item.stockMax}</span>`;
+
+            return `
+              <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
+                <div>
+                  ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
+                  <h3 class="shop-title">${item.nom}</h3>
+                  <div class="shop-badge-container">
+                    <span style="font-weight: bold; color: #007bff; font-size: 14px;">💰 ${item.prix} K</span>
+                    ${stockDisplay}
+                  </div>
+                  <div class="shop-desc">${item.desc}</div>
+                </div>
+                <div>
+                  ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '')" class="login-btn" style="width:100%; padding:10px;">Acheter (${item.prix} K)</button>`}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Enchères
+          document.getElementById("grid-boutique-encheres").innerHTML = itemsEncheres.map(item => {
+            const currentBid = mesMises[item.nom];
+            let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
+            let actionHTML = currentBid ? `
+              <div style="background: #e8f0fe; padding: 8px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; text-align: center;">Mise actuelle : <strong>${currentBid} K</strong></div>
+              <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+              <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 8px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-bottom: 6px;">Modifier</button>
+              <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 6px; background: #dc3545; color: white; cursor: pointer; border: none; border-radius: 4px; font-size: 12px;">Retirer</button>
+            ` : `
+              <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+              <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 10px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 6px;">Placer mise</button>
+            `;
+
+            return `
+              <div class="shop-card">
+                <div>
+                  ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
+                  <h3 class="shop-title">${item.nom}</h3>
+                  <div class="shop-badge-container"><span style="font-weight: bold; color: #b38600; font-size: 14px;">🔨 Départ : ${item.prix} K</span></div>
+                  <div class="shop-desc">${item.desc}</div>
+                </div>
+                <div>${actionHTML}</div>
+              </div>
+            `;
+          }).join('');
+
+          // Équipe
+          if (estCap) {
+            document.getElementById("grid-boutique-equipe").innerHTML = (result.boutiqueEquipe || []).map(item => {
               const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
-
-              let imgUrl = item.img;
-              if (imgUrl && imgUrl.includes("file/d/")) {
-                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-              }
-
-              let stockDisplay = "";
-              if (item.stockType === "illimite") {
-                stockDisplay = `<span style="color: #28a745; font-weight: bold;">Stock : Illimité ♾️</span>`;
-              } else if (item.stockType === "equipe") {
-                stockDisplay = `<span style="color: #17a2b8; font-weight: bold;">Tribu : ${item.stock} restant(s)</span>`;
-              } else {
-                stockDisplay = `<span style="color: #d93025; font-weight: bold;">Stock : ${item.stock} / ${item.stockMax}</span>`;
-              }
+              let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
+              let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Stock : Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">Stock Tribu : ${item.stock}</span>`;
 
               return `
-                <div class="shop-card" style="${outOfStock ? 'opacity: 0.55; filter: grayscale(0.8);' : ''}">
+                <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
                   <div>
                     ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
                     <h3 class="shop-title">${item.nom}</h3>
                     <div class="shop-badge-container">
-                      <span style="font-weight: bold; color: #007bff; font-size: 14px;">💰 ${item.prix} Kohrocq</span>
+                      <span style="font-weight: bold; color: #d93025; font-size: 14px;">👥 ${item.prix} K</span>
                       ${stockDisplay}
                     </div>
                     <div class="shop-desc">${item.desc}</div>
                   </div>
                   <div>
-                    ${outOfStock 
-                      ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">RUPTURE DE STOCK</button>'
-                      : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '')" class="login-btn" style="width:100%; padding:10px;">Acheter (${item.prix} K)</button>`
-                    }
+                    ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`}
                   </div>
                 </div>
               `;
             }).join('');
           }
 
-          // 2. BOUTIQUE ENCHÈRES
-          const gridEncheres = document.getElementById("grid-boutique-encheres");
-          if (itemsEncheres.length === 0) {
-            gridEncheres.innerHTML = "<p style='color:#666;'>Aucune enchère active pour le moment.</p>";
-          } else {
-            gridEncheres.innerHTML = itemsEncheres.map(item => {
-              const currentBid = mesMises[item.nom];
-
-              let imgUrl = item.img;
-              if (imgUrl && imgUrl.includes("file/d/")) {
-                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-              }
-
-              let actionHTML = "";
-              if (currentBid) {
-                actionHTML = `
-                  <div style="background: #e8f0fe; padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; border: 1px solid #b6d4fe; text-align: center;">
-                    Votre mise actuelle : <strong>${currentBid} K</strong>
-                  </div>
-                  <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" placeholder="Nouvelle mise" style="width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                  <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 8px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-bottom: 6px;">Modifier la mise</button>
-                  <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 6px; background: #dc3545; color: white; cursor: pointer; border: none; border-radius: 4px; font-size: 12px;">Retirer ma mise</button>
-                `;
-              } else {
-                actionHTML = `
-                  <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                  <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 10px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 6px;">Placer ma mise</button>
-                `;
-              }
-
-              return `
-                <div class="shop-card">
-                  <div>
-                    ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
-                    <h3 class="shop-title">${item.nom}</h3>
-                    <div class="shop-badge-container">
-                      <span style="font-weight: bold; color: #b38600; font-size: 14px;">🔨 Mise de départ : ${item.prix} K</span>
-                      <span style="background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; font-weight: bold;">Enchère</span>
-                    </div>
-                    <div class="shop-desc">${item.desc}</div>
-                  </div>
-                  <div>
-                    ${actionHTML}
-                  </div>
-                </div>
-              `;
-            }).join('');
-          }
-
-          // 3. BOUTIQUE ÉQUIPE (AVEC SUPPORT 1/EQUIPE & ILLIMITÉ)
-          if (estCap) {
-            const gridEquipe = document.getElementById("grid-boutique-equipe");
-            const itemsEquipe = result.boutiqueEquipe || [];
-
-            if (itemsEquipe.length === 0) {
-              gridEquipe.innerHTML = "<p style='color:#666;'>Aucun objet d'équipe disponible actuellement.</p>";
-            } else {
-              gridEquipe.innerHTML = itemsEquipe.map(item => {
-                const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
-
-                let imgUrl = item.img;
-                if (imgUrl && imgUrl.includes("file/d/")) {
-                  const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-                  imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-                }
-
-                let stockDisplay = "";
-                if (item.stockType === "illimite") {
-                  stockDisplay = `<span style="color: #28a745; font-weight: bold;">Stock : Illimité ♾️</span>`;
-                } else if (item.stockType === "equipe") {
-                  stockDisplay = `<span style="color: #17a2b8; font-weight: bold;">Stock Tribu : ${item.stock} restant(s)</span>`;
-                } else {
-                  stockDisplay = `<span style="color: #d93025; font-weight: bold;">Stock Global : ${item.stock} / ${item.stockMax}</span>`;
-                }
-
-                return `
-                  <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
-                    <div>
-                      ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
-                      <h3 class="shop-title">${item.nom}</h3>
-                      <div class="shop-badge-container">
-                        <span style="font-weight: bold; color: #d93025; font-size: 14px;">👥 ${item.prix} K (Cagnotte Tribu)</span>
-                        ${stockDisplay}
-                      </div>
-                      <div class="shop-desc">${item.desc}</div>
-                    </div>
-                    <div>
-                      ${outOfStock 
-                        ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">RUPTURE POUR VOTRE ÉQUIPE</button>'
-                        : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`
-                      }
-                    </div>
-                  </div>
-                `;
-              }).join('');
-            }
-          }
-
-          // 4. INVENTAIRE
+          // Inventaire
           const tbody = document.getElementById("table-inventaire");
           if (result.inventaire.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5' style='padding: 15px; text-align: center; color: #666;'>Votre inventaire est vide.</td></tr>";
@@ -603,10 +403,7 @@
               const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
               const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
               const canUse = isOwner || (isTeamItem && estCap);
-
-              const btnAction = canUse 
-                ? `<button class="use-btn" onclick="utiliserObjet('${inv.objet}', '${inv.proprietaire}')">Utiliser</button>`
-                : `<span style="font-size: 11px; color: #999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
+              const btnAction = canUse ? `<button class="use-btn" onclick="demarrerUtilisation('${inv.objet}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
 
               return `
                 <tr>
@@ -620,15 +417,76 @@
             }).join('');
           }
         }
-      } catch (err) {
-        console.error("Erreur chargement boutique", err);
+      } catch (err) { console.error("Erreur boutique", err); }
+    }
+
+    // -------------------------------------------------------------
+    // MODAL MULTI-CIBLES & UTILISATION
+    // -------------------------------------------------------------
+    function demarrerUtilisation(itemName, owner, cibleRequise) {
+      pendingUseItem = { itemName, owner, cibleRequise };
+
+      var reqUpper = String(cibleRequise).toUpperCase().trim();
+      var nbCibles = 0;
+      if (reqUpper === "JOUEUR") nbCibles = 1;
+      else if (reqUpper === "2 JOUEURS" || reqUpper === "2") nbCibles = 2;
+      else if (reqUpper === "3 JOUEURS" || reqUpper === "3") nbCibles = 3;
+
+      if (nbCibles > 0) {
+        const modal = document.getElementById("target-modal");
+        const container = document.getElementById("target-dropdowns-container");
+        const joueur = localStorage.getItem("joueur_connecte");
+
+        document.getElementById("target-modal-item").innerText = itemName;
+        container.innerHTML = "";
+
+        for (let i = 1; i <= nbCibles; i++) {
+          let label = nbCibles > 1 ? `<label style="display:block; font-weight:bold; margin-top:8px; font-size:13px;">Cible N°${i} :</label>` : '';
+          let options = `<option value="">-- Choisir un aventurier --</option>`;
+          listeCandidatsGlobale.forEach(c => {
+            if (c.nom.toLowerCase() !== joueur.toLowerCase()) {
+              options += `<option value="${c.nom}">${c.nom} (${c.equipe})</option>`;
+            }
+          });
+          container.innerHTML += `${label}<select class="target-select-field" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:5px; font-size:14px;">${options}</select>`;
+        }
+
+        modal.style.display = "flex";
+      } else {
+        if (!confirm(`Confirmer l'utilisation de "${itemName}" ?`)) return;
+        executerUtilisation(itemName, owner, []);
       }
     }
 
-    async function utiliserObjet(itemName, owner) {
-      if (!confirm(`Voulez-vous vraiment utiliser "${itemName}" ?\n\nCet objet sera immédiatement consommé et retiré de votre inventaire.`)) return;
+    function fermerModalCible() {
+      document.getElementById("target-modal").style.display = "none";
+      pendingUseItem = null;
+    }
 
+    function validerUtilisationAvecCible() {
+      const selects = document.querySelectorAll(".target-select-field");
+      let ciblesChoisies = [];
+
+      for (let sel of selects) {
+        if (!sel.value) { alert("Veuillez sélectionner toutes les cibles requises."); return; }
+        ciblesChoisies.push(sel.value);
+      }
+
+      // Vérifier les doublons
+      let uniques = new Set(ciblesChoisies);
+      if (uniques.size !== ciblesChoisies.length) {
+        alert("Vous ne pouvez pas sélectionner deux fois le même aventurier !");
+        return;
+      }
+
+      const item = pendingUseItem;
+      fermerModalCible();
+      executerUtilisation(item.itemName, item.owner, ciblesChoisies);
+    }
+
+    async function executerUtilisation(itemName, owner, targets) {
       const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
 
       try {
         const response = await fetch(API_URL, {
@@ -637,8 +495,10 @@
           body: JSON.stringify({
             action: "use_item",
             username: joueur,
+            equipe: equipe,
             itemName: itemName,
-            owner: owner
+            owner: owner,
+            targets: targets
           })
         });
         const res = await response.json();
@@ -651,70 +511,115 @@
         } else {
           alert(res.message);
         }
-      } catch (err) {
-        alert("Erreur lors de l'utilisation de l'objet.");
-      }
+      } catch (err) { alert("Erreur lors de l'utilisation."); }
     }
 
     function fermerModalUtilisation() {
       document.getElementById("use-modal").style.display = "none";
     }
 
-    async function placerEnchere(itemName) {
-      const input = document.getElementById(`bid-${itemName}`);
-      const bidAmount = parseInt(input.value, 10);
-      const minPrice = parseInt(input.min, 10);
-      
-      if (isNaN(bidAmount) || bidAmount < minPrice) {
-        alert(`Votre mise doit être d'au moins ${minPrice} Kohrocq.`);
-        return;
-      }
-      
-      if (!confirm(`Confirmer la mise de ${bidAmount} Kohrocq sur "${itemName}" ?`)) return;
-      
-      const username = localStorage.getItem("joueur_connecte");
+    // -------------------------------------------------------------
+    // CONSEIL & VOTE
+    // -------------------------------------------------------------
+    async function chargerConseil() {
+      const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
+      const statusDiv = document.getElementById("conseil-status");
+      const formDiv = document.getElementById("conseil-form");
+      const select1 = document.getElementById("vote-select-1");
+      const select2 = document.getElementById("vote-select-2");
+      const zoneB2 = document.getElementById("zone-bulletin-2");
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount })
-      });
-      const res = await response.json();
-      alert(res.message);
-      
-      if (res.status === "success") {
-        if (res.soldeIndividuel !== undefined) {
-          localStorage.setItem("solde_individuel", res.soldeIndividuel);
-          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
+      statusDiv.innerHTML = "<p>Actualisation...</p>";
+      formDiv.style.display = "none";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "get_conseil_data", username: joueur, equipe: equipe })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          if (res.monStatut.elimine) {
+            statusDiv.innerHTML = `<div style="background:#f8d7da; color:#721c24; padding:15px; border-radius:6px;">💀 <strong>Vous êtes éliminé.</strong></div>`;
+            return;
+          }
+
+          if (!res.isConseilOuvert) {
+            statusDiv.innerHTML = `<div style="font-size:40px;">🔥</div><h3>Aucun conseil en cours pour la tribu ${equipe}</h3>`;
+            return;
+          }
+
+          hasDoubleVote = res.aDoubleVote === true;
+          let extraMsg = res.monStatut.immunise ? `<p style="color:#28a745; font-weight:bold;">🛡️ Vous possédez l'immunité !</p>` : "";
+
+          let voteRecap = "";
+          if (res.monVote1) {
+            voteRecap = `<div style="background:#e8f5e9; padding:10px; border-radius:6px; margin-bottom:15px;">🗳️ Bulletin 1 déposé : <strong>${res.monVote1}</strong>${res.monVote2 ? `<br>🗳️ Bulletin 2 déposé : <strong>${res.monVote2}</strong>` : ''}</div>`;
+          }
+
+          statusDiv.innerHTML = `
+            <div style="font-size:40px;">🔥</div>
+            <h3 style="color:#d93025;">Le Conseil de la tribu ${equipe} est OUVERT !</h3>
+            ${extraMsg}
+            ${voteRecap}
+          `;
+
+          let options = `<option value="">-- Sélectionner un aventurier --</option>`;
+          res.candidatsVotables.forEach(cand => {
+            options += `<option value="${cand}">${cand}</option>`;
+          });
+
+          select1.innerHTML = options;
+          if (res.monVote1) select1.value = res.monVote1;
+
+          if (hasDoubleVote) {
+            zoneB2.style.display = "block";
+            select2.innerHTML = options;
+            if (res.monVote2) select2.value = res.monVote2;
+          } else {
+            zoneB2.style.display = "none";
+          }
+
+          formDiv.style.display = "block";
         }
-        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
-      }
+      } catch (err) { statusDiv.innerHTML = "<p style='color:red;'>Erreur conseil.</p>"; }
     }
 
-    async function annulerEnchere(itemName) {
-      if (!confirm(`Voulez-vous vraiment retirer votre mise sur "${itemName}" et récupérer vos Kohrocq ?`)) return;
-      
-      const username = localStorage.getItem("joueur_connecte");
+    async function soumettreVote() {
+      const v1 = document.getElementById("vote-select-1").value;
+      const v2 = document.getElementById("vote-select-2").value;
+      const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "cancel_bid", username, itemName })
-      });
-      const res = await response.json();
-      alert(res.message);
-      
-      if (res.status === "success") {
-        if (res.soldeIndividuel !== undefined) {
-          localStorage.setItem("solde_individuel", res.soldeIndividuel);
-          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
-        }
-        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
-      }
+      if (!v1) { alert("Veuillez choisir un candidat pour le bulletin 1."); return; }
+      if (hasDoubleVote && !v2) { alert("Veuillez choisir un candidat pour le bulletin 2."); return; }
+
+      if (!confirm("Confirmer votre vote ?")) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "submit_vote",
+            username: joueur,
+            equipe: equipe,
+            vote1: v1,
+            vote2: v2,
+            aDoubleVote: hasDoubleVote
+          })
+        });
+        const res = await response.json();
+        alert(res.message);
+        if (res.status === "success") chargerConseil();
+      } catch (err) { alert("Erreur enregistrement vote."); }
     }
 
     async function acheterDirect(itemName, price, shopType, target) {
-      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} Kohrocq ?`)) return;
+      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} K ?`)) return;
       const username = localStorage.getItem("joueur_connecte");
       const equipe = localStorage.getItem("equipe_joueur");
 
@@ -734,360 +639,116 @@
           localStorage.setItem("solde_equipe", res.soldeEquipe);
           document.getElementById("solde-equipe").innerText = res.soldeEquipe;
         }
-        if (res.nouveauNiveau !== undefined) {
-          localStorage.setItem("niveau_recherche", res.nouveauNiveau);
-          document.getElementById("info-niveau-recherche").innerText = `Niveau ${res.nouveauNiveau} (${res.nouveauNiveau} action(s)/série)`;
-        }
         setTimeout(() => chargerBoutiqueEtInventaire(), 500);
       }
     }
 
-    // -------------------------------------------------------------
-    // LOGIQUE CONSEIL ET VOTE
-    // -------------------------------------------------------------
-    async function chargerConseil() {
-      const joueur = localStorage.getItem("joueur_connecte");
-      const equipe = localStorage.getItem("equipe_joueur");
-      const statusDiv = document.getElementById("conseil-status");
-      const formDiv = document.getElementById("conseil-form");
-      const select = document.getElementById("vote-candidate-select");
-      const submitBtn = document.getElementById("vote-submit-btn");
-      const voteLabel = document.getElementById("vote-label");
+    async function placerEnchere(itemName) {
+      const input = document.getElementById(`bid-${itemName}`);
+      const bidAmount = parseInt(input.value, 10);
+      const minPrice = parseInt(input.min, 10);
+      if (isNaN(bidAmount) || bidAmount < minPrice) { alert(`Mise minimum: ${minPrice} K`); return; }
+      if (!confirm(`Confirmer la mise de ${bidAmount} K sur "${itemName}" ?`)) return;
 
-      statusDiv.innerHTML = "<p>Actualisation de l'état du conseil...</p>";
-      formDiv.style.display = "none";
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "get_conseil_data",
-            username: joueur,
-            equipe: equipe
-          })
-        });
-        const res = await response.json();
-
-        if (res.status === "success") {
-          if (res.monStatut.elimine) {
-            statusDiv.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px;">💀 <strong>Vous avez été éliminé de l'aventure.</strong><br>Vous ne participez plus aux votes du conseil.</div>`;
-            return;
-          }
-
-          if (!res.isConseilOuvert) {
-            statusDiv.innerHTML = `
-              <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
-              <h3 style="color: #1a1a1a; margin-bottom: 8px;">Aucun conseil en cours pour la tribu ${equipe}</h3>
-              <p style="font-size: 13px; color: #666;">Les urnes sont fermées pour le moment.</p>
-            `;
-            return;
-          }
-
-          let extraMsg = "";
-          if (res.monStatut.immunise) {
-            extraMsg = `<p style="color: #28a745; font-weight: bold; margin-bottom: 10px;">🛡️ Vous possédez l'immunité pour ce conseil !</p>`;
-          }
-
-          let voteActuelHTML = "";
-          if (res.aDejaVote) {
-            voteActuelHTML = `
-              <div style="background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                🗳️ Bulletin actuellement dans l'urne : <strong>${res.monVote}</strong>
-                <div style="font-size: 12px; color: #555; margin-top: 4px;">Vous pouvez modifier votre choix ci-dessous :</div>
-              </div>
-            `;
-            submitBtn.innerText = "Modifier mon vote";
-            submitBtn.style.background = "#ff9800";
-            voteLabel.innerText = "Changer votre vote contre :";
-          } else {
-            submitBtn.innerText = "Déposer mon bulletin dans l'urne";
-            submitBtn.style.background = "#d93025";
-            voteLabel.innerText = "Choisissez le candidat contre qui vous votez :";
-          }
-
-          statusDiv.innerHTML = `
-            <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
-            <h3 style="color: #d93025; margin-bottom: 8px;">Le Conseil de la tribu ${equipe} est OUVERT !</h3>
-            ${extraMsg}
-            ${voteActuelHTML}
-          `;
-
-          select.innerHTML = `<option value="">-- Sélectionner un aventurier --</option>`;
-          res.candidatsVotables.forEach(cand => {
-            const isSelected = (res.monVote === cand) ? "selected" : "";
-            select.innerHTML += `<option value="${cand}" ${isSelected}>${cand}</option>`;
-          });
-
-          formDiv.style.display = "block";
-        } else {
-          statusDiv.innerHTML = `<p style="color: red;">${res.message}</p>`;
-        }
-      } catch (err) {
-        statusDiv.innerHTML = `<p style="color: red;">Erreur de connexion au conseil.</p>`;
-      }
+      const username = localStorage.getItem("joueur_connecte");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if (res.status === "success") setTimeout(() => chargerBoutiqueEtInventaire(), 500);
     }
 
-    async function soumettreVote() {
-      const select = document.getElementById("vote-candidate-select");
-      const target = select.value;
-      const joueur = localStorage.getItem("joueur_connecte");
-      const equipe = localStorage.getItem("equipe_joueur");
-
-      if (!target) {
-        alert("Veuillez sélectionner un aventurier contre qui voter.");
-        return;
-      }
-
-      if (!confirm(`Confirmez-vous votre vote contre "${target}" ?`)) {
-        return;
-      }
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "submit_vote",
-            username: joueur,
-            equipe: equipe,
-            targetCandidate: target
-          })
-        });
-        const res = await response.json();
-        alert(res.message);
-
-        if (res.status === "success") {
-          chargerConseil();
-        }
-      } catch (err) {
-        alert("Erreur lors de l'enregistrement de votre vote.");
-      }
+    async function annulerEnchere(itemName) {
+      if (!confirm(`Retirer votre mise sur "${itemName}" ?`)) return;
+      const username = localStorage.getItem("joueur_connecte");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "cancel_bid", username, itemName })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if (res.status === "success") setTimeout(() => chargerBoutiqueEtInventaire(), 500);
     }
 
-    // -------------------------------------------------------------
-    // VIREMENT DE FONDS
-    // -------------------------------------------------------------
     async function transfererKohrocq() {
-      const montantInput = document.getElementById("virement-montant");
-      const montant = parseInt(montantInput.value, 10);
+      const montant = parseInt(document.getElementById("virement-montant").value, 10);
       const binome = localStorage.getItem("binome_joueur");
+      if (isNaN(montant) || montant <= 0) { alert("Montant invalide."); return; }
+      if (!confirm(`Envoyer ${montant} K à ${binome} ?`)) return;
 
-      if (isNaN(montant) || montant <= 0) {
-        alert("Veuillez saisir un montant valide (supérieur à 0).");
-        return;
-      }
-
-      if (!binome || binome === "Aucun") {
-        alert("Vous n'avez pas de binôme assigné pour recevoir ce virement.");
-        return;
-      }
-
-      if (!confirm(`Confirmer l'envoi de ${montant} Kohrocq à ${binome} ?`)) return;
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "transfer_funds",
-            username: localStorage.getItem("joueur_connecte"),
-            amount: montant
-          })
-        });
-        const res = await response.json();
-        alert(res.message);
-
-        if (res.status === "success") {
-          montantInput.value = "";
-          if (res.soldeIndividuel !== undefined) {
-            localStorage.setItem("solde_individuel", res.soldeIndividuel);
-            document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
-          }
-          chargerBoutiqueEtInventaire();
-        }
-      } catch (err) {
-        alert("Erreur lors du virement.");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "transfer_funds", username: localStorage.getItem("joueur_connecte"), amount: montant })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if (res.status === "success") {
+        document.getElementById("virement-montant").value = "";
+        chargerBoutiqueEtInventaire();
       }
     }
 
-    // -------------------------------------------------------------
-    // LOGIQUE RECHERCHE
-    // -------------------------------------------------------------
-    let currentPosition = null;
-    let timerInterval = null;
-
-    function fermerModalTrouvaille() {
-      document.getElementById("found-modal").style.display = "none";
-      chargerRecherche();
-    }
-
+    let currentPosition = null, timerInterval = null;
+    function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
     async function chargerRecherche() {
       const joueur = localStorage.getItem("joueur_connecte");
-      const statusDiv = document.getElementById("recherche-status");
-      const actionDiv = document.getElementById("recherche-actions");
-      const histList = document.getElementById("recherche-historique");
-      const adjacentZone = document.getElementById("zone-cases-adjacentes");
-      const adjacentBtnContainer = document.getElementById("btn-container-adjacentes");
-      const titreFouille = document.getElementById("titre-fouille");
-      
-      statusDiv.innerHTML = "<p>Actualisation...</p>";
-      actionDiv.style.display = "none";
-      histList.innerHTML = "";
-      adjacentZone.style.display = "none";
-      adjacentBtnContainer.innerHTML = "";
+      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "get_recherche", username: joueur }) });
+      const result = await response.json();
+      if (result.status === "success") {
+        currentPosition = result.position;
+        const niveau = result.niveauRecherche || 1;
+        const histList = document.getElementById("recherche-historique");
+        histList.innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille.</li>";
 
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "get_recherche", username: joueur })
-        });
-        const result = await response.json();
-        
-        if(result.status === "success") {
-          currentPosition = result.position;
-          const niveau = result.niveauRecherche || 1;
-          const actionsFaite = result.actionsSerie || 0;
-          const actionsRestantes = Math.max(0, niveau - actionsFaite);
+        const statusDiv = document.getElementById("recherche-status");
+        const actionDiv = document.getElementById("recherche-actions");
 
-          localStorage.setItem("niveau_recherche", niveau);
-          document.getElementById("info-niveau-recherche").innerText = `Niveau ${niveau} (${niveau} action(s)/série)`;
-          
-          if(result.historique.length === 0) {
-            histList.innerHTML = "<li style='color: #666;'>Aucune fouille pour le moment.</li>";
-          } else {
-            result.historique.forEach(h => {
-              const color = h.resultat.includes("TROUVÉ") ? "green" : "red";
-              histList.innerHTML += `<li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                <strong>${h.case}</strong> à ${h.date.split(" ")[1]} <br>
-                <span style="color: ${color};">${h.resultat}</span>
-              </li>`;
-            });
-          }
-
-          if (!result.isOpen) {
-            statusDiv.innerHTML = `<div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; text-align: center;">🌙 <strong>Recherche fermée pour la nuit</strong><br>Les recherches rouvrent chaque jour à <strong>08h00</strong>.</div>`;
-            return;
-          }
-
-          const nextAction = result.prochaineAction;
-          const now = result.maintenant;
-
-          if (!currentPosition) {
-            titreFouille.innerText = "Choisir votre point de départ";
-            document.getElementById("target-cell").placeholder = "Ex: B50 (libre de A1 à Z400)";
-            statusDiv.innerHTML = `
-              <p style="font-weight:bold; color: #1a1a1a;">Nouvelle journée ! Entrez votre point de départ pour aujourd'hui (A1 à Z400).</p>
-              <div style="margin-top: 8px; font-size: 13px; color: #007bff;">Compétence : <strong>Niveau ${niveau}</strong> (${niveau} déplacement(s) consécutif(s) disponible(s)).</div>
-            `;
-            actionDiv.style.display = "block";
-          } else if (now < nextAction) {
-            lancerTimer(nextAction, statusDiv, actionDiv, niveau);
-          } else {
-            titreFouille.innerText = "Fouiller une case adjacente";
-            document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B51");
-            
-            if (result.adjacentChoices && result.adjacentChoices.length > 0) {
-              adjacentZone.style.display = "block";
-              adjacentBtnContainer.innerHTML = result.adjacentChoices.map(c => 
-                `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`
-              ).join('');
-            }
-
-            statusDiv.innerHTML = `
-              <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 5px;">Position actuelle : ${currentPosition}</div>
-              <div style="background: #e3f2fd; color: #0d47a1; padding: 8px 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 14px;">
-                ⚡ Actions consécutives restantes : ${actionsRestantes} / ${niveau}
-              </div>
-              <span style="color: green; font-weight: bold;">Prêt pour un déplacement !</span>
-            `;
-            actionDiv.style.display = "block";
-          }
-        }
-      } catch (err) {
-        statusDiv.innerHTML = "<p style='color:red;'>Erreur de connexion.</p>";
-      }
-    }
-
-    function lancerTimer(endTimeMs, statusDiv, actionDiv, niveau) {
-      if (timerInterval) clearInterval(timerInterval);
-      actionDiv.style.display = "none";
-      
-      timerInterval = setInterval(() => {
-        const now = new Date().getTime();
-        const distanceMs = endTimeMs - now;
-
-        if (distanceMs <= 0) {
-          clearInterval(timerInterval);
-          chargerRecherche();
+        if (!result.isOpen) {
+          statusDiv.innerHTML = "<p>🌙 Recherche fermée la nuit (8h-24h).</p>";
+          actionDiv.style.display = "none";
           return;
         }
 
-        const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distanceMs % (1000 * 60)) / (1000 * 60));
-        const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
-
-        statusDiv.innerHTML = `
-          <div style="font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px;">Position : ${currentPosition}</div>
-          <div style="background: #ffebee; color: #c62828; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-bottom: 10px;">
-            💤 Série de ${niveau} action(s) terminée. Temps de repos en cours.
-          </div>
-          <div style="font-size: 20px; font-weight: bold; color: #d93025; margin-top: 10px;">
-            ⏳ Prochaine série disponible dans : ${h}h ${m}m ${s}s
-          </div>
-        `;
-      }, 1000);
+        if (!currentPosition) {
+          statusDiv.innerHTML = "<p>Choisissez votre point de départ du jour.</p>";
+          actionDiv.style.display = "block";
+        } else if (result.maintenant < result.prochaineAction) {
+          actionDiv.style.display = "none";
+          statusDiv.innerHTML = `<p>Position: ${currentPosition}<br>⏳ Repos en cours...</p>`;
+        } else {
+          statusDiv.innerHTML = `<p>Position actuelle : <strong>${currentPosition}</strong></p>`;
+          actionDiv.style.display = "block";
+          if (result.adjacentChoices && result.adjacentChoices.length > 0) {
+            document.getElementById("zone-cases-adjacentes").style.display = "block";
+            document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
+          }
+        }
+      }
     }
 
     async function deplacerRecherche() {
-      const joueur = localStorage.getItem("joueur_connecte");
       const target = document.getElementById("target-cell").value;
-      const msgLabel = document.getElementById("recherche-msg");
-      
-      if (!target) { msgLabel.innerText = "Veuillez entrer une case."; return; }
-      msgLabel.innerText = "Calcul en cours...";
-      
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "move_recherche", username: joueur, currentCell: currentPosition, targetCell: target })
-        });
-        const result = await response.json();
-        
-        if (result.status === "success") {
-          msgLabel.innerText = "";
-          document.getElementById("target-cell").value = "";
-          
-          if (result.foundItem) {
-            document.getElementById("modal-title").innerText = result.foundItem;
-            
-            const modalImg = document.getElementById("modal-img");
-            let imgUrl = result.foundImage;
-            if (imgUrl) {
-              if (imgUrl.includes("file/d/")) {
-                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-              }
-              modalImg.src = imgUrl;
-              modalImg.style.display = "block";
-            } else {
-              modalImg.style.display = "none";
-            }
-
-            document.getElementById("found-modal").style.display = "flex";
-            chargerBoutiqueEtInventaire();
-          } else {
-            alert(result.message);
-            chargerRecherche();
-          }
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "move_recherche", username: localStorage.getItem("joueur_connecte"), currentCell: currentPosition, targetCell: target })
+      });
+      const result = await response.json();
+      if (result.status === "success") {
+        document.getElementById("target-cell").value = "";
+        if (result.foundItem) {
+          document.getElementById("modal-title").innerText = result.foundItem;
+          document.getElementById("found-modal").style.display = "flex";
         } else {
-          msgLabel.innerText = result.message;
+          alert(result.message);
+          chargerRecherche();
         }
-      } catch (err) {
-        msgLabel.innerText = "Erreur de communication serveur.";
-      }
+      } else { alert(result.message); }
     }
   </script>
 </body>
