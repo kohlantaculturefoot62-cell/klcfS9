@@ -641,50 +641,149 @@
 
     // Fouille
     let currentPosition = null;
+    let timerInterval = null;
+
+    function fermerModalTrouvaille() { 
+      document.getElementById("found-modal").style.display = "none"; 
+      chargerRecherche(); 
+    }
+
     async function chargerRecherche() {
-      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "get_recherche", username: localStorage.getItem("joueur_connecte") }) });
-      const result = await response.json();
-      if (result.status === "success") {
-        currentPosition = result.position;
-        document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille.</li>";
+      const joueur = localStorage.getItem("joueur_connecte");
+      try {
+        const response = await fetch(API_URL, { 
+          method: "POST", 
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+          body: JSON.stringify({ action: "get_recherche", username: joueur }) 
+        });
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          currentPosition = result.position;
+          
+          const histList = document.getElementById("recherche-historique");
+          histList.innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille enregistrée.</li>";
 
-        const statusDiv = document.getElementById("recherche-status");
-        const actionDiv = document.getElementById("recherche-actions");
+          const statusDiv = document.getElementById("recherche-status");
+          const actionDiv = document.getElementById("recherche-actions");
 
-        if (!result.isOpen) { statusDiv.innerHTML = "<p>🌙 Fermé la nuit (8h-24h).</p>"; actionDiv.style.display = "none"; return; }
+          if (!result.isOpen) { 
+            statusDiv.innerHTML = "<p style='color:#856404;'>🌙 Recherche fermée la nuit (de 00h à 08h).</p>"; 
+            actionDiv.style.display = "none"; 
+            if (timerInterval) clearInterval(timerInterval);
+            return; 
+          }
 
-        if (!currentPosition) {
-          statusDiv.innerHTML = "<p>Choisissez votre point de départ.</p>";
-          actionDiv.style.display = "block";
-        } else if (result.maintenant < result.prochaineAction) {
-          actionDiv.style.display = "none";
-          statusDiv.innerHTML = `<p>Position : <strong>${currentPosition}</strong><br>⏳ En temps de repos...</p>`;
-        } else {
-          statusDiv.innerHTML = `<p>Position : <strong>${currentPosition}</strong></p>`;
-          actionDiv.style.display = "block";
-          if (result.adjacentChoices && result.adjacentChoices.length > 0) {
-            document.getElementById("zone-cases-adjacentes").style.display = "block";
-            document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
+          const now = result.maintenant;
+          const prochaineAction = result.prochaineAction;
+
+          if (!currentPosition) {
+            if (timerInterval) clearInterval(timerInterval);
+            statusDiv.innerHTML = "<p>Choisissez votre première case de départ pour aujourd'hui (ex: A1).</p>";
+            document.getElementById("target-cell").placeholder = "Ex: A1";
+            document.getElementById("zone-cases-adjacentes").style.display = "none";
+            actionDiv.style.display = "block";
+          } else if (prochaineAction && now < prochaineAction) {
+            // Lancer ou maintenir le compte à rebours visuel
+            actionDiv.style.display = "none";
+            lancerTimerRecherche(prochaineAction, statusDiv, actionDiv);
+          } else {
+            if (timerInterval) clearInterval(timerInterval);
+            statusDiv.innerHTML = `<p style="margin:0 0 8px 0;">Position actuelle : <strong style="color:#007bff; font-size:16px;">${currentPosition}</strong></p><span style="color:#28a745; font-weight:bold; font-size:13px;">⚡ Prêt à fouiller une case adjacente !</span>`;
+            document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
+            
+            if (result.adjacentChoices && result.adjacentChoices.length > 0) {
+              document.getElementById("zone-cases-adjacentes").style.display = "block";
+              document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
+            } else {
+              document.getElementById("zone-cases-adjacentes").style.display = "none";
+            }
+            actionDiv.style.display = "block";
           }
         }
+      } catch (err) {
+        console.error("Erreur recherche:", err);
       }
     }
 
+    function lancerTimerRecherche(endTimeMs, statusDiv, actionDiv) {
+      if (timerInterval) clearInterval(timerInterval);
+      actionDiv.style.display = "none";
+
+      function mettreAJourTemps() {
+        const now = new Date().getTime();
+        const distanceMs = endTimeMs - now;
+
+        if (distanceMs <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          chargerRecherche(); // Actualisation automatique dès la fin du repos
+          return;
+        }
+
+        const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
+
+        statusDiv.innerHTML = `
+          <p style="margin:0 0 5px 0;">Position : <strong>${currentPosition}</strong></p>
+          <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center;">
+            💤 Repos en cours suite à votre série d'actions.<br>
+            <span style="font-size: 16px; display: inline-block; margin-top: 4px;">⏳ ${h}h ${m}m ${s}s</span>
+          </div>
+        `;
+      }
+
+      mettreAJourTemps();
+      timerInterval = setInterval(mettreAJourTemps, 1000);
+    }
+
     async function deplacerRecherche() {
-      const target = document.getElementById("target-cell").value;
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "move_recherche", username: localStorage.getItem("joueur_connecte"), currentCell: currentPosition, targetCell: target })
-      });
-      const result = await response.json();
-      if (result.status === "success") {
-        document.getElementById("target-cell").value = "";
-        if (result.foundItem) {
-          document.getElementById("modal-title").innerText = result.foundItem;
-          document.getElementById("found-modal").style.display = "flex";
-        } else { alert(result.message); chargerRecherche(); }
-      } else { alert(result.message); }
+      const target = document.getElementById("target-cell").value.trim();
+      if (!target) { alert("Veuillez entrer une case."); return; }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ 
+            action: "move_recherche", 
+            username: localStorage.getItem("joueur_connecte"), 
+            currentCell: currentPosition, 
+            targetCell: target 
+          })
+        });
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          document.getElementById("target-cell").value = "";
+          if (result.foundItem) {
+            document.getElementById("modal-title").innerText = result.foundItem;
+            
+            let imgUrl = result.foundImage;
+            const modalImg = document.getElementById("modal-img");
+            if (imgUrl) {
+              if (imgUrl.includes("file/d/")) {
+                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
+                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+              }
+              modalImg.src = imgUrl;
+              modalImg.style.display = "block";
+            } else {
+              modalImg.style.display = "none";
+            }
+
+            document.getElementById("found-modal").style.display = "flex";
+          } else {
+            alert(result.message);
+            chargerRecherche();
+          }
+        } else {
+          alert(result.message);
+        }
+      } catch (err) {
+        alert("Erreur de communication avec le serveur.");
+      }
     }
   </script>
 </body>
