@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion KLCF</title>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -21,51 +22,54 @@
   </div>
 
   <script>
-    // METS LA MEME URL ICI AUSSI
     const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec"; 
 
-    async function seConnecter() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  const errorMsg = document.getElementById("error-msg");
-  
-  errorMsg.innerText = "Connexion en cours...";
-  
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      // On utilise text/plain pour que le navigateur n'envoie pas de requête pré-flight CORS
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({
-        action: "login",
-        username: user,
-        password: pass
-      })
+    // Vérification de la connexion automatique dès le chargement de la page
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("joueur_connecte")) {
+        window.location.href = "espace_candidat.html";
+      }
     });
 
-    const result = await response.json();
-    
-    if (result.status === "success") {
-      // Sauvegarde des infos de profil
-      sessionStorage.setItem("joueur_connecte", result.candidat);
-      sessionStorage.setItem("equipe_joueur", result.equipe);
-      sessionStorage.setItem("binome_joueur", result.binome);
-      sessionStorage.setItem("est_capitaine", result.estCapitaine);
+    async function seConnecter() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      const errorMsg = document.getElementById("error-msg");
       
-      // Sauvegarde de l'équipe et des soldes
-      sessionStorage.setItem("liste_coequipiers", JSON.stringify(result.coequipiers || []));
-      sessionStorage.setItem("solde_binome", result.soldeBinome);
-      sessionStorage.setItem("solde_equipe", result.soldeEquipe);
+      errorMsg.innerText = "Connexion en cours...";
       
-      window.location.href = "espace-candidat.html";
-    } else {
-      errorMsg.innerText = result.message;
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "login",
+            username: user,
+            password: pass
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          // Sauvegarde persistante dans localStorage
+          localStorage.setItem("joueur_connecte", result.candidat);
+          localStorage.setItem("equipe_joueur", result.equipe);
+          localStorage.setItem("binome_joueur", result.binome);
+          localStorage.setItem("est_capitaine", result.estCapitaine);
+          localStorage.setItem("liste_coequipiers", JSON.stringify(result.coequipiers || []));
+          localStorage.setItem("solde_binome", result.soldeBinome);
+          localStorage.setItem("solde_equipe", result.soldeEquipe);
+          
+          window.location.href = "espace_candidat.html";
+        } else {
+          errorMsg.innerText = result.message;
+        }
+      } catch (error) {
+        console.error("Erreur connexion:", error);
+        errorMsg.innerText = "Erreur de connexion au serveur.";
+      }
     }
-  } catch (error) {
-    console.error("Erreur connexion:", error);
-    errorMsg.innerText = "Erreur de connexion au serveur.";
-  }
-}
   </script>
 </body>
 </html>
