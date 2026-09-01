@@ -2,217 +2,265 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Espace Candidat - KLCF S9</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .user-info { display: flex; align-items: center; gap: 15px; }
-    .solde-box { background-color: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
-    .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-    .logout-btn:hover { background-color: #bd2130; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f0f2f5; color: #222; }
 
-    .tabs-nav { display: flex; gap: 8px; margin-bottom: 25px; border-bottom: 2px solid #ddd; padding-bottom: 12px; flex-wrap: wrap; }
-    .tab-btn { padding: 10px 18px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 14px; transition: all 0.2s ease; }
-    .tab-btn:hover { background: #d0d0d0; }
-    .tab-btn.active { background: #ffcc00; color: #1a1a1a; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+    /* Header & Navigation mobile */
+    .banner { background: #1a1a1a; padding: 12px 15px; color: white; }
+    .banner-content { display: flex; flex-direction: column; gap: 10px; max-width: 1200px; margin: auto; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; }
+    .logo { margin: 0; font-size: 20px; color: #ffcc00; }
+    .user-info { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     
+    .solde-box { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px; }
+    .logout-btn { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+
+    /* Onglets scrollables au doigt sur smartphone */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      padding: 10px 15px;
+      background: white;
+      border-bottom: 2px solid #e0e0e0;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 8px 14px;
+      border: none;
+      background: #f0f2f5;
+      cursor: pointer;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .tab-btn.active { background: #ffcc00; color: #1a1a1a; }
+
+    .main-container { padding: 15px; max-width: 1200px; margin: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
-    .shop-card { background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
-    .shop-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
-    .shop-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #f5f5f5; }
-    .shop-title { font-size: 18px; font-weight: bold; color: #1a1a1a; margin: 0 0 8px 0; }
-    .shop-desc { font-size: 13px; color: #444; line-height: 1.5; background: #f9f9f9; padding: 10px 12px; border-radius: 8px; min-height: 75px; max-height: 140px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #eee; }
-    .shop-badge-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 12px; }
+    /* Grille responsive boutique */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    @media (min-width: 600px) {
+      .shop-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+      .banner-content { flex-direction: row; justify-content: space-between; align-items: center; }
+    }
 
-    .adjacent-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px; margin-bottom: 5px; }
-    .adjacent-btn:hover { background: #1a73e8; color: white; }
+    .shop-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .shop-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #eee; }
+    .shop-title { font-size: 16px; font-weight: bold; margin: 0 0 6px 0; }
+    .shop-desc { font-size: 13px; color: #4b5563; line-height: 1.4; background: #f9fafb; padding: 8px 10px; border-radius: 6px; min-height: 50px; max-height: 120px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #f3f4f6; }
+    .shop-badge-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
 
-    .use-btn { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .use-btn:hover { background: #218838; }
+    /* Tableaux avec scroll horizontal fluide */
+    .table-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    table { width: 100%; border-collapse: collapse; min-width: 480px; font-size: 13px; text-align: left; }
+    th { background: #f9fafb; padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; }
+    td { padding: 10px; border-bottom: 1px solid #f3f4f6; }
 
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
-    .modal-box { background: white; padding: 25px; border-radius: 12px; text-align: center; max-width: 440px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
-    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .btn-action { width: 100%; padding: 10px; font-size: 14px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
+    .btn-buy { background: #007bff; color: white; }
+    .btn-bid { background: #ffcc00; color: #111; }
+    .btn-team { background: #28a745; color: white; }
+
+    .adjacent-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 4px; display: inline-block; }
+
+    /* Pop-ups / Modals */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
+    .modal-box { background: white; padding: 20px; border-radius: 12px; text-align: center; max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
 <body>
 
-  <!-- Modal Découverte Fouille -->
+  <!-- Modal Trouvaille -->
   <div id="found-modal" class="modal-overlay">
     <div class="modal-box">
-      <h2 style="color: #28a745; margin-bottom: 10px;">🎉 DÉCOUVERTE !</h2>
-      <p style="font-size: 15px; margin-bottom: 15px;">Vous venez de mettre la main sur :</p>
-      <img id="modal-img" src="" alt="Objet trouvé" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; display: none;">
-      <h3 id="modal-title" style="font-size: 20px; color: #ffcc00; margin-bottom: 10px;">---</h3>
-      <p style="font-size: 13px; color: #666; margin-bottom: 20px;">L'objet a été automatiquement transféré dans votre inventaire personnel.</p>
-      <button class="login-btn" style="width: 100%;" onclick="fermerModalTrouvaille()">Génial !</button>
+      <h2 style="color: #28a745; margin: 0 0 10px 0;">🎉 DÉCOUVERTE !</h2>
+      <p style="font-size: 14px; margin-bottom: 15px;">Vous avez trouvé :</p>
+      <img id="modal-img" src="" alt="Objet" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; margin-bottom: 10px; display: none;">
+      <h3 id="modal-title" style="color: #ffcc00; margin: 0 0 10px 0;">---</h3>
+      <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Transféré dans votre inventaire.</p>
+      <button class="btn-action btn-buy" onclick="fermerModalTrouvaille()">Super !</button>
     </div>
   </div>
 
-  <!-- Modal Multi-Cibles Dynamique (Uniquement Coéquipiers) -->
+  <!-- Modal Cibles Multiples -->
   <div id="target-modal" class="modal-overlay">
     <div class="modal-box">
-      <h2 style="color: #007bff; margin-bottom: 10px;">🎯 CHOISIR LES CIBLES</h2>
-      <p style="font-size: 14px; margin-bottom: 15px;">Sélectionnez parmi vos coéquipiers pour <strong id="target-modal-item">---</strong> :</p>
-      <div id="target-dropdowns-container" style="text-align: left; margin-bottom: 20px;"></div>
+      <h2 style="color: #007bff; margin: 0 0 10px 0; font-size: 18px;">🎯 CHOISIR LES CIBLES</h2>
+      <p style="font-size: 13px; margin-bottom: 15px;">Sélectionnez vos coéquipiers pour <strong id="target-modal-item">---</strong> :</p>
+      <div id="target-dropdowns-container" style="text-align: left; margin-bottom: 15px;"></div>
       <div style="display: flex; gap: 10px;">
-        <button class="login-btn" style="flex: 1; background: #28a745;" onclick="validerUtilisationAvecCible()">Confirmer</button>
-        <button class="logout-btn" style="flex: 1;" onclick="fermerModalCible()">Annuler</button>
+        <button class="btn-action btn-team" onclick="validerUtilisationAvecCible()">Confirmer</button>
+        <button class="btn-action" style="background: #ccc;" onclick="fermerModalCible()">Annuler</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Résultat Utilisation -->
+  <!-- Modal Résultat Objet -->
   <div id="use-modal" class="modal-overlay">
     <div class="modal-box">
-      <h2 style="color: #007bff; margin-bottom: 10px;">⚡ OBJET ACTIVÉ</h2>
-      <h3 id="use-modal-title" style="font-size: 18px; color: #1a1a1a; margin-bottom: 15px;">---</h3>
-      <div id="use-modal-desc" style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 20px; text-align: left;">---</div>
-      <button class="login-btn" style="width: 100%;" onclick="fermerModalUtilisation()">Fermer</button>
+      <h2 style="color: #007bff; margin: 0 0 8px 0; font-size: 18px;">⚡ OBJET ACTIVÉ</h2>
+      <h3 id="use-modal-title" style="color: #1a1a1a; font-size: 16px; margin: 0 0 10px 0;">---</h3>
+      <div id="use-modal-desc" style="background: #f9fafb; border: 1px solid #eee; padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.4; margin-bottom: 15px; text-align: left;">---</div>
+      <button class="btn-action btn-buy" onclick="fermerModalUtilisation()">Fermer</button>
     </div>
   </div>
 
-  <!-- Banderole -->
+  <!-- Header -->
   <header class="banner">
     <div class="banner-content">
-      <h1 class="logo">KLCF S9</h1>
-      <div class="user-info" style="display: flex; gap: 10px; align-items: center;">
-        <div class="solde-box" style="background: #ffcc00; color: #1a1a1a; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Solde Individuel : <span id="solde-individuel">0</span> Kohrocq
-        </div>
-        <div class="solde-box" style="background: #d93025; color: white; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold;">
-          Cagnotte Équipe : <span id="solde-equipe">0</span> Kohrocq
-        </div>
+      <div class="header-top">
+        <h1 class="logo">KLCF S9</h1>
         <button class="logout-btn" onclick="deconnexion()">Déconnexion</button>
+      </div>
+      <div class="user-info">
+        <div class="solde-box" style="background: #ffcc00; color: #111;">
+          Indiv : <span id="solde-individuel">0</span> K
+        </div>
+        <div class="solde-box" style="background: #d93025; color: white;">
+          Tribu : <span id="solde-equipe">0</span> K
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="section-container">
+  <!-- Navigation par Onglets -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" onclick="afficherOnglet('boutique-standard', this); chargerBoutiqueEtInventaire();">🛍️ Boutique</button>
+    <button class="tab-btn" onclick="afficherOnglet('boutique-encheres', this); chargerBoutiqueEtInventaire();">🔨 Enchères</button>
+    <button id="nav-btn-boutique-equipe" class="tab-btn" style="display: none; background: #ffebee; color: #c62828;" onclick="afficherOnglet('boutique-equipe', this); chargerBoutiqueEtInventaire();">👑 Tribu</button>
+    <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">🎒 Inventaire</button>
+    <button class="tab-btn" onclick="afficherOnglet('conseil', this); chargerConseil();">🗳️ Conseil</button>
+    <button class="tab-btn" onclick="afficherOnglet('equipe', this)">👥 Tribu</button>
+    <button class="tab-btn" onclick="afficherOnglet('agenda', this)">📅 Agenda</button>
+    <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">🧭 Fouille</button>
+  </nav>
+
+  <main class="main-container">
     
-    <!-- Profil & Virement -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;" class="profile-grid">
-      <div class="user-profile-summary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-        <h3 style="margin-bottom: 8px;">Profil de <span id="info-nom" style="color: #ffcc00;">---</span></h3>
-        <p>Équipe : <strong id="info-equipe">---</strong></p>
-        <p>Binôme : <strong id="info-binome">---</strong></p>
-        <p>Niveau Chercheur : <strong id="info-niveau-recherche" style="color: #007bff;">Niveau 1</strong></p>
-        <p id="badge-capitaine" style="display: none; color: #d93025; font-weight: bold; margin-top: 8px;">👑 Capitaine d'équipe</p>
+    <!-- Profil & Virement rapide -->
+    <div style="background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); font-size: 13px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <span>Aventurier : <strong id="info-nom" style="color:#007bff;">---</strong> (<span id="info-equipe">---</span>)</span>
+        <span id="info-niveau-recherche" style="color: #28a745; font-weight: bold;">Niveau 1</span>
       </div>
-
-      <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border: 1px solid #ffe082;">
-        <h3 style="margin-bottom: 8px; font-size: 16px;">💸 Virement à votre Binôme</h3>
-        <p style="font-size: 13px; color: #555; margin-bottom: 10px;">Transférez des Kohrocq directement à <strong id="virement-nom-binome">votre binôme</strong> :</p>
-        <div style="display: flex; gap: 10px;">
-          <input type="number" id="virement-montant" min="1" placeholder="Montant en K" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
-          <button class="login-btn" onclick="transfererKohrocq()" style="padding: 8px 15px;">Envoyer</button>
-        </div>
+      <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+        <input type="number" id="virement-montant" min="1" placeholder="Virement binôme (K)" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; flex: 1; font-size: 13px;">
+        <button class="btn-buy" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; border:none; font-weight:bold; cursor:pointer;" onclick="transfererKohrocq()">Envoyer</button>
       </div>
     </div>
 
-    <!-- Navigation -->
-    <div class="tabs-nav">
-      <button class="tab-btn active" onclick="afficherOnglet('boutique-standard', this); chargerBoutiqueEtInventaire();">🛍️ Boutique Standard</button>
-      <button class="tab-btn" onclick="afficherOnglet('boutique-encheres', this); chargerBoutiqueEtInventaire();">🔨 Enchères</button>
-      <button id="nav-btn-boutique-equipe" class="tab-btn" style="display: none; background: #ffebee; color: #c62828;" onclick="afficherOnglet('boutique-equipe', this); chargerBoutiqueEtInventaire();">👑 Boutique Équipe</button>
-      <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">🎒 Mon Inventaire</button>
-      <button class="tab-btn" onclick="afficherOnglet('conseil', this); chargerConseil();">🗳️ Conseil & Vote</button>
-      <button class="tab-btn" onclick="afficherOnglet('equipe', this)">👥 Mon Équipe</button>
-      <button class="tab-btn" onclick="afficherOnglet('agenda', this)">📅 Agenda</button>
-      <button class="tab-btn" onclick="afficherOnglet('recherche', this); chargerRecherche();">🧭 Recherche</button>
-    </div>
-
-    <!-- Onglets Boutiques & Inventaire -->
+    <!-- 1. Boutique Standard -->
     <div id="tab-boutique-standard" class="tab-content active">
-      <h2>Boutique Standard (Achats Directs)</h2>
-      <div class="shop-grid" id="grid-boutique-standard"><p>Chargement des objets...</p></div>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Boutique Standard</h2>
+      <div class="shop-grid" id="grid-boutique-standard"><p>Chargement...</p></div>
     </div>
 
+    <!-- 2. Enchères -->
     <div id="tab-boutique-encheres" class="tab-content">
-      <h2>Boutique aux Enchères</h2>
-      <div class="shop-grid" id="grid-boutique-encheres"><p>Chargement des enchères...</p></div>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Enchères en cours</h2>
+      <div class="shop-grid" id="grid-boutique-encheres"><p>Chargement...</p></div>
     </div>
 
+    <!-- 3. Boutique Équipe -->
     <div id="tab-boutique-equipe" class="tab-content">
-      <h2>Boutique d'Équipe (Réservée Capitaine)</h2>
+      <h2 style="font-size: 18px; margin: 0 0 5px 0; color: #d93025;">👑 Boutique Réservée Capitaine</h2>
       <div class="shop-grid" id="grid-boutique-equipe"><p>Chargement...</p></div>
     </div>
 
+    <!-- 4. Inventaire -->
     <div id="tab-inventaire" class="tab-content">
-      <h2>Mon Inventaire</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <thead style="background: #f8f9fa;">
-          <tr>
-            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Objet</th>
-            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Propriétaire</th>
-            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Qté</th>
-            <th style="padding: 10px; border-bottom: 2px solid #ddd;">Source</th>
-            <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Action</th>
-          </tr>
-        </thead>
-        <tbody id="table-inventaire"><tr><td colspan="5" style="padding: 10px;">Chargement...</td></tr></tbody>
-      </table>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Mon Inventaire</h2>
+      <div class="table-container">
+        <table id="table-inventaire">
+          <thead>
+            <tr>
+              <th>Objet</th>
+              <th>Propriétaire</th>
+              <th>Qté</th>
+              <th style="text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="4">Chargement...</td></tr></tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Onglet Conseil -->
+    <!-- 5. Conseil -->
     <div id="tab-conseil" class="tab-content">
-      <h2>Le Conseil Tribal</h2>
-      <div style="max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-        <div id="conseil-status"><p>Chargement du conseil...</p></div>
-
-        <div id="conseil-form" style="display: none; margin-top: 20px; text-align: left;">
-          <label style="font-weight: bold; display: block; margin-bottom: 5px;">Bulletin N°1 :</label>
-          <select id="vote-select-1" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
-            <option value="">-- Sélectionner un aventurier --</option>
-          </select>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Conseil Tribal</h2>
+      <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center;">
+        <div id="conseil-status"><p>Chargement...</p></div>
+        <div id="conseil-form" style="display: none; margin-top: 15px; text-align: left;">
+          <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Bulletin 1 :</label>
+          <select id="vote-select-1" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 12px;"></select>
 
           <div id="zone-bulletin-2" style="display: none;">
-            <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #d93025;">🔥 Bulletin N°2 (Avantage Double Vote actif) :</label>
-            <select id="vote-select-2" style="width: 100%; padding: 10px; border: 1px solid #d93025; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
-              <option value="">-- Sélectionner un 2ème aventurier --</option>
-            </select>
+            <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px; color: #d93025;">🔥 Bulletin 2 (Double Vote) :</label>
+            <select id="vote-select-2" style="width: 100%; padding: 10px; border: 1px solid #d93025; border-radius: 6px; font-size: 14px; margin-bottom: 12px;"></select>
           </div>
 
-          <button id="vote-submit-btn" class="login-btn" style="width: 100%; background: #d93025;" onclick="soumettreVote()">Déposer dans l'urne</button>
+          <button class="btn-action" style="background: #d93025; color: white;" onclick="soumettreVote()">Sceller mon bulletin</button>
         </div>
       </div>
     </div>
 
+    <!-- 6. Tribu -->
     <div id="tab-equipe" class="tab-content">
-      <h2>Membres de l'Équipe (<span id="nom-equipe-titre">---</span>)</h2>
-      <div class="candidates-grid" id="grid-coequipiers"></div>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Membres de votre Tribu</h2>
+      <div class="shop-grid" id="grid-coequipiers"></div>
     </div>
 
+    <!-- 7. Agenda -->
     <div id="tab-agenda" class="tab-content">
-      <h2>Agenda des Événements</h2>
-      <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border: 0" width="100%" height="500" frameborder="0"></iframe>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Agenda</h2>
+      <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border:0; width:100%; height:450px; border-radius:8px;" frameborder="0"></iframe>
     </div>
 
+    <!-- 8. Fouille -->
     <div id="tab-recherche" class="tab-content">
-      <h2>Chasse au Collier</h2>
-      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px;">
-          <h3>Votre Position</h3>
-          <div id="recherche-status"><p>Chargement...</p></div>
-          <div id="recherche-actions" style="display: none; margin-top: 20px;">
-            <h4 id="titre-fouille">Fouiller une case</h4>
-            <div id="zone-cases-adjacentes" style="margin-bottom: 12px; display: none;">
-              <div id="btn-container-adjacentes"></div>
-            </div>
-            <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" maxlength="4">
-            <button class="login-btn" style="width: 100%;" onclick="deplacerRecherche()">Valider</button>
-            <p id="recherche-msg" style="color: red; margin-top: 10px; font-weight: bold;"></p>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Chasse aux Colliers</h2>
+      <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <div id="recherche-status">Chargement...</div>
+        <div id="recherche-actions" style="display: none; margin-top: 15px;">
+          <div id="zone-cases-adjacentes" style="margin-bottom: 10px; display: none;">
+            <span style="font-size: 12px; color: #666;">Cases adjacentes :</span><br>
+            <div id="btn-container-adjacentes" style="margin-top: 5px;"></div>
           </div>
-        </div>
-        <div style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px;">
-          <h3>Historique de Fouille</h3>
-          <ul id="recherche-historique" style="list-style: none; padding-top: 15px; font-size: 14px;"></ul>
+          <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; margin-bottom: 10px;" maxlength="4">
+          <button class="btn-action btn-buy" onclick="deplacerRecherche()">Fouiller la case</button>
         </div>
       </div>
+      <div style="background: white; padding: 15px; border-radius: 8px; font-size: 13px;">
+        <h3 style="margin: 0 0 10px 0; font-size: 15px;">Historique de vos fouilles</h3>
+        <ul id="recherche-historique" style="padding-left: 18px; margin: 0;"></ul>
+      </div>
     </div>
+
   </main>
 
   <script>
@@ -236,39 +284,21 @@
 
       document.getElementById("info-nom").innerText = joueur;
       document.getElementById("info-equipe").innerText = nomEquipe;
-      document.getElementById("nom-equipe-titre").innerText = nomEquipe;
-      document.getElementById("info-binome").innerText = binome;
-      document.getElementById("virement-nom-binome").innerText = binome;
-      document.getElementById("info-niveau-recherche").innerText = `Niveau ${niveauChercheur} (${niveauChercheur} action(s)/série)`;
+      document.getElementById("info-niveau-recherche").innerText = `Chercheur Niv. ${niveauChercheur}`;
 
       if (estCapitaine) {
-        document.getElementById("badge-capitaine").style.display = "block";
         document.getElementById("nav-btn-boutique-equipe").style.display = "inline-block";
       }
 
       const coequipiers = JSON.parse(localStorage.getItem("liste_coequipiers") || "[]");
       const gridCoequipiers = document.getElementById("grid-coequipiers");
-      gridCoequipiers.innerHTML = "";
-
-      if (coequipiers.length === 0) {
-        gridCoequipiers.innerHTML = "<p>Aucun coéquipier trouvé.</p>";
-      } else {
-        coequipiers.forEach(member => {
-          const card = document.createElement("div");
-          card.className = "candidate-card";
-          const isCap = member.estCapitaine;
-          const isMe = member.nom.toLowerCase() === joueur.toLowerCase();
-          card.style.border = isCap ? "2px solid #ffcc00" : "1px solid #ddd";
-          card.style.background = isMe ? "#fffde7" : "white";
-          card.innerHTML = `
-            ${isCap ? '<div style="font-size: 24px;">👑</div>' : '<div style="font-size: 24px;">👤</div>'}
-            <h3>${member.nom} ${isMe ? '(Vous)' : ''}</h3>
-            ${isCap ? '<span style="color: #d93025; font-weight: bold; font-size: 13px;">CAPITAINE</span><br>' : ''}
-            <span style="font-size: 13px; color: #666; margin-top: 8px; display: block;">Binôme : <strong>${member.binome}</strong></span>
-          `;
-          gridCoequipiers.appendChild(card);
-        });
-      }
+      gridCoequipiers.innerHTML = (coequipiers.length === 0) ? "<p>Aucun coéquipier.</p>" : coequipiers.map(m => `
+        <div class="shop-card" style="${m.nom.toLowerCase() === joueur.toLowerCase() ? 'border: 2px solid #ffcc00;' : ''}">
+          <h3 style="margin:0 0 5px 0;">${m.nom} ${m.nom.toLowerCase() === joueur.toLowerCase() ? '(Vous)' : ''}</h3>
+          ${m.estCapitaine ? '<span style="color:#d93025; font-weight:bold; font-size:12px;">👑 CAPITAINE</span><br>' : ''}
+          <span style="font-size:12px; color:#666;">Binôme : <strong>${m.binome}</strong></span>
+        </div>
+      `).join('');
 
       chargerBoutiqueEtInventaire();
     });
@@ -319,22 +349,22 @@
           document.getElementById("grid-boutique-standard").innerHTML = itemsStandard.map(item => {
             const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
-            let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Stock : Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">Stock : ${item.stock} / ${item.stockMax}</span>`;
+            let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax}</span>`;
             const safeItemName = item.nom.replace(/'/g, "\\'");
 
             return `
-              <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
+              <div class="shop-card" style="${outOfStock ? 'opacity:0.5;' : ''}">
                 <div>
                   ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
                   <h3 class="shop-title">${item.nom}</h3>
                   <div class="shop-badge-container">
-                    <span style="font-weight: bold; color: #007bff; font-size: 14px;">💰 ${item.prix} K</span>
+                    <span style="font-weight:bold; color:#007bff;">💰 ${item.prix} K</span>
                     ${stockDisplay}
                   </div>
                   <div class="shop-desc">${item.desc}</div>
                 </div>
                 <div>
-                  ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${safeItemName}', ${item.prix}, 'Normale', '')" class="login-btn" style="width:100%; padding:10px;">Acheter (${item.prix} K)</button>`}
+                  ${outOfStock ? '<button disabled class="btn-action" style="background:#ccc;">RUPTURE</button>' : `<button onclick="acheterDirect('${safeItemName}', ${item.prix}, 'Normale', '')" class="btn-action btn-buy">Acheter (${item.prix} K)</button>`}
                 </div>
               </div>
             `;
@@ -347,13 +377,13 @@
             const safeItemName = item.nom.replace(/'/g, "\\'");
             
             let actionHTML = currentBid ? `
-              <div style="background: #e8f0fe; padding: 8px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; text-align: center;">Mise actuelle : <strong>${currentBid} K</strong></div>
-              <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-              <button onclick="placerEnchere('${safeItemName}')" style="width: 100%; padding: 8px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-bottom: 6px;">Modifier</button>
-              <button onclick="annulerEnchere('${safeItemName}')" style="width: 100%; padding: 6px; background: #dc3545; color: white; cursor: pointer; border: none; border-radius: 4px; font-size: 12px;">Retirer</button>
+              <div style="background:#e8f0fe; padding:6px; border-radius:6px; font-size:12px; margin-bottom:6px; text-align:center;">Mise actuelle : <strong>${currentBid} K</strong></div>
+              <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ccc; border-radius:6px;">
+              <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid" style="margin-bottom:6px;">Modifier mise</button>
+              <button onclick="annulerEnchere('${safeItemName}')" class="btn-action" style="background:#dc3545; color:white; font-size:12px; padding:6px;">Retirer</button>
             ` : `
-              <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-              <button onclick="placerEnchere('${safeItemName}')" style="width: 100%; padding: 10px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 6px;">Placer mise</button>
+              <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #ccc; border-radius:6px;">
+              <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid">Enchérir</button>
             `;
 
             return `
@@ -361,7 +391,7 @@
                 <div>
                   ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
                   <h3 class="shop-title">${item.nom}</h3>
-                  <div class="shop-badge-container"><span style="font-weight: bold; color: #b38600; font-size: 14px;">🔨 Départ : ${item.prix} K</span></div>
+                  <div class="shop-badge-container"><span style="font-weight:bold; color:#b38600;">🔨 Dès ${item.prix} K</span></div>
                   <div class="shop-desc">${item.desc}</div>
                 </div>
                 <div>${actionHTML}</div>
@@ -374,22 +404,21 @@
             document.getElementById("grid-boutique-equipe").innerHTML = (result.boutiqueEquipe || []).map(item => {
               const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
               let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
-              let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Stock : Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">Stock Tribu : ${item.stock}</span>`;
               const safeItemName = item.nom.replace(/'/g, "\\'");
 
               return `
-                <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
+                <div class="shop-card" style="${outOfStock ? 'opacity:0.5;' : ''}">
                   <div>
                     ${imgUrl ? `<img src="${imgUrl}" alt="${item.nom}" class="shop-img">` : ''}
                     <h3 class="shop-title">${item.nom}</h3>
                     <div class="shop-badge-container">
-                      <span style="font-weight: bold; color: #d93025; font-size: 14px;">👥 ${item.prix} K</span>
-                      ${stockDisplay}
+                      <span style="font-weight:bold; color:#d93025;">👥 ${item.prix} K</span>
+                      <span>Stock: ${item.stock}</span>
                     </div>
                     <div class="shop-desc">${item.desc}</div>
                   </div>
                   <div>
-                    ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${safeItemName}', ${item.prix}, 'Equipe', '${equipe}')" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`}
+                    ${outOfStock ? '<button disabled class="btn-action" style="background:#ccc;">RUPTURE</button>' : `<button onclick="acheterDirect('${safeItemName}', ${item.prix}, 'Equipe', '${equipe}')" class="btn-action btn-team">Acheter (${item.prix} K)</button>`}
                   </div>
                 </div>
               `;
@@ -397,43 +426,32 @@
           }
 
           // Inventaire
-          const tbody = document.getElementById("table-inventaire");
-          if (result.inventaire.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5' style='padding: 15px; text-align: center; color: #666;'>Votre inventaire est vide.</td></tr>";
-          } else {
-            tbody.innerHTML = result.inventaire.map(inv => {
-              const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
-              const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
-              const canUse = isOwner || (isTeamItem && estCap);
-              const safeItemName = inv.objet.replace(/'/g, "\\'");
-              const btnAction = canUse ? `<button class="use-btn" onclick="demarrerUtilisation('${safeItemName}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
+          const tbody = document.querySelector("#table-inventaire tbody");
+          tbody.innerHTML = (result.inventaire.length === 0) ? "<tr><td colspan='4' style='text-align:center;'>Inventaire vide.</td></tr>" : result.inventaire.map(inv => {
+            const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
+            const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
+            const canUse = isOwner || (isTeamItem && estCap);
+            const safeItemName = inv.objet.replace(/'/g, "\\'");
+            const btnAction = canUse ? `<button class="btn-buy" style="padding:5px 10px; font-size:12px; border-radius:4px; border:none; cursor:pointer;" onclick="demarrerUtilisation('${safeItemName}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Verrouillé</span>`;
 
-              return `
-                <tr>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${btnAction}</td>
-                </tr>
-              `;
-            }).join('');
-          }
+            return `
+              <tr>
+                <td><strong>${inv.objet}</strong></td>
+                <td>${inv.proprietaire}</td>
+                <td>${inv.quantite}</td>
+                <td style="text-align:center;">${btnAction}</td>
+              </tr>
+            `;
+          }).join('');
         }
       } catch (err) { console.error("Erreur boutique", err); }
     }
 
-    // -------------------------------------------------------------
-    // MODAL MULTI-CIBLES (RESTRICTION EXCLUSIVE AUX COÉQUIPIERS)
-    // -------------------------------------------------------------
+    // Modal Cibles
     function demarrerUtilisation(itemName, owner, cibleRequise) {
       pendingUseItem = { itemName, owner, cibleRequise };
-
       var reqUpper = String(cibleRequise).toUpperCase().trim();
-      var nbCibles = 0;
-      if (reqUpper === "JOUEUR") nbCibles = 1;
-      else if (reqUpper === "2 JOUEURS" || reqUpper === "2") nbCibles = 2;
-      else if (reqUpper === "3 JOUEURS" || reqUpper === "3") nbCibles = 3;
+      var nbCibles = (reqUpper === "JOUEUR") ? 1 : ((reqUpper.indexOf("2") !== -1) ? 2 : ((reqUpper.indexOf("3") !== -1) ? 3 : 0));
 
       if (nbCibles > 0) {
         const modal = document.getElementById("target-modal");
@@ -450,21 +468,14 @@
         );
 
         if (coequipiersDisponibles.length < nbCibles) {
-          alert(`Action impossible : Vous devez choisir ${nbCibles} coéquipier(s) distinct(s), mais votre équipe n'en compte que ${coequipiersDisponibles.length}.`);
+          alert(`Action impossible : Il faut ${nbCibles} coéquipier(s) distinct(s).`);
           return;
         }
 
         for (let i = 1; i <= nbCibles; i++) {
-          let label = nbCibles > 1 ? `<label style="display:block; font-weight:bold; margin-top:8px; font-size:13px;">Coéquipier N°${i} :</label>` : '';
-          let options = `<option value="">-- Choisir un membre de l'équipe --</option>`;
-          
-          coequipiersDisponibles.forEach(c => {
-            options += `<option value="${c.nom}">${c.nom}</option>`;
-          });
-
-          container.innerHTML += `${label}<select class="target-select-field" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:5px; font-size:14px;">${options}</select>`;
+          let options = `<option value="">-- Choisir un coéquipier --</option>` + coequipiersDisponibles.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('');
+          container.innerHTML += `<label style="font-size:12px; font-weight:bold; display:block; margin-top:6px;">Cible ${i} :</label><select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; margin-top:3px;">${options}</select>`;
         }
-
         modal.style.display = "flex";
       } else {
         if (!confirm(`Confirmer l'utilisation de "${itemName}" ?`)) return;
@@ -472,29 +483,19 @@
       }
     }
 
-    function fermerModalCible() {
-      document.getElementById("target-modal").style.display = "none";
-      pendingUseItem = null;
-    }
+    function fermerModalCible() { document.getElementById("target-modal").style.display = "none"; pendingUseItem = null; }
 
     function validerUtilisationAvecCible() {
       const selects = document.querySelectorAll(".target-select-field");
-      let ciblesChoisies = [];
-
+      let cibles = [];
       for (let sel of selects) {
-        if (!sel.value) { alert("Veuillez sélectionner tous les coéquipiers requis."); return; }
-        ciblesChoisies.push(sel.value);
+        if (!sel.value) { alert("Veuillez sélectionner toutes les cibles."); return; }
+        cibles.push(sel.value);
       }
-
-      let uniques = new Set(ciblesChoisies);
-      if (uniques.size !== ciblesChoisies.length) {
-        alert("Vous ne pouvez pas sélectionner deux fois le même coéquipier !");
-        return;
-      }
-
+      if (new Set(cibles).size !== cibles.length) { alert("Pas de doublons autorisés !"); return; }
       const item = pendingUseItem;
       fermerModalCible();
-      executerUtilisation(item.itemName, item.owner, ciblesChoisies);
+      executerUtilisation(item.itemName, item.owner, cibles);
     }
 
     async function executerUtilisation(itemName, owner, targets) {
@@ -505,35 +506,22 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "use_item",
-            username: joueur,
-            equipe: equipe,
-            itemName: itemName,
-            owner: owner,
-            targets: targets
-          })
+          body: JSON.stringify({ action: "use_item", username: joueur, equipe: equipe, itemName: itemName, owner: owner, targets: targets })
         });
         const res = await response.json();
-
         if (res.status === "success") {
           document.getElementById("use-modal-title").innerText = res.itemName;
           document.getElementById("use-modal-desc").innerText = res.message;
           document.getElementById("use-modal").style.display = "flex";
           chargerBoutiqueEtInventaire();
-        } else {
-          alert(res.message);
-        }
-      } catch (err) { alert("Erreur lors de l'utilisation."); }
+        } else { alert(res.message); }
+      } catch (err) { alert("Erreur serveur."); }
     }
 
-    function fermerModalUtilisation() {
-      document.getElementById("use-modal").style.display = "none";
-    }
+    function fermerModalUtilisation() { document.getElementById("use-modal").style.display = "none"; }
+    function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
 
-    // -------------------------------------------------------------
-    // CONSEIL & VOTE
-    // -------------------------------------------------------------
+    // Conseil & Vote
     async function chargerConseil() {
       const joueur = localStorage.getItem("joueur_connecte");
       const equipe = localStorage.getItem("equipe_joueur");
@@ -555,46 +543,21 @@
         const res = await response.json();
 
         if (res.status === "success") {
-          if (res.monStatut.elimine) {
-            statusDiv.innerHTML = `<div style="background:#f8d7da; color:#721c24; padding:15px; border-radius:6px;">💀 <strong>Vous êtes éliminé.</strong></div>`;
-            return;
-          }
-
-          if (!res.isConseilOuvert) {
-            statusDiv.innerHTML = `<div style="font-size:40px;">🔥</div><h3>Aucun conseil en cours pour la tribu ${equipe}</h3>`;
-            return;
-          }
+          if (res.monStatut.elimine) { statusDiv.innerHTML = `<p style="color:red; font-weight:bold;">💀 Vous êtes éliminé.</p>`; return; }
+          if (!res.isConseilOuvert) { statusDiv.innerHTML = `<h3>🔥 Conseil fermé pour la tribu ${equipe}.</h3>`; return; }
 
           hasDoubleVote = res.aDoubleVote === true;
-          let extraMsg = res.monStatut.immunise ? `<p style="color:#28a745; font-weight:bold;">🛡️ Vous possédez l'immunité !</p>` : "";
+          statusDiv.innerHTML = `<h3 style="color:#d93025; margin:0 0 10px 0;">Conseil Ouvert !</h3>${res.monVote1 ? `<p style="font-size:12px; color:green;">Bulletin déposé : <strong>${res.monVote1}</strong></p>` : ''}`;
 
-          let voteRecap = "";
-          if (res.monVote1) {
-            voteRecap = `<div style="background:#e8f5e9; padding:10px; border-radius:6px; margin-bottom:15px;">🗳️ Bulletin 1 déposé : <strong>${res.monVote1}</strong>${res.monVote2 ? `<br>🗳️ Bulletin 2 déposé : <strong>${res.monVote2}</strong>` : ''}</div>`;
-          }
-
-          statusDiv.innerHTML = `
-            <div style="font-size:40px;">🔥</div>
-            <h3 style="color:#d93025;">Le Conseil de la tribu ${equipe} est OUVERT !</h3>
-            ${extraMsg}
-            ${voteRecap}
-          `;
-
-          let options = `<option value="">-- Sélectionner un aventurier --</option>`;
-          res.candidatsVotables.forEach(cand => {
-            options += `<option value="${cand}">${cand}</option>`;
-          });
-
-          select1.innerHTML = options;
+          let opts = `<option value="">-- Choisir un aventurier --</option>` + res.candidatsVotables.map(c => `<option value="${c}">${c}</option>`).join('');
+          select1.innerHTML = opts;
           if (res.monVote1) select1.value = res.monVote1;
 
           if (hasDoubleVote) {
             zoneB2.style.display = "block";
-            select2.innerHTML = options;
+            select2.innerHTML = opts;
             if (res.monVote2) select2.value = res.monVote2;
-          } else {
-            zoneB2.style.display = "none";
-          }
+          } else { zoneB2.style.display = "none"; }
 
           formDiv.style.display = "block";
         }
@@ -604,94 +567,64 @@
     async function soumettreVote() {
       const v1 = document.getElementById("vote-select-1").value;
       const v2 = document.getElementById("vote-select-2").value;
-      const joueur = localStorage.getItem("joueur_connecte");
-      const equipe = localStorage.getItem("equipe_joueur");
-
-      if (!v1) { alert("Veuillez choisir un candidat pour le bulletin 1."); return; }
-      if (hasDoubleVote && !v2) { alert("Veuillez choisir un candidat pour le bulletin 2."); return; }
-
-      if (!confirm("Confirmer votre vote ?")) return;
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "submit_vote",
-            username: joueur,
-            equipe: equipe,
-            vote1: v1,
-            vote2: v2,
-            aDoubleVote: hasDoubleVote
-          })
-        });
-        const res = await response.json();
-        alert(res.message);
-        if (res.status === "success") chargerConseil();
-      } catch (err) { alert("Erreur enregistrement vote."); }
-    }
-
-    async function acheterDirect(itemName, price, shopType, target) {
-      if (!confirm(`Confirmer l'achat de "${itemName}" pour ${price} K ?`)) return;
-      const username = localStorage.getItem("joueur_connecte");
-      const equipe = localStorage.getItem("equipe_joueur");
+      if (!v1 || (hasDoubleVote && !v2)) { alert("Veuillez remplir vos bulletins."); return; }
+      if (!confirm("Sceller définitivement votre vote ?")) return;
 
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "buy_direct", username, itemName, price, shopType, target, equipe })
+        body: JSON.stringify({ action: "submit_vote", username: localStorage.getItem("joueur_connecte"), equipe: localStorage.getItem("equipe_joueur"), vote1: v1, vote2: v2, aDoubleVote: hasDoubleVote })
       });
       const res = await response.json();
       alert(res.message);
-      if(res.status === "success") {
-        if (res.soldeIndividuel !== undefined) {
-          localStorage.setItem("solde_individuel", res.soldeIndividuel);
-          document.getElementById("solde-individuel").innerText = res.soldeIndividuel;
-        }
-        if (res.soldeEquipe !== undefined) {
-          localStorage.setItem("solde_equipe", res.soldeEquipe);
-          document.getElementById("solde-equipe").innerText = res.soldeEquipe;
-        }
-        setTimeout(() => chargerBoutiqueEtInventaire(), 500);
-      }
+      if (res.status === "success") chargerConseil();
+    }
+
+    // Achat & Enchères
+    async function acheterDirect(itemName, price, shopType, target) {
+      if (!confirm(`Acheter "${itemName}" pour ${price} K ?`)) return;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "buy_direct", username: localStorage.getItem("joueur_connecte"), itemName, price, shopType, target, equipe: localStorage.getItem("equipe_joueur") })
+      });
+      const res = await response.json();
+      alert(res.message);
+      if (res.status === "success") chargerBoutiqueEtInventaire();
     }
 
     async function placerEnchere(itemName) {
       const input = document.getElementById(`bid-${itemName}`);
       const bidAmount = parseInt(input.value, 10);
-      const minPrice = parseInt(input.min, 10);
-      if (isNaN(bidAmount) || bidAmount < minPrice) { alert(`Mise minimum: ${minPrice} K`); return; }
-      if (!confirm(`Confirmer la mise de ${bidAmount} K sur "${itemName}" ?`)) return;
+      if (isNaN(bidAmount) || bidAmount <= 0) return;
+      if (!confirm(`Confirmer la mise de ${bidAmount} K ?`)) return;
 
-      const username = localStorage.getItem("joueur_connecte");
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "place_bid", username, itemName, bidAmount })
+        body: JSON.stringify({ action: "place_bid", username: localStorage.getItem("joueur_connecte"), itemName, bidAmount })
       });
       const res = await response.json();
       alert(res.message);
-      if (res.status === "success") setTimeout(() => chargerBoutiqueEtInventaire(), 500);
+      if (res.status === "success") chargerBoutiqueEtInventaire();
     }
 
     async function annulerEnchere(itemName) {
-      if (!confirm(`Retirer votre mise sur "${itemName}" ?`)) return;
-      const username = localStorage.getItem("joueur_connecte");
+      if (!confirm("Retirer votre mise ?")) return;
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "cancel_bid", username, itemName })
+        body: JSON.stringify({ action: "cancel_bid", username: localStorage.getItem("joueur_connecte"), itemName })
       });
       const res = await response.json();
       alert(res.message);
-      if (res.status === "success") setTimeout(() => chargerBoutiqueEtInventaire(), 500);
+      if (res.status === "success") chargerBoutiqueEtInventaire();
     }
 
     async function transfererKohrocq() {
       const montant = parseInt(document.getElementById("virement-montant").value, 10);
-      const binome = localStorage.getItem("binome_joueur");
       if (isNaN(montant) || montant <= 0) { alert("Montant invalide."); return; }
-      if (!confirm(`Envoyer ${montant} K à ${binome} ?`)) return;
+      if (!confirm(`Envoyer ${montant} K à votre binôme ?`)) return;
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -706,35 +639,28 @@
       }
     }
 
-    let currentPosition = null, timerInterval = null;
-    function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
+    // Fouille
+    let currentPosition = null;
     async function chargerRecherche() {
-      const joueur = localStorage.getItem("joueur_connecte");
-      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "get_recherche", username: joueur }) });
+      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "get_recherche", username: localStorage.getItem("joueur_connecte") }) });
       const result = await response.json();
       if (result.status === "success") {
         currentPosition = result.position;
-        const niveau = result.niveauRecherche || 1;
-        const histList = document.getElementById("recherche-historique");
-        histList.innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille.</li>";
+        document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille.</li>";
 
         const statusDiv = document.getElementById("recherche-status");
         const actionDiv = document.getElementById("recherche-actions");
 
-        if (!result.isOpen) {
-          statusDiv.innerHTML = "<p>🌙 Recherche fermée la nuit (8h-24h).</p>";
-          actionDiv.style.display = "none";
-          return;
-        }
+        if (!result.isOpen) { statusDiv.innerHTML = "<p>🌙 Fermé la nuit (8h-24h).</p>"; actionDiv.style.display = "none"; return; }
 
         if (!currentPosition) {
-          statusDiv.innerHTML = "<p>Choisissez votre point de départ du jour.</p>";
+          statusDiv.innerHTML = "<p>Choisissez votre point de départ.</p>";
           actionDiv.style.display = "block";
         } else if (result.maintenant < result.prochaineAction) {
           actionDiv.style.display = "none";
-          statusDiv.innerHTML = `<p>Position: ${currentPosition}<br>⏳ Repos en cours...</p>`;
+          statusDiv.innerHTML = `<p>Position : <strong>${currentPosition}</strong><br>⏳ En temps de repos...</p>`;
         } else {
-          statusDiv.innerHTML = `<p>Position actuelle : <strong>${currentPosition}</strong></p>`;
+          statusDiv.innerHTML = `<p>Position : <strong>${currentPosition}</strong></p>`;
           actionDiv.style.display = "block";
           if (result.adjacentChoices && result.adjacentChoices.length > 0) {
             document.getElementById("zone-cases-adjacentes").style.display = "block";
@@ -757,10 +683,7 @@
         if (result.foundItem) {
           document.getElementById("modal-title").innerText = result.foundItem;
           document.getElementById("found-modal").style.display = "flex";
-        } else {
-          alert(result.message);
-          chargerRecherche();
-        }
+        } else { alert(result.message); chargerRecherche(); }
       } else { alert(result.message); }
     }
   </script>
