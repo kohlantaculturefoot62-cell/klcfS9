@@ -34,7 +34,22 @@
       color: white;
     }
 
-    /* Modal / Pop-up de trouvaille */
+    .use-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+    .use-btn:hover {
+      background: #218838;
+    }
+
+    /* Modal / Pop-ups */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -50,7 +65,7 @@
       padding: 25px;
       border-radius: 12px;
       text-align: center;
-      max-width: 400px;
+      max-width: 420px;
       width: 90%;
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       animation: popIn 0.3s ease;
@@ -72,6 +87,18 @@
       <h3 id="modal-title" style="font-size: 20px; color: #ffcc00; margin-bottom: 10px;">---</h3>
       <p style="font-size: 13px; color: #666; margin-bottom: 20px;">L'objet a été automatiquement transféré dans votre inventaire personnel.</p>
       <button class="login-btn" style="width: 100%;" onclick="fermerModalTrouvaille()">Génial !</button>
+    </div>
+  </div>
+
+  <!-- Modal Pop-up Utilisation Objet -->
+  <div id="use-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h2 style="color: #007bff; margin-bottom: 10px;">⚡ OBJET ACTIVÉ</h2>
+      <h3 id="use-modal-title" style="font-size: 18px; color: #1a1a1a; margin-bottom: 15px;">---</h3>
+      <div id="use-modal-desc" style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 20px; text-align: left;">
+        ---
+      </div>
+      <button class="login-btn" style="width: 100%;" onclick="fermerModalUtilisation()">Fermer</button>
     </div>
   </div>
 
@@ -148,10 +175,11 @@
             <th style="padding: 10px; border-bottom: 2px solid #ddd;">Propriétaire</th>
             <th style="padding: 10px; border-bottom: 2px solid #ddd;">Qté</th>
             <th style="padding: 10px; border-bottom: 2px solid #ddd;">Source</th>
+            <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Action</th>
           </tr>
         </thead>
         <tbody id="table-inventaire">
-          <tr><td colspan="4" style="padding: 10px;">Chargement de l'inventaire...</td></tr>
+          <tr><td colspan="5" style="padding: 10px;">Chargement de l'inventaire...</td></tr>
         </tbody>
       </table>
     </div>
@@ -320,9 +348,10 @@
     }
 
     // -------------------------------------------------------------
-    // BOUTIQUE ET INVENTAIRE
+    // BOUTIQUE ET INVENTAIRE (AVEC UTILISATION D'OBJET)
     // -------------------------------------------------------------
     async function chargerBoutiqueEtInventaire() {
+      const joueur = localStorage.getItem("joueur_connecte");
       const equipe = localStorage.getItem("equipe_joueur");
       const estCap = localStorage.getItem("est_capitaine") === "true";
 
@@ -332,7 +361,7 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ 
             action: "get_shop_data", 
-            username: localStorage.getItem("joueur_connecte"), 
+            username: joueur, 
             equipe: equipe 
           })
         });
@@ -416,21 +445,67 @@
 
           const tbody = document.getElementById("table-inventaire");
           if (result.inventaire.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='4' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='5' style='padding: 10px;'>Votre inventaire est vide.</td></tr>";
           } else {
-            tbody.innerHTML = result.inventaire.map(inv => `
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
-              </tr>
-            `).join('');
+            tbody.innerHTML = result.inventaire.map(inv => {
+              const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
+              const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
+              const canUse = isOwner || (isTeamItem && estCap);
+
+              const btnAction = canUse 
+                ? `<button class="use-btn" onclick="utiliserObjet('${inv.objet}', '${inv.proprietaire}')">Utiliser</button>`
+                : `<span style="font-size: 11px; color: #999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
+
+              return `
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${inv.objet}</strong></td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.proprietaire}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.quantite}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee;">${inv.source}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${btnAction}</td>
+                </tr>
+              `;
+            }).join('');
           }
         }
       } catch (err) {
         console.error("Erreur chargement boutique", err);
       }
+    }
+
+    async function utiliserObjet(itemName, owner) {
+      if (!confirm(`Voulez-vous vraiment utiliser "${itemName}" ?\n\nCet objet sera immédiatement consommé et retiré de votre inventaire.`)) return;
+
+      const joueur = localStorage.getItem("joueur_connecte");
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "use_item",
+            username: joueur,
+            itemName: itemName,
+            owner: owner
+          })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          document.getElementById("use-modal-title").innerText = res.itemName;
+          document.getElementById("use-modal-desc").innerText = res.message;
+          document.getElementById("use-modal").style.display = "flex";
+          chargerBoutiqueEtInventaire();
+        } else {
+          alert(res.message);
+        }
+      } catch (err) {
+        alert("Erreur lors de l'utilisation de l'objet.");
+      }
+    }
+
+    function fermerModalUtilisation() {
+      document.getElementById("use-modal").style.display = "none";
     }
 
     async function placerEnchere(itemName) {
