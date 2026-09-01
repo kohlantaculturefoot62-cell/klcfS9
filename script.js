@@ -1,8 +1,14 @@
-// REMPLACE PAR L'URL DONNÉE PAR APPS SCRIPT À L'ÉTAPE 1
 const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
   chargerCandidats();
+
+  // Si le joueur est déjà connecté, on adapte le bouton de la bannière
+  const loginBtn = document.querySelector(".login-btn");
+  if (loginBtn && localStorage.getItem("joueur_connecte")) {
+    loginBtn.innerText = "Mon Espace";
+    loginBtn.onclick = () => { window.location.href = "espace_candidat.html"; };
+  }
 });
 
 async function chargerCandidats() {
@@ -21,11 +27,9 @@ async function chargerCandidats() {
         // Extraction de l'ID de l'image Drive et utilisation du meilleur format d'URL
         if (photoUrl.includes("file/d/")) {
           const fileId = photoUrl.split("file/d/")[1].split("/")[0];
-          // lh3.googleusercontent est la méthode la plus stable pour afficher une image Drive
           photoUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
         }
 
-        // Création de la carte avec les nouvelles classes CSS
         const card = document.createElement("div");
         card.className = "candidate-card";
         card.innerHTML = `
