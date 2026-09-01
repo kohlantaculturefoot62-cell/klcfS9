@@ -16,7 +16,7 @@
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
     th { background: #f8f9fa; padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: bold; }
-    td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+    td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
     tr:hover { background: #fdfdfe; }
 
     .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
@@ -26,13 +26,15 @@
     .badge-info { background: #d1ecf1; color: #0c5460; }
     .badge-primary { background: #cce5ff; color: #004085; }
 
+    .btn-resolve { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-resolve:hover { background: #218838; }
+
     .search-input { padding: 10px 15px; width: 300px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
     .login-input { width: 100%; padding: 10px; margin: 10px 0 20px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 15px; }
   </style>
 </head>
 <body>
 
-  <!-- Banderole -->
   <header class="banner" style="background: #1a1a1a;">
     <div class="banner-content" style="display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: auto; padding: 10px 20px;">
       <h1 class="logo" style="color: #ffcc00; margin: 0;">👑 KLCF S9 - Console Organisation</h1>
@@ -42,20 +44,18 @@
 
   <main class="admin-container">
     
-    <!-- ÉCRAN DE CONNEXION PAR MOT DE PASSE ORGA -->
+    <!-- Login Gate -->
     <div id="login-gate" class="card" style="max-width: 420px; margin: 80px auto; text-align: center;">
       <h2 style="color: #1a1a1a; margin-bottom: 10px;">Accès Réservé Orga</h2>
       <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Entrez la clé secrète administrateur :</p>
-      
       <form onsubmit="seConnecterAdmin(event)">
         <input type="password" id="admin-password-input" class="login-input" placeholder="Mot de passe secret" required autofocus>
         <button type="submit" class="login-btn" style="width: 100%; padding: 10px;">Déverrouiller l'Espace Orga</button>
       </form>
-      
       <p id="auth-error" style="color: red; margin-top: 15px; font-weight: bold;"></p>
     </div>
 
-    <!-- TABLEAU DE BORD ORGANISATION -->
+    <!-- Dashboard -->
     <div id="admin-dashboard" style="display: none;">
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -63,52 +63,74 @@
         <button class="login-btn" onclick="chargerDonneesOrga()" style="padding: 8px 16px;">🔄 Rafraîchir les données</button>
       </div>
 
-      <!-- SECTION 1 : ENCHÈRES EN COURS & CLASSEMENT DES MISES -->
-      <div class="card" style="border-top: 4px solid #ffcc00;">
-        <h3 style="margin-top: 0; color: #b38600;">🏷️ Enchères Actives & Mises en Cours</h3>
-        <p style="color: #666; font-size: 13px;">Voici les objets actuellement aux enchères avec le classement détaillé des offres (de la plus haute à la plus basse) :</p>
-        
-        <div id="grid-encheres-admin" class="stats-grid" style="margin-top: 15px;">
-          <p>Chargement des enchères...</p>
-        </div>
+      <!-- SECTION 1 : ACTIONS ORGA EN ATTENTE -->
+      <div class="card" style="border-top: 4px solid #007bff;">
+        <h3 style="margin-top: 0; color: #007bff;">⚡ Actions & Pouvoirs en Attente d'Arbitrage</h3>
+        <p style="color: #666; font-size: 13px;">Voici les pouvoirs spéciaux activés par les candidats nécessitant votre intervention :</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Joueur</th>
+              <th>Tribu</th>
+              <th>Objet Utilisé</th>
+              <th>Cible(s)</th>
+              <th>Détails Effet</th>
+              <th>Statut</th>
+              <th style="text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="table-actions-orga">
+            <tr><td colspan="8">Chargement...</td></tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- SECTION 2 : SYNTHÈSE DU CONSEIL & DÉPOUILLEMENT -->
+      <!-- SECTION 2 : EFFETS CONSEILS ACTIFS & DÉPOUILLEMENT -->
       <div class="card" style="border-top: 4px solid #d93025;">
-        <h3 style="margin-top: 0; color: #d93025;">🗳️ Synthèse des Votes du Conseil</h3>
-        <p style="color: #666; font-size: 13px;">Dépouillement des bulletins actuellement dans l'urne :</p>
+        <h3 style="margin-top: 0; color: #d93025;">🗳️ Dépouillement Réel du Conseil</h3>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="conseil-grid">
+        <!-- Effets actifs enregistrés -->
+        <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 5px 0; color: #b38600;">🔥 Pouvoirs joués pour ce Conseil :</h4>
+          <div id="recap-effets-conseil" style="font-size: 13px; color: #444;">Aucun pouvoir enregistré pour le moment.</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- Résultat Dépouillement -->
           <div>
-            <h4>Répartition des votes contre chaque joueur</h4>
+            <h4>Résultat Calculé des Votes</h4>
             <table>
               <thead>
                 <tr>
-                  <th>Candidat Ciblé</th>
-                  <th style="text-align: center;">Nombre de Votes</th>
-                  <th>Statut Risque</th>
+                  <th>Candidat</th>
+                  <th style="text-align: center;">Votes Bruts</th>
+                  <th style="text-align: center;">Protection</th>
+                  <th style="text-align: center;">Score Final</th>
                 </tr>
               </thead>
               <tbody id="table-votes-summary">
-                <tr><td colspan="3">Aucun vote enregistré.</td></tr>
+                <tr><td colspan="4">Aucun vote enregistré.</td></tr>
               </tbody>
             </table>
           </div>
 
+          <!-- Détail des Bulletins -->
           <div>
-            <h4>Détail de l'urne (Secret Orga)</h4>
+            <h4>Détail de l'Urne (Bulletins Déposés)</h4>
             <div style="max-height: 250px; overflow-y: auto;">
               <table>
                 <thead>
                   <tr>
-                    <th>Date / Heure</th>
+                    <th>Date</th>
                     <th>Votant</th>
-                    <th>Tribu</th>
-                    <th>A voté contre</th>
+                    <th>Cible</th>
+                    <th>Bulletin</th>
+                    <th>Validité</th>
                   </tr>
                 </thead>
                 <tbody id="table-votes-details">
-                  <tr><td colspan="4">Urne vide.</td></tr>
+                  <tr><td colspan="5">Urne vide.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -116,15 +138,20 @@
         </div>
       </div>
 
-      <!-- SECTION 3 : MONITORING GLOBAL DES CANDIDATS -->
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <h3 style="margin: 0;">👥 Suivi Détaillé des Candidats</h3>
-          <input type="text" id="search-candidate" class="search-input" placeholder="🔍 Rechercher un candidat..." onkeyup="filtrerTableau()">
-        </div>
+      <!-- SECTION 3 : ENCHÈRES ACTIVES -->
+      <div class="card" style="border-top: 4px solid #ffcc00;">
+        <h3 style="margin-top: 0; color: #b38600;">🏷️ Enchères en Cours</h3>
+        <div id="grid-encheres-admin" class="stats-grid" style="margin-top: 15px;"></div>
+      </div>
 
+      <!-- SECTION 4 : MONITORING GLOBAL DES CANDIDATS -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0;">👥 Suivi des Candidats</h3>
+          <input type="text" id="search-candidate" class="search-input" placeholder="🔍 Rechercher..." onkeyup="filtrerTableau()">
+        </div>
         <div style="overflow-x: auto;">
-          <table id="table-candidates-main">
+          <table>
             <thead>
               <tr>
                 <th>Candidat</th>
@@ -132,16 +159,16 @@
                 <th>Binôme</th>
                 <th>Solde Indiv.</th>
                 <th>Cagnotte Tribu</th>
-                <th>Inventaire Actuel</th>
+                <th>Inventaire</th>
                 <th>Objets Utilisés</th>
-                <th>Statut Conseil</th>
+                <th>Statut</th>
                 <th>Vote Déposé</th>
-                <th>Position Grille</th>
-                <th>Fouilles / Trouvailles</th>
+                <th>Position</th>
+                <th>Fouilles</th>
               </tr>
             </thead>
             <tbody id="table-candidates-body">
-              <tr><td colspan="11" style="text-align:center;">Chargement des candidats...</td></tr>
+              <tr><td colspan="11">Chargement...</td></tr>
             </tbody>
           </table>
         </div>
@@ -167,17 +194,13 @@
       e.preventDefault();
       const pass = document.getElementById("admin-password-input").value;
       const errorMsg = document.getElementById("auth-error");
-
-      errorMsg.innerText = "Vérification en cours...";
+      errorMsg.innerText = "Vérification...";
 
       try {
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "get_admin_data",
-            adminPassword: pass
-          })
+          body: JSON.stringify({ action: "get_admin_data", adminPassword: pass })
         });
         const res = await response.json();
 
@@ -185,16 +208,11 @@
           sessionStorage.setItem("admin_password", pass);
           errorMsg.innerText = "";
           afficherInterfaceAdmin();
-          allCandidatsData = res.candidats;
-          rendreEncheres(res.encheresActives || []);
-          rendreSyntheseConseil(res.votesSummary, res.votesDetails);
-          rendreTableauCandidats(res.candidats);
+          rendreDashboardComplet(res);
         } else {
           errorMsg.innerText = res.message;
         }
-      } catch (err) {
-        errorMsg.innerText = "Erreur de connexion au serveur.";
-      }
+      } catch (err) { errorMsg.innerText = "Erreur de connexion."; }
     }
 
     function afficherInterfaceAdmin() {
@@ -203,7 +221,7 @@
       document.getElementById("auth-box").innerHTML = `
         <div style="display:flex; align-items:center; gap:10px; color:white;">
           <span style="font-size:13px; color:#ffcc00;">🔑 Session Orga Active</span>
-          <button onclick="deconnexionAdmin()" style="background:#dc3545; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">Déconnexion</button>
+          <button onclick="deconnexionAdmin()" style="background:#dc3545; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Déconnexion</button>
         </div>
       `;
     }
@@ -221,153 +239,135 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "get_admin_data",
-            adminPassword: pass
-          })
+          body: JSON.stringify({ action: "get_admin_data", adminPassword: pass })
         });
         const res = await response.json();
-
-        if (res.status === "success") {
-          allCandidatsData = res.candidats;
-          rendreEncheres(res.encheresActives || []);
-          rendreSyntheseConseil(res.votesSummary, res.votesDetails);
-          rendreTableauCandidats(res.candidats);
-        } else {
-          alert(res.message);
-          deconnexionAdmin();
-        }
-      } catch (err) {
-        console.error("Erreur admin:", err);
-      }
+        if (res.status === "success") rendreDashboardComplet(res);
+      } catch (err) { console.error("Erreur admin:", err); }
     }
 
-    function rendreEncheres(encheres) {
-      const container = document.getElementById("grid-encheres-admin");
+    function rendreDashboardComplet(res) {
+      allCandidatsData = res.candidats || [];
 
-      if (encheres.length === 0) {
-        container.innerHTML = "<p style='color:#888;'>Aucune enchère en cours pour le moment.</p>";
-        return;
-      }
-
-      container.innerHTML = encheres.map(ench => {
-        let rankHTML = "";
-
-        if (ench.mises.length === 0) {
-          rankHTML = "<p style='font-size:12px; color:#888;'>Aucune offre déposée.</p>";
-        } else {
-          rankHTML = `
-            <table style="font-size: 12px; margin-top: 8px;">
-              <thead>
-                <tr>
-                  <th>Rang</th>
-                  <th>Candidat</th>
-                  <th>Montant</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${ench.mises.map((m, idx) => `
-                  <tr style="${idx === 0 ? 'background:#fff8e1; font-weight:bold;' : ''}">
-                    <td>${idx === 0 ? '🥇 1er' : (idx === 1 ? '🥈 2e' : (idx === 2 ? '🥉 3e' : `${idx + 1}e`))}</td>
-                    <td>${m.bidder}</td>
-                    <td><span class="badge ${idx === 0 ? 'badge-success' : 'badge-primary'}">${m.amount} K</span></td>
-                    <td style="font-size:10px; color:#666;">${m.date}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          `;
-        }
-
-        return `
-          <div class="stat-card" style="border-left-color: #ffcc00;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h4 style="font-size:15px; color:#1a1a1a; margin:0;">${ench.objet}</h4>
-              <span class="badge badge-warning">${ench.totalEncherisseurs} mise(s)</span>
-            </div>
-            <p style="font-size:13px; margin: 6px 0;">Actuel Vainqueur : <strong>${ench.leader}</strong> (${ench.topMise} K)</p>
-            ${rankHTML}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function rendreSyntheseConseil(summary, details) {
-      const summaryTbody = document.getElementById("table-votes-summary");
-      const detailsTbody = document.getElementById("table-votes-details");
-
-      const sortedCandidates = Object.keys(summary).sort((a, b) => summary[b] - summary[a]);
-
-      if (sortedCandidates.length === 0) {
-        summaryTbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">Aucun bulletin dans l'urne.</td></tr>`;
+      // 1. Actions en attente
+      const tbodyActions = document.getElementById("table-actions-orga");
+      if (!res.actionsOrga || res.actionsOrga.length === 0) {
+        tbodyActions.innerHTML = "<tr><td colspan='8' style='text-align:center; color:#888;'>Aucune action en attente.</td></tr>";
       } else {
-        const maxVotes = summary[sortedCandidates[0]];
-        summaryTbody.innerHTML = sortedCandidates.map(nom => {
-          const count = summary[nom];
-          const isLeader = (count === maxVotes && count > 0);
-          return `
-            <tr style="${isLeader ? 'background:#fff3f3; font-weight:bold;' : ''}">
-              <td>${isLeader ? '⚠️ ' : ''}${nom}</td>
-              <td style="text-align: center;"><span class="badge ${isLeader ? 'badge-danger' : 'badge-warning'}">${count} vote(s)</span></td>
-              <td>${isLeader ? '<span class="badge badge-danger">En tête des votes</span>' : '<span class="badge badge-info">En sécurité relative</span>'}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      if (details.length === 0) {
-        detailsTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">Urne vide.</td></tr>`;
-      } else {
-        detailsTbody.innerHTML = details.map(d => `
-          <tr>
-            <td style="font-size:11px; color:#666;">${d.date}</td>
-            <td><strong>${d.votant}</strong></td>
-            <td><span class="badge badge-primary">${d.equipe}</span></td>
-            <td><strong style="color:#d93025;">${d.cible}</strong></td>
+        tbodyActions.innerHTML = res.actionsOrga.map(act => `
+          <tr style="${act.statut === 'À traiter' ? 'background:#fff8e1;' : ''}">
+            <td style="font-size:11px; color:#666;">${act.date}</td>
+            <td><strong>${act.joueur}</strong></td>
+            <td><span class="badge badge-primary">${act.equipe}</span></td>
+            <td><strong>${act.objet}</strong></td>
+            <td>${act.cibles}</td>
+            <td>${act.details}</td>
+            <td><span class="badge ${act.statut === 'À traiter' ? 'badge-warning' : 'badge-success'}">${act.statut}</span></td>
+            <td style="text-align:center;">
+              ${act.statut === 'À traiter' ? `<button class="btn-resolve" onclick="validerActionOrga(${act.rowIndex})">Marquer Traité ✔️</button>` : '✔️'}
+            </td>
           </tr>
         `).join('');
       }
+
+      // 2. Effets Conseil Actifs
+      const recapEffets = document.getElementById("recap-effets-conseil");
+      if (!res.effetsConseil || res.effetsConseil.length === 0) {
+        recapEffets.innerHTML = "<em>Aucun pouvoir joué pour ce conseil.</em>";
+      } else {
+        recapEffets.innerHTML = res.effetsConseil.map(ef => `
+          <div style="margin-bottom:4px;">• <strong>${ef.joueur}</strong> (${ef.equipe}) a activé <strong>${ef.objet}</strong> ${ef.cibles ? `(Cible: ${ef.cibles})` : ''} à ${ef.date}</div>
+        `).join('');
+      }
+
+      // 3. Dépouillement des votes
+      const summaryTbody = document.getElementById("table-votes-summary");
+      if (!res.votesSummary || res.votesSummary.length === 0) {
+        summaryTbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#888;'>Aucun vote enregistré.</td></tr>";
+      } else {
+        summaryTbody.innerHTML = res.votesSummary.map((s, idx) => `
+          <tr style="${idx === 0 && s.votesFinaux > 0 ? 'background:#fff3f3; font-weight:bold;' : ''}">
+            <td>${idx === 0 && s.votesFinaux > 0 ? '⚠️ ' : ''}${s.nom}</td>
+            <td style="text-align:center;">${s.votesBruts}</td>
+            <td style="text-align:center;"><span class="badge ${s.protection > 0 ? 'badge-success' : 'badge-info'}">-${s.protection}</span></td>
+            <td style="text-align:center;"><span class="badge badge-danger">${s.votesFinaux}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // 4. Détail Bulletins
+      const detailsTbody = document.getElementById("table-votes-details");
+      if (!res.votesDetails || res.votesDetails.length === 0) {
+        detailsTbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#888;'>Urne vide.</td></tr>";
+      } else {
+        detailsTbody.innerHTML = res.votesDetails.map(d => `
+          <tr style="${!d.estValide ? 'text-decoration:line-through; opacity:0.6;' : ''}">
+            <td style="font-size:11px; color:#666;">${d.date}</td>
+            <td><strong>${d.votant}</strong></td>
+            <td><strong style="color:#d93025;">${d.cible}</strong></td>
+            <td>B${d.bulletin}</td>
+            <td>${d.estValide ? '<span class="badge badge-success">Valide</span>' : `<span class="badge badge-danger">${d.motifInvalidation}</span>`}</td>
+          </tr>
+        `).join('');
+      }
+
+      // 5. Enchères
+      const gridEnch = document.getElementById("grid-encheres-admin");
+      gridEnch.innerHTML = (res.encheresActives || []).map(ench => `
+        <div class="stat-card">
+          <div style="display:flex; justify-content:space-between;">
+            <h4 style="margin:0; font-size:15px;">${ench.objet}</h4>
+            <span class="badge badge-warning">${ench.totalEncherisseurs} mise(s)</span>
+          </div>
+          <p style="font-size:13px; margin:6px 0;">Leader : <strong>${ench.leader}</strong> (${ench.topMise} K)</p>
+          <table style="font-size:12px;">
+            <tbody>
+              ${ench.mises.map((m, idx) => `<tr><td>${idx === 0 ? '🥇' : `${idx + 1}e`}</td><td>${m.bidder}</td><td><span class="badge badge-primary">${m.amount} K</span></td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      `).join('') || "<p style='color:#888;'>Aucune enchère en cours.</p>";
+
+      // 6. Tableau Candidats
+      rendreTableauCandidats(allCandidatsData);
+    }
+
+    async function validerActionOrga(rowIndex) {
+      const pass = sessionStorage.getItem("admin_password");
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "resolve_orga_action", adminPassword: pass, rowIndex: rowIndex })
+        });
+        const res = await response.json();
+        if (res.status === "success") chargerDonneesOrga();
+        else alert(res.message);
+      } catch (err) { alert("Erreur validation."); }
     }
 
     function rendreTableauCandidats(candidats) {
       const tbody = document.getElementById("table-candidates-body");
-      
-      tbody.innerHTML = candidats.map(c => {
-        let roleBadge = c.estCapitaine ? '<span class="badge badge-warning">👑 Capitaine</span>' : '';
-        let statutBadge = c.elimine 
-          ? '<span class="badge badge-danger">💀 Éliminé</span>' 
-          : (c.immunise ? '<span class="badge badge-success">🛡️ Immunisé</span>' : '<span class="badge badge-info">En jeu</span>');
-
-        let invText = c.inventaire.length > 0 ? c.inventaire.join(', ') : '<span style="color:#999;">Vide</span>';
-        let usedText = c.objetsUtilises.length > 0 ? c.objetsUtilises.join(', ') : '<span style="color:#999;">Aucun</span>';
-        let itemsFoundText = c.objetsTrouves.length > 0 ? c.objetsTrouves.join('<br>') : '<span style="color:#999;">Aucun</span>';
-
-        return `
-          <tr>
-            <td><strong>${c.nom}</strong> ${roleBadge}</td>
-            <td><span class="badge badge-primary">${c.equipe}</span></td>
-            <td>${c.binome}</td>
-            <td><strong>${c.soldeIndiv} K</strong></td>
-            <td>${c.soldeEquipe} K</td>
-            <td>${invText}</td>
-            <td style="color:#666;">${usedText}</td>
-            <td>${statutBadge}</td>
-            <td><strong style="color:${c.aVoteContre === 'Non voté' ? '#999' : '#d93025'};">${c.aVoteContre}</strong></td>
-            <td><span class="badge badge-warning">${c.positionActuelle}</span></td>
-            <td><strong>${c.nbPropositions} fouille(s)</strong><br><small style="color:#28a745;">${itemsFoundText}</small></td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = candidats.map(c => `
+        <tr>
+          <td><strong>${c.nom}</strong> ${c.estCapitaine ? '<span class="badge badge-warning">👑</span>' : ''}</td>
+          <td><span class="badge badge-primary">${c.equipe}</span></td>
+          <td>${c.binome}</td>
+          <td><strong>${c.soldeIndiv} K</strong></td>
+          <td>${c.soldeEquipe} K</td>
+          <td>${c.inventaire.length ? c.inventaire.join(', ') : '<span style="color:#999;">Vide</span>'}</td>
+          <td style="color:#666;">${c.objetsUtilises.length ? c.objetsUtilises.join(', ') : '<span style="color:#999;">Aucun</span>'}</td>
+          <td>${c.elimine ? '<span class="badge badge-danger">Éliminé</span>' : (c.immunise ? '<span class="badge badge-success">Immunisé</span>' : '<span class="badge badge-info">En jeu</span>')}</td>
+          <td><strong style="color:#d93025;">${c.aVoteContre}</strong></td>
+          <td><span class="badge badge-warning">${c.positionActuelle}</span></td>
+          <td><strong>${c.nbPropositions} fouille(s)</strong></td>
+        </tr>
+      `).join('');
     }
 
     function filtrerTableau() {
       const input = document.getElementById("search-candidate").value.toLowerCase();
-      const filtered = allCandidatsData.filter(c => 
-        c.nom.toLowerCase().includes(input) || 
-        c.equipe.toLowerCase().includes(input) || 
-        c.binome.toLowerCase().includes(input)
-      );
+      const filtered = allCandidatsData.filter(c => c.nom.toLowerCase().includes(input) || c.equipe.toLowerCase().includes(input) || c.binome.toLowerCase().includes(input));
       rendreTableauCandidats(filtered);
     }
   </script>
