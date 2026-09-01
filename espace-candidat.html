@@ -157,20 +157,18 @@
       </table>
     </div>
 
-    <!-- Onglet Conseil avec Support Double Vote -->
+    <!-- Onglet Conseil -->
     <div id="tab-conseil" class="tab-content">
       <h2>Le Conseil Tribal</h2>
       <div style="max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
         <div id="conseil-status"><p>Chargement du conseil...</p></div>
 
         <div id="conseil-form" style="display: none; margin-top: 20px; text-align: left;">
-          <!-- Bulletin 1 -->
           <label style="font-weight: bold; display: block; margin-bottom: 5px;">Bulletin N°1 :</label>
           <select id="vote-select-1" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
             <option value="">-- Sélectionner un aventurier --</option>
           </select>
 
-          <!-- Bulletin 2 (Visible si Double/Steal Vote actif) -->
           <div id="zone-bulletin-2" style="display: none;">
             <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #d93025;">🔥 Bulletin N°2 (Avantage Double Vote actif) :</label>
             <select id="vote-select-2" style="width: 100%; padding: 10px; border: 1px solid #d93025; border-radius: 5px; margin-bottom: 15px; font-size: 15px;">
@@ -311,10 +309,6 @@
             localStorage.setItem("solde_equipe", result.soldeEquipe);
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
-          if (result.niveauRecherche !== undefined) {
-            localStorage.setItem("niveau_recherche", result.niveauRecherche);
-            document.getElementById("info-niveau-recherche").innerText = `Niveau ${result.niveauRecherche} (${result.niveauRecherche} action(s)/série)`;
-          }
 
           const mesMises = result.mesMises || {};
           const tousNormale = result.boutiqueNormale || [];
@@ -326,6 +320,7 @@
             const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
             let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Stock : Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">Stock : ${item.stock} / ${item.stockMax}</span>`;
+            const safeItemName = item.nom.replace(/'/g, "\\'");
 
             return `
               <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
@@ -339,7 +334,7 @@
                   <div class="shop-desc">${item.desc}</div>
                 </div>
                 <div>
-                  ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Normale', '')" class="login-btn" style="width:100%; padding:10px;">Acheter (${item.prix} K)</button>`}
+                  ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${safeItemName}', ${item.prix}, 'Normale', '')" class="login-btn" style="width:100%; padding:10px;">Acheter (${item.prix} K)</button>`}
                 </div>
               </div>
             `;
@@ -349,14 +344,16 @@
           document.getElementById("grid-boutique-encheres").innerHTML = itemsEncheres.map(item => {
             const currentBid = mesMises[item.nom];
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
+            const safeItemName = item.nom.replace(/'/g, "\\'");
+            
             let actionHTML = currentBid ? `
               <div style="background: #e8f0fe; padding: 8px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; text-align: center;">Mise actuelle : <strong>${currentBid} K</strong></div>
               <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width: 100%; padding: 8px; margin-bottom: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-              <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 8px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-bottom: 6px;">Modifier</button>
-              <button onclick="annulerEnchere('${item.nom}')" style="width: 100%; padding: 6px; background: #dc3545; color: white; cursor: pointer; border: none; border-radius: 4px; font-size: 12px;">Retirer</button>
+              <button onclick="placerEnchere('${safeItemName}')" style="width: 100%; padding: 8px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-bottom: 6px;">Modifier</button>
+              <button onclick="annulerEnchere('${safeItemName}')" style="width: 100%; padding: 6px; background: #dc3545; color: white; cursor: pointer; border: none; border-radius: 4px; font-size: 12px;">Retirer</button>
             ` : `
               <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-              <button onclick="placerEnchere('${item.nom}')" style="width: 100%; padding: 10px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 6px;">Placer mise</button>
+              <button onclick="placerEnchere('${safeItemName}')" style="width: 100%; padding: 10px; background: #ffcc00; font-weight: bold; cursor: pointer; border: none; border-radius: 6px;">Placer mise</button>
             `;
 
             return `
@@ -378,6 +375,7 @@
               const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
               let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
               let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Stock : Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">Stock Tribu : ${item.stock}</span>`;
+              const safeItemName = item.nom.replace(/'/g, "\\'");
 
               return `
                 <div class="shop-card" style="${outOfStock ? 'opacity: 0.55;' : ''}">
@@ -391,7 +389,7 @@
                     <div class="shop-desc">${item.desc}</div>
                   </div>
                   <div>
-                    ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${item.nom}', ${item.prix}, 'Equipe', '${equipe}')" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`}
+                    ${outOfStock ? '<button disabled style="width:100%; padding:10px; background:#ccc; border:none; border-radius:6px;">RUPTURE</button>' : `<button onclick="acheterDirect('${safeItemName}', ${item.prix}, 'Equipe', '${equipe}')" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Acheter pour l'Équipe (${item.prix} K)</button>`}
                   </div>
                 </div>
               `;
@@ -407,7 +405,8 @@
               const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
               const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
               const canUse = isOwner || (isTeamItem && estCap);
-              const btnAction = canUse ? `<button class="use-btn" onclick="demarrerUtilisation('${inv.objet}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
+              const safeItemName = inv.objet.replace(/'/g, "\\'");
+              const btnAction = canUse ? `<button class="use-btn" onclick="demarrerUtilisation('${safeItemName}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Réservé ${isTeamItem ? 'Capitaine' : 'Propriétaire'}</span>`;
 
               return `
                 <tr>
@@ -445,14 +444,13 @@
         document.getElementById("target-modal-item").innerText = itemName;
         container.innerHTML = "";
 
-        // Récupération exclusive des membres de sa propre tribu (hors soi-même)
         const coequipiersDisponibles = listeCandidatsGlobale.filter(c => 
           c.equipe.toLowerCase() === userEquipe.toLowerCase() && 
           c.nom.toLowerCase() !== joueur.toLowerCase()
         );
 
         if (coequipiersDisponibles.length < nbCibles) {
-          alert(`Action impossible : Vous avez besoin de ${nbCibles} coéquipier(s) distinct(s), mais votre équipe n'en compte que ${coequipiersDisponibles.length}.`);
+          alert(`Action impossible : Vous devez choisir ${nbCibles} coéquipier(s) distinct(s), mais votre équipe n'en compte que ${coequipiersDisponibles.length}.`);
           return;
         }
 
