@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Espace Candidat - KLCF S9</title>
   
-  <!-- Intégration de Leaflet pour la Carte Interactive -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="style.css">
@@ -14,7 +13,6 @@
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f0f2f5; color: #222; }
 
-    /* Header responsive */
     .banner { background: #1a1a1a; padding: 12px 15px; color: white; }
     .banner-content { display: flex; flex-direction: column; gap: 10px; max-width: 1200px; margin: auto; }
     .header-top { display: flex; justify-content: space-between; align-items: center; }
@@ -24,7 +22,6 @@
     .solde-box { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px; }
     .logout-btn { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
-    /* Onglets scrollables */
     .tabs-nav {
       display: flex;
       gap: 8px;
@@ -53,7 +50,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Grille responsive boutique */
     .shop-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -80,7 +76,6 @@
     .shop-desc { font-size: 13px; color: #4b5563; line-height: 1.4; background: #f9fafb; padding: 8px 10px; border-radius: 6px; min-height: 50px; max-height: 120px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #f3f4f6; }
     .shop-badge-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
 
-    /* Tableaux */
     .table-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     table { width: 100%; border-collapse: collapse; min-width: 480px; font-size: 13px; text-align: left; }
     th { background: #f9fafb; padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; }
@@ -116,7 +111,27 @@
 
     .adjacent-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 4px; display: inline-block; }
 
-    /* Carte Leaflet */
+    .grille-btn-group { display: flex; gap: 6px; justify-content: center; }
+    .btn-prono {
+      flex: 1;
+      max-width: 45px;
+      padding: 8px 0;
+      border: 1px solid #ccc;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-prono.selected {
+      background: #ffcc00;
+      color: #1a1a1a;
+      border-color: #e6b800;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
     #map {
       height: 55vh;
       min-height: 380px;
@@ -137,14 +152,13 @@
       padding: 2px;
     }
 
-    /* Modals */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
     .modal-box { background: white; padding: 20px; border-radius: 12px; text-align: center; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
 <body>
 
-  <!-- Modal Trouvaille Fouille (Trouvé) -->
+  <!-- Modal Trouvaille Fouille -->
   <div id="found-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #28a745; margin: 0 0 10px 0;">🎉 DÉCOUVERTE !</h2>
@@ -156,7 +170,7 @@
     </div>
   </div>
 
-  <!-- Modal Rien Trouvé (Case vide) -->
+  <!-- Modal Rien Trouvé -->
   <div id="empty-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #6c757d; margin: 0 0 10px 0;">🏜️ RIEN ICI...</h2>
@@ -166,7 +180,7 @@
     </div>
   </div>
 
-  <!-- Modal Information Objet (Description Boutique) -->
+  <!-- Modal Information Objet -->
   <div id="info-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin: 0 0 8px 0; font-size: 18px;">ℹ️ DÉTAILS DE L'OBJET</h2>
@@ -223,6 +237,7 @@
     <button class="tab-btn" onclick="afficherOnglet('boutique-encheres', this); chargerBoutiqueEtInventaire();">🔨 Enchères</button>
     <button id="nav-btn-boutique-equipe" class="tab-btn" style="display: none; background: #ffebee; color: #c62828;" onclick="afficherOnglet('boutique-equipe', this); chargerBoutiqueEtInventaire();">👑 Tribu</button>
     <button class="tab-btn" onclick="afficherOnglet('inventaire', this); chargerBoutiqueEtInventaire();">🎒 Inventaire</button>
+    <button class="tab-btn" onclick="afficherOnglet('grille-foot', this); chargerGrilleFoot();">⚽ Grille Foot</button>
     <button class="tab-btn" onclick="afficherOnglet('conseil', this); chargerConseil();">🗳️ Conseil</button>
     <button class="tab-btn" onclick="afficherOnglet('equipe', this)">👥 Tribu</button>
     <button class="tab-btn" onclick="afficherOnglet('agenda', this)">📅 Agenda</button>
@@ -268,7 +283,7 @@
       <div class="shop-grid" id="grid-boutique-equipe"><p>Chargement...</p></div>
     </div>
 
-    <!-- 4. Inventaire (avec Bouton ℹ️ Description Boutique) -->
+    <!-- 4. Inventaire -->
     <div id="tab-inventaire" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Mon Inventaire</h2>
       <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Cliquez sur ℹ️ pour voir la description officielle de la boutique.</p>
@@ -288,7 +303,44 @@
       </div>
     </div>
 
-    <!-- 5. Conseil -->
+    <!-- 5. GRILLE FOOT -->
+    <div id="tab-grille-foot" class="tab-content">
+      <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 15px;">
+        <h2 style="font-size: 18px; margin: 0 0 10px 0; color: #007bff;">⚽ Grand Concours Grille Foot (15 Matchs)</h2>
+        
+        <div style="background: #e3f2fd; border-left: 4px solid #1e88e5; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; color: #0d47a1; margin-bottom: 15px;">
+          <strong>📜 RÈGLES DU JEU :</strong><br>
+          • <strong>Frais d'entrée :</strong> <strong>25 Kohrocq</strong> prélevés sur votre cagnotte personnelle.<br>
+          • <strong>Clôture des pronos :</strong> Chaque <strong>Jeudi à 23h59 (heure de Paris)</strong>.<br>
+          • <strong>Pronostics :</strong> Choisissez pour chaque match <strong>1</strong> (Victoire Domicile), <strong>X</strong> (Match Nul), ou <strong>2</strong> (Victoire Extérieur).<br>
+          • <strong>Points :</strong> <strong>1 point</strong> par bon résultat.<br>
+          • <strong>Gains :</strong> 100% des mises reversées au <strong>Top 3</strong> (🥇 50% / 🥈 30% / 🥉 20% de la cagnotte totale).
+        </div>
+
+        <div id="grille-status-box" style="margin-bottom: 15px;"></div>
+
+        <div class="table-container">
+          <table id="table-grille-matchs">
+            <thead>
+              <tr>
+                <th style="width: 40px; text-align: center;">N°</th>
+                <th>Championnat</th>
+                <th>Match</th>
+                <th style="text-align: center;">Score</th>
+                <th style="text-align: center; width: 160px;">Pronostic</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-grille-matchs">
+              <tr><td colspan="5" style="text-align: center;">Chargement des 15 matchs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button id="btn-valider-grille" class="btn-action btn-buy" style="margin-top: 15px; font-size: 15px; padding: 12px;" onclick="validerGrilleFoot()">Valider mes pronostics (25 Kohrocq)</button>
+      </div>
+    </div>
+
+    <!-- 6. Conseil -->
     <div id="tab-conseil" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Conseil Tribal</h2>
       <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center;">
@@ -307,23 +359,22 @@
       </div>
     </div>
 
-    <!-- 6. Tribu -->
+    <!-- 7. Tribu -->
     <div id="tab-equipe" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Membres de votre Tribu</h2>
       <div class="shop-grid" id="grid-coequipiers"></div>
     </div>
 
-    <!-- 7. Agenda -->
+    <!-- 8. Agenda -->
     <div id="tab-agenda" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Agenda</h2>
       <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border:0; width:100%; height:450px; border-radius:8px;" frameborder="0"></iframe>
     </div>
 
-    <!-- 8. Fouille (avec Carte Leaflet & Compteur d'actions restantes) -->
+    <!-- 9. Fouille -->
     <div id="tab-recherche" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Chasse aux Colliers</h2>
 
-      <!-- Carte Interactive Leaflet -->
       <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
         <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #007bff;">🗺️ Carte Interactive de l'Île (Grille A-Z / 1-400)</h3>
         <p style="font-size: 12px; color: #666; margin: 0 0 10px 0;">Zoomez et naviguez sur la carte. <strong>Cliquez sur une case pour la sélectionner automatiquement !</strong></p>
@@ -360,6 +411,11 @@
     let timerInterval = null;
     let mapLeaflet = null;
     let serverTimeOffset = 0;
+
+    let grilleMatchsData = [];
+    let userPronos = {};
+    let isGrilleCloturee = false;
+    let aParticipeGrille = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -446,7 +502,6 @@
           const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
           const itemsEncheres = tousNormale.filter(item => item.type.toLowerCase() === "enchere");
 
-          // 1. Récapitulatif des Mises en cours
           const recapMisesDiv = document.getElementById("recap-mes-mises");
           if (!result.listeMesMises || result.listeMesMises.length === 0) {
             recapMisesDiv.innerHTML = "<em>Aucune enchère en cours pour le moment.</em>";
@@ -458,7 +513,6 @@
             `).join('');
           }
 
-          // 2. Boutique Standard
           document.getElementById("grid-boutique-standard").innerHTML = itemsStandard.map(item => {
             const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
@@ -483,7 +537,6 @@
             `;
           }).join('');
 
-          // 3. Enchères
           document.getElementById("grid-boutique-encheres").innerHTML = itemsEncheres.map(item => {
             const currentBid = mesMises[item.nom];
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
@@ -512,7 +565,6 @@
             `;
           }).join('');
 
-          // 4. Équipe
           if (estCap) {
             document.getElementById("grid-boutique-equipe").innerHTML = (result.boutiqueEquipe || []).map(item => {
               const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
@@ -538,7 +590,6 @@
             }).join('');
           }
 
-          // 5. Inventaire avec Description issue de la Boutique
           const tbody = document.querySelector("#table-inventaire tbody");
           tbody.innerHTML = (result.inventaire.length === 0) ? "<tr><td colspan='4' style='text-align:center;'>Inventaire vide.</td></tr>" : result.inventaire.map(inv => {
             const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
@@ -566,7 +617,6 @@
       } catch (err) { console.error("Erreur boutique", err); }
     }
 
-    // Modals Info, Trouvaille & Vide
     function afficherModalInfo(titre, desc) {
       document.getElementById("info-modal-title").innerText = titre;
       document.getElementById("info-modal-desc").innerText = desc;
@@ -576,7 +626,6 @@
     function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
     function fermerModalVide() { document.getElementById("empty-modal").style.display = "none"; chargerRecherche(); }
 
-    // Modal Cibles
     function demarrerUtilisation(itemName, owner, cibleRequise) {
       pendingUseItem = { itemName, owner, cibleRequise };
       var reqUpper = String(cibleRequise).toUpperCase().trim();
@@ -648,6 +697,158 @@
     }
 
     function fermerModalUtilisation() { document.getElementById("use-modal").style.display = "none"; }
+
+    // ---------------------------------------------------------
+    // GRILLE FOOT CANDIDAT
+    // ---------------------------------------------------------
+    async function chargerGrilleFoot() {
+      const joueur = localStorage.getItem("joueur_connecte");
+      const statusBox = document.getElementById("grille-status-box");
+      const tbody = document.getElementById("tbody-grille-matchs");
+      const btnValider = document.getElementById("btn-valider-grille");
+
+      statusBox.innerHTML = "<p>Actualisation de la grille...</p>";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "get_grille_data", username: joueur })
+        });
+        const res = await response.json();
+
+        if (res.status === "success") {
+          grilleMatchsData = res.matchs || [];
+          userPronos = res.mesPronos || {};
+          isGrilleCloturee = res.isCloture;
+          aParticipeGrille = res.aParticipe;
+
+          let statusHTML = "";
+          if (aParticipeGrille) {
+            statusHTML = `
+              <div style="background: #e8f5e9; border: 1px solid #c8e6c9; padding: 12px; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 13px;">
+                ✅ Vous participez à la Grille Foot ! Score actuel : <span style="font-size: 18px; color: #d93025;">${res.points} / ${grilleMatchsData.length} pts</span><br>
+                ${isGrilleCloturee ? '🔒 Les pronostics sont verrouillés (matchs en cours).' : '✏️ Vous pouvez modifier vos pronostics sans frais jusqu\'à Jeudi 23h59.'}
+              </div>
+            `;
+            btnValider.innerText = "Mettre à jour mes pronostics (Gratuit)";
+            btnValider.style.background = "#ff9800";
+          } else {
+            statusHTML = `
+              <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 6px; color: #856404; font-size: 13px;">
+                ⚠️ <strong>Vous ne participez pas encore à la grille de cette semaine.</strong><br>
+                Faites vos 15 choix ci-dessous et validez votre grille (25 Kohrocq) avant Jeudi 23h59 !
+              </div>
+            `;
+            btnValider.innerText = "Valider ma grille & Payer 25 Kohrocq";
+            btnValider.style.background = "#28a745";
+          }
+
+          if (isGrilleCloturee) {
+            btnValider.disabled = true;
+            btnValider.style.background = "#ccc";
+            btnValider.innerText = "🔒 Grille Clôturée (Jeudi 23h59 dépassé)";
+          } else {
+            btnValider.disabled = false;
+          }
+
+          statusBox.innerHTML = statusHTML;
+
+          if (grilleMatchsData.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Aucun match dans la sélection pour le moment.</td></tr>";
+          } else {
+            tbody.innerHTML = grilleMatchsData.map((m, idx) => {
+              const myChoice = userPronos[m.id] || "";
+              const isFinished = m.statut === "FINISHED";
+              let scoreText = isFinished ? `<strong>${m.scoreDom} - ${m.scoreExt}</strong>` : `<span style="color:#888;">${m.dateHeure.split(" à ")[1] || "-"}</span>`;
+              
+              let resultBadge = "";
+              if (isFinished && myChoice) {
+                if (myChoice === m.resultatExact) {
+                  resultBadge = `<span style="color:green; font-weight:bold; font-size:11px;"> ✔️ (+1 pt)</span>`;
+                } else {
+                  resultBadge = `<span style="color:red; font-weight:bold; font-size:11px;"> ❌</span>`;
+                }
+              }
+
+              return `
+                <tr>
+                  <td style="text-align: center; font-weight: bold; color: #666;">${idx + 1}</td>
+                  <td><span style="font-size: 11px; background: #eee; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${m.championnat}</span></td>
+                  <td>
+                    <strong>${m.dom}</strong> vs <strong>${m.ext}</strong>
+                    <div style="font-size: 11px; color: #888;">${m.dateHeure}</div>
+                  </td>
+                  <td style="text-align: center;">${scoreText}</td>
+                  <td style="text-align: center;">
+                    <div class="grille-btn-group">
+                      <button type="button" class="btn-prono ${myChoice === '1' ? 'selected' : ''}" ${isGrilleCloturee ? 'disabled' : ''} onclick="selectionnerProno('${m.id}', '1', this)">1</button>
+                      <button type="button" class="btn-prono ${myChoice === 'X' ? 'selected' : ''}" ${isGrilleCloturee ? 'disabled' : ''} onclick="selectionnerProno('${m.id}', 'X', this)">X</button>
+                      <button type="button" class="btn-prono ${myChoice === '2' ? 'selected' : ''}" ${isGrilleCloturee ? 'disabled' : ''} onclick="selectionnerProno('${m.id}', '2', this)">2</button>
+                    </div>
+                    ${resultBadge}
+                  </td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        statusBox.innerHTML = "<p style='color:red;'>Erreur lors du chargement de la grille.</p>";
+      }
+    }
+
+    function selectionnerProno(matchId, choice, btnElement) {
+      if (isGrilleCloturee) return;
+      userPronos[matchId] = choice;
+
+      const parent = btnElement.parentElement;
+      parent.querySelectorAll(".btn-prono").forEach(b => b.classList.remove("selected"));
+      btnElement.classList.add("selected");
+    }
+
+    async function validerGrilleFoot() {
+      if (isGrilleCloturee) { alert("La grille est clôturée !"); return; }
+
+      const totalMatchs = grilleMatchsData.length;
+      const nbChoixFaits = Object.keys(userPronos).length;
+
+      if (nbChoixFaits < totalMatchs) {
+        alert(`Attention : Vous n'avez pronostiqué que ${nbChoixFaits} match(s) sur ${totalMatchs}. Veuillez cocher tous les matchs.`);
+        return;
+      }
+
+      const joueur = localStorage.getItem("joueur_connecte");
+      const equipe = localStorage.getItem("equipe_joueur");
+      const confirmationMsg = aParticipeGrille 
+        ? "Confirmez-vous la modification de vos pronostics ?" 
+        : "Confirmez-vous votre participation à la Grille Foot ?\n\n25 Kohrocq seront débités de votre solde individuel.";
+
+      if (!confirm(confirmationMsg)) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "submit_grille_prono",
+            username: joueur,
+            equipe: equipe,
+            pronos: userPronos,
+            journee: (grilleMatchsData[0] ? grilleMatchsData[0].journee : "Grille Hebdo")
+          })
+        });
+        const res = await response.json();
+        alert(res.message);
+
+        if (res.status === "success") {
+          chargerBoutiqueEtInventaire();
+          chargerGrilleFoot();
+        }
+      } catch (err) {
+        alert("Erreur lors de la validation de la grille.");
+      }
+    }
 
     // Conseil & Vote
     async function chargerConseil() {
@@ -775,9 +976,7 @@
       }
     }
 
-    // ---------------------------------------------------------
-    // INITIALISATION CARTE LEAFLET (GRILLE A-Z / 1-400 sur carte.png)
-    // ---------------------------------------------------------
+    // Carte Leaflet
     function initCarteLeaflet() {
       if (mapLeaflet !== null) {
         mapLeaflet.invalidateSize();
@@ -853,9 +1052,7 @@
       });
     }
 
-    // ---------------------------------------------------------
-    // FOUILLE & COMPTEUR DE SÉRIE / REPOS
-    // ---------------------------------------------------------
+    // Fouille
     async function chargerRecherche() {
       const joueur = localStorage.getItem("joueur_connecte");
       try {
