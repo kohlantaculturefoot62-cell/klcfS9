@@ -63,6 +63,39 @@
         <button class="login-btn" onclick="chargerDonneesOrga()" style="padding: 8px 16px;">🔄 Rafraîchir les données</button>
       </div>
 
+      <!-- SECTION : SUIVI GRILLE FOOT -->
+      <div class="card" style="border-top: 4px solid #17a2b8;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin: 0; color: #117a8b;">⚽ Suivi en Direct de la Grille Foot</h3>
+          <div style="display: flex; gap: 10px;">
+            <span class="badge badge-info" style="font-size: 13px;" id="orga-grille-participants">0 participant(s)</span>
+            <span class="badge badge-warning" style="font-size: 13px;" id="orga-grille-cagnotte">Cagnotte : 0 K</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 15px; background: #e8f4f8; padding: 10px 15px; border-radius: 6px; font-size: 13px;" id="orga-grille-repartition">
+          <strong>💰 Répartition estimée des gains :</strong> 🥇 1er : 0 K | 🥈 2e : 0 K | 🥉 3e : 0 K
+        </div>
+
+        <h4 style="margin: 15px 0 5px 0;">🏆 Classement en direct des participants :</h4>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 60px; text-align: center;">Rang</th>
+                <th>Candidat</th>
+                <th>Tribu</th>
+                <th>Date Validation</th>
+                <th style="text-align: center;">Points Obtenus</th>
+              </tr>
+            </thead>
+            <tbody id="table-grille-orga-classement">
+              <tr><td colspan="5" style="text-align: center;">Aucun participant pour le moment.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- SECTION 1 : ACTIONS ORGA EN ATTENTE -->
       <div class="card" style="border-top: 4px solid #007bff;">
         <h3 style="margin-top: 0; color: #007bff;">⚡ Actions & Pouvoirs en Attente d'Arbitrage</h3>
@@ -246,7 +279,36 @@
     function rendreDashboardComplet(res) {
       allCandidatsData = res.candidats || [];
 
-      // 1. Actions en attente
+      // 1. Grille Foot Orga
+      if (res.grilleOrga) {
+        document.getElementById("orga-grille-participants").innerText = `${res.grilleOrga.participantsCount} participant(s)`;
+        document.getElementById("orga-grille-cagnotte").innerText = `Cagnotte : ${res.grilleOrga.totalMises} K`;
+        
+        const pot = res.grilleOrga.totalMises;
+        document.getElementById("orga-grille-repartition").innerHTML = `
+          <strong>💰 Répartition estimée des gains :</strong> 
+          🥇 1er : <strong>${Math.round(pot * 0.5)} K</strong> | 
+          🥈 2e : <strong>${Math.round(pot * 0.3)} K</strong> | 
+          🥉 3e : <strong>${Math.round(pot * 0.2)} K</strong>
+        `;
+
+        const tbodyGrille = document.getElementById("table-grille-orga-classement");
+        if (!res.grilleOrga.classement || res.grilleOrga.classement.length === 0) {
+          tbodyGrille.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#888;'>Aucun participant pour le moment.</td></tr>";
+        } else {
+          tbodyGrille.innerHTML = res.grilleOrga.classement.map((c, idx) => `
+            <tr style="${idx === 0 ? 'background:#fffde7; font-weight:bold;' : ''}">
+              <td style="text-align:center;">${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx + 1}e`))}</td>
+              <td><strong>${c.candidat}</strong></td>
+              <td><span class="badge badge-primary">${c.equipe}</span></td>
+              <td style="font-size:11px; color:#666;">${c.date}</td>
+              <td style="text-align:center;"><span class="badge badge-success" style="font-size:13px;">${c.points} pts</span></td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      // 2. Actions en attente
       const tbodyActions = document.getElementById("table-actions-orga");
       if (!res.actionsOrga || res.actionsOrga.length === 0) {
         tbodyActions.innerHTML = "<tr><td colspan='8' style='text-align:center; color:#888;'>Aucune action en attente.</td></tr>";
@@ -267,7 +329,7 @@
         `).join('');
       }
 
-      // 2. Effets Conseil Actifs
+      // 3. Effets Conseil Actifs
       const recapEffets = document.getElementById("recap-effets-conseil");
       if (!res.effetsConseil || res.effetsConseil.length === 0) {
         recapEffets.innerHTML = "<em>Aucun pouvoir joué pour ce conseil.</em>";
@@ -277,7 +339,7 @@
         `).join('');
       }
 
-      // 3. Dépouillement des votes
+      // 4. Dépouillement des votes
       const summaryTbody = document.getElementById("table-votes-summary");
       if (!res.votesSummary || res.votesSummary.length === 0) {
         summaryTbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#888;'>Aucun vote enregistré.</td></tr>";
@@ -292,7 +354,7 @@
         `).join('');
       }
 
-      // 4. Détail Bulletins
+      // 5. Détail Bulletins
       const detailsTbody = document.getElementById("table-votes-details");
       if (!res.votesDetails || res.votesDetails.length === 0) {
         detailsTbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#888;'>Urne vide.</td></tr>";
@@ -308,7 +370,7 @@
         `).join('');
       }
 
-      // 5. Enchères
+      // 6. Enchères
       const gridEnch = document.getElementById("grid-encheres-admin");
       gridEnch.innerHTML = (res.encheresActives || []).map(ench => `
         <div class="stat-card">
@@ -325,7 +387,7 @@
         </div>
       `).join('') || "<p style='color:#888;'>Aucune enchère en cours.</p>";
 
-      // 6. Tableau Candidats
+      // 7. Tableau Candidats
       rendreTableauCandidats(allCandidatsData);
     }
 
