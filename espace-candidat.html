@@ -758,9 +758,19 @@
             tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Aucun match dans la sélection pour le moment.</td></tr>";
           } else {
             tbody.innerHTML = grilleMatchsData.map((m, idx) => {
+              // --- NOUVEAU CODE CORRIGÉ ---
               const myChoice = userPronos[m.id] || "";
-              const isFinished = m.statut === "FINISHED";
-              let scoreText = isFinished ? `<strong>${m.scoreDom} - ${m.scoreExt}</strong>` : `<span style="color:#888;">${m.dateHeure.split(" à ")[1] || "-"}</span>`;
+              const hasScore = m.scoreDom !== undefined && m.scoreDom !== null && String(m.scoreDom).trim() !== "" && String(m.scoreDom).trim() !== "-";
+              const isFinished = m.statut === "FINISHED" || m.statut === "FT" || m.statut === "Terminé";
+              
+              let scoreText = "";
+              if (hasScore && isFinished) {
+                scoreText = `<strong style="font-size: 14px;">${m.scoreDom} - ${m.scoreExt}</strong>`;
+              } else if (hasScore && (m.statut === "IN_PLAY" || m.statut === "LIVE" || m.statut === "En direct")) {
+                scoreText = `<strong style="color: #d93025; font-size: 13px;">🔴 ${m.scoreDom} - ${m.scoreExt}</strong>`;
+              } else {
+                scoreText = `<span style="color: #888; font-weight: bold;">- vs -</span>`;
+              }
               
               let resultBadge = "";
               if (isFinished && myChoice) {
