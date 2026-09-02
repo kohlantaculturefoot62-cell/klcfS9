@@ -1064,181 +1064,182 @@
     }
 
     // Fouille
-    async function chargerRecherche() {
-      const joueur = localStorage.getItem("joueur_connecte");
-      try {
-        const response = await fetch(API_URL, { 
-          method: "POST", 
-          headers: { "Content-Type": "text/plain;charset=utf-8" }, 
-          body: JSON.stringify({ action: "get_recherche", username: joueur }) 
-        });
-        const result = await response.json();
+    // Fouille
+async function chargerRecherche() {
+  const joueur = localStorage.getItem("joueur_connecte");
+  try {
+    const response = await fetch(API_URL, { 
+      method: "POST", 
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+      body: JSON.stringify({ action: "get_recherche", username: joueur }) 
+    });
+    const result = await response.json();
 
-        if (result.status === "success") {
-          currentPosition = result.position;
-          const niveau = result.niveauRecherche || 1;
-          const actionsFaite = result.actionsSerie || 0;
-          const actionsRestantes = Math.max(0, niveau - actionsFaite);
+    if (result.status === "success") {
+      currentPosition = result.position;
+      const niveau = result.niveauRecherche || 1;
+      const actionsFaite = result.actionsSerie || 0;
+      const actionsRestantes = Math.max(0, niveau - actionsFaite);
 
-          if (result.serverTime) {
-            serverTimeOffset = result.serverTime - Date.now();
-          }
+      if (result.serverTime) {
+        serverTimeOffset = result.serverTime - Date.now();
+      }
 
-          document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille enregistrée.</li>";
+      document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille enregistrée.</li>";
 
-          const statusDiv = document.getElementById("recherche-status");
-          const actionDiv = document.getElementById("recherche-actions");
+      const statusDiv = document.getElementById("recherche-status");
+      const actionDiv = document.getElementById("recherche-actions");
 
-          if (!result.isOpen) { 
-            statusDiv.innerHTML = "<p style='color:#856404;'>🌙 Recherche fermée la nuit (de 00h à 08h).</p>"; 
-            actionDiv.style.display = "none"; 
-            if (timerInterval) clearInterval(timerInterval);
-            return; 
-          }
+      if (!result.isOpen) { 
+        statusDiv.innerHTML = "<p style='color:#856404; font-weight:bold;'>🌙 Recherche fermée la nuit (de 00h à 08h, heure de Paris).</p>"; 
+        actionDiv.style.display = "none"; 
+        if (timerInterval) clearInterval(timerInterval);
+        return; 
+      }
 
-          const currentSyncedTime = Date.now() + serverTimeOffset;
-          const prochaineAction = Number(result.prochaineAction) || 0;
+      const currentSyncedTime = Date.now() + serverTimeOffset;
+      const prochaineAction = Number(result.prochaineAction) || 0;
 
-          if (!currentPosition) {
-            if (timerInterval) clearInterval(timerInterval);
-            statusDiv.innerHTML = `
-              <p style="margin:0 0 6px 0; font-weight:bold;">Nouvelle journée ! Choisissez votre point de départ du jour (A1 à Z400).</p>
-              <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:12px; display:inline-block;">
-                Compétence : Niveau ${niveau} (${niveau} action(s) par série)
-              </div>
-            `;
-            document.getElementById("target-cell").placeholder = "Ex: A1 (libre de A1 à Z400)";
-            document.getElementById("zone-cases-adjacentes").style.display = "none";
-            actionDiv.style.display = "block";
-          } else if (prochaineAction > 0 && currentSyncedTime < prochaineAction) {
-            actionDiv.style.display = "none";
-            lancerTimerRecherche(prochaineAction, statusDiv, actionDiv, niveau);
-          } else {
-            if (timerInterval) clearInterval(timerInterval);
-            statusDiv.innerHTML = `
-              <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position actuelle : ${currentPosition}</div>
-              <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin-bottom:8px; display:inline-block;">
-                ⚡ Actions restantes dans la série : ${actionsRestantes} / ${niveau}
-              </div>
-              <div style="color:green; font-weight:bold; font-size:13px;">Prêt pour un déplacement !</div>
-            `;
-            document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
-            
-            if (result.adjacentChoices && result.adjacentChoices.length > 0) {
-              document.getElementById("zone-cases-adjacentes").style.display = "block";
-              document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
-            } else {
-              document.getElementById("zone-cases-adjacentes").style.display = "none";
-            }
-            actionDiv.style.display = "block";
-          }
-        }
-      } catch (err) { console.error("Erreur recherche:", err); }
-    }
-
-    function lancerTimerRecherche(endTimeMs, statusDiv, actionDiv, niveau) {
-      if (timerInterval) clearInterval(timerInterval);
-      actionDiv.style.display = "none";
-
-      function mettreAJourTemps() {
-        const syncedNow = Date.now() + serverTimeOffset;
-        const distanceMs = endTimeMs - syncedNow;
-
-        if (distanceMs <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          chargerRecherche();
-          return;
-        }
-
-        const h = Math.floor(distanceMs / (1000 * 60 * 60));
-        const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
-
+      if (!currentPosition) {
+        if (timerInterval) clearInterval(timerInterval);
         statusDiv.innerHTML = `
-          <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position : ${currentPosition || '---'}</div>
-          <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center;">
-            💤 Série de ${niveau} action(s) terminée. Temps de repos en cours.<br>
-            <span style="font-size: 16px; display: inline-block; margin-top: 4px;">⏳ Prochaine série dans : ${h}h ${m}m ${s}s</span>
+          <p style="margin:0 0 6px 0; font-weight:bold;">Nouvelle journée ! Choisissez votre point de départ du jour (A1 à Z400).</p>
+          <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:12px; display:inline-block;">
+            Compétence : Niveau ${niveau} (${niveau} action(s) par série)
           </div>
         `;
-      }
-
-      mettreAJourTemps();
-      timerInterval = setInterval(mettreAJourTemps, 1000);
-    }
-
-    async function deplacerRecherche() {
-      const target = document.getElementById("target-cell").value.trim().toUpperCase();
-      const btnFouiller = document.getElementById("btn-fouiller");
-      if (!target) { alert("Veuillez entrer une case."); return; }
-
-      btnFouiller.disabled = true;
-      btnFouiller.innerText = "Fouille en cours...";
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ 
-            action: "move_recherche", 
-            username: localStorage.getItem("joueur_connecte"), 
-            currentCell: currentPosition, 
-            targetCell: target 
-          })
-        });
-        const result = await response.json();
-        
-        btnFouiller.disabled = false;
-        btnFouiller.innerText = "Fouiller la case";
-
-        if (result.status === "success") {
-          document.getElementById("target-cell").value = "";
-          currentPosition = result.position || target;
-
-          if (result.serverTime) {
-            serverTimeOffset = result.serverTime - Date.now();
-          }
-
-          const prochaine = Number(result.prochaineAction) || 0;
-          const syncedNow = Date.now() + serverTimeOffset;
-
-          // Si le cooldown de 1 heure est activé, déclencher directement le timer
-          if (prochaine > 0 && prochaine > syncedNow) {
-            const statusDiv = document.getElementById("recherche-status");
-            const actionDiv = document.getElementById("recherche-actions");
-            lancerTimerRecherche(prochaine, statusDiv, actionDiv, result.niveauRecherche || 1);
-          }
-
-          if (result.foundItem) {
-            document.getElementById("modal-title").innerText = result.foundItem;
-            let imgUrl = result.foundImage;
-            const modalImg = document.getElementById("modal-img");
-            if (imgUrl) {
-              if (imgUrl.includes("file/d/")) {
-                const fileId = imgUrl.split("file/d/")[1].split("/")[0];
-                imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-              }
-              modalImg.src = imgUrl;
-              modalImg.style.display = "block";
-            } else {
-              modalImg.style.display = "none";
-            }
-            document.getElementById("found-modal").style.display = "flex";
-          } else {
-            document.getElementById("empty-modal-title").innerText = "Case " + target + " fouillée";
-            document.getElementById("empty-modal-desc").innerHTML = result.message + "<br><br><em>La case est vide, aucun trésor ici !</em>";
-            document.getElementById("empty-modal").style.display = "flex";
-          }
-        } else {
-          alert(result.message);
+        document.getElementById("target-cell").placeholder = "Ex: A1 (libre de A1 à Z400)";
+        document.getElementById("zone-cases-adjacentes").style.display = "none";
+        actionDiv.style.display = "block";
+      } else if (prochaineAction > 0 && currentSyncedTime < prochaineAction) {
+        actionDiv.style.display = "none";
+        lancerTimerRecherche(prochaineAction, statusDiv, actionDiv, niveau);
+      } else {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
         }
-      } catch (err) { 
-        btnFouiller.disabled = false;
-        btnFouiller.innerText = "Fouiller la case";
-        alert("Erreur de communication."); 
+        statusDiv.innerHTML = `
+          <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position actuelle : ${currentPosition}</div>
+          <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin-bottom:8px; display:inline-block;">
+            ⚡ Actions restantes dans la série : ${actionsRestantes > 0 ? actionsRestantes : niveau} / ${niveau}
+          </div>
+          <div style="color:green; font-weight:bold; font-size:13px;">Prêt pour un déplacement !</div>
+        `;
+        document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
+        
+        if (result.adjacentChoices && result.adjacentChoices.length > 0) {
+          document.getElementById("zone-cases-adjacentes").style.display = "block";
+          document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
+        } else {
+          document.getElementById("zone-cases-adjacentes").style.display = "none";
+        }
+        actionDiv.style.display = "block";
       }
     }
+  } catch (err) { console.error("Erreur recherche:", err); }
+}
+
+function lancerTimerRecherche(endTimeMs, statusDiv, actionDiv, niveau) {
+  if (timerInterval) clearInterval(timerInterval);
+  actionDiv.style.display = "none";
+
+  function mettreAJourTemps() {
+    const syncedNow = Date.now() + serverTimeOffset;
+    const distanceMs = endTimeMs - syncedNow;
+
+    if (distanceMs <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      chargerRecherche();
+      return;
+    }
+
+    const h = Math.floor(distanceMs / (1000 * 60 * 60));
+    const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
+
+    statusDiv.innerHTML = `
+      <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position : ${currentPosition || '---'}</div>
+      <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center;">
+        💤 Série de ${niveau} action(s) terminée. Temps de repos en cours.<br>
+        <span style="font-size: 16px; display: inline-block; margin-top: 4px;">⏳ Prochaine série dans : ${h}h ${m}m ${s}s</span>
+      </div>
+    `;
+  }
+
+  mettreAJourTemps();
+  timerInterval = setInterval(mettreAJourTemps, 1000);
+}
+
+async function deplacerRecherche() {
+  const target = document.getElementById("target-cell").value.trim().toUpperCase();
+  const btnFouiller = document.getElementById("btn-fouiller");
+  if (!target) { alert("Veuillez entrer une case."); return; }
+
+  if (btnFouiller) {
+    btnFouiller.disabled = true;
+    btnFouiller.innerText = "Fouille en cours...";
+  }
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ 
+        action: "move_recherche", 
+        username: localStorage.getItem("joueur_connecte"), 
+        currentCell: currentPosition, 
+        targetCell: target 
+      })
+    });
+    const result = await response.json();
+    
+    if (btnFouiller) {
+      btnFouiller.disabled = false;
+      btnFouiller.innerText = "Fouiller la case";
+    }
+
+    if (result.status === "success") {
+      document.getElementById("target-cell").value = "";
+      currentPosition = result.position || target;
+
+      if (result.serverTime) {
+        serverTimeOffset = result.serverTime - Date.now();
+      }
+
+      if (result.foundItem) {
+        document.getElementById("modal-title").innerText = result.foundItem;
+        let imgUrl = result.foundImage;
+        const modalImg = document.getElementById("modal-img");
+        if (imgUrl) {
+          if (imgUrl.includes("file/d/")) {
+            const fileId = imgUrl.split("file/d/")[1].split("/")[0];
+            imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+          }
+          modalImg.src = imgUrl;
+          modalImg.style.display = "block";
+        } else {
+          modalImg.style.display = "none";
+        }
+        document.getElementById("found-modal").style.display = "flex";
+      } else {
+        document.getElementById("empty-modal-title").innerText = "Case " + target + " fouillée";
+        document.getElementById("empty-modal-desc").innerHTML = result.message + "<br><br><em>La case est vide, aucun trésor ici !</em>";
+        document.getElementById("empty-modal").style.display = "flex";
+      }
+    } else {
+      alert(result.message);
+      chargerRecherche();
+    }
+  } catch (err) { 
+    if (btnFouiller) {
+      btnFouiller.disabled = false;
+      btnFouiller.innerText = "Fouiller la case";
+    }
+    alert("Erreur de communication."); 
+  }
+}
   </script>
 </body>
 </html>
