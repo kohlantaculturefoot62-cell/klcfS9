@@ -144,7 +144,7 @@
 </head>
 <body>
 
-  <!-- Modal Trouvaille Fouille -->
+  <!-- Modal Trouvaille Fouille (Trouvé) -->
   <div id="found-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #28a745; margin: 0 0 10px 0;">🎉 DÉCOUVERTE !</h2>
@@ -152,7 +152,17 @@
       <img id="modal-img" src="" alt="Objet" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; margin-bottom: 10px; display: none;">
       <h3 id="modal-title" style="color: #ffcc00; margin: 0 0 10px 0;">---</h3>
       <p style="font-size: 12px; color: #666; margin-bottom: 15px;">L'objet a été automatiquement ajouté à votre inventaire personnel.</p>
-      <button class="btn-action btn-buy" onclick="fermerModalTrouvaille()">Super !</button>
+      <button class="btn-action btn-buy" onclick="fermerModalTrouvaille()">Génial !</button>
+    </div>
+  </div>
+
+  <!-- Modal Rien Trouvé (Case vide) -->
+  <div id="empty-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h2 style="color: #6c757d; margin: 0 0 10px 0;">🏜️ RIEN ICI...</h2>
+      <h3 id="empty-modal-title" style="color: #1a1a1a; margin: 0 0 10px 0;">Case fouillée</h3>
+      <p id="empty-modal-desc" style="font-size: 14px; color: #555; margin-bottom: 20px; line-height: 1.4;">Vous avez fouillé cette case minutieusement, mais aucun avantage ou collier ne s'y cache.</p>
+      <button class="btn-action btn-buy" onclick="fermerModalVide()">Continuer</button>
     </div>
   </div>
 
@@ -309,7 +319,7 @@
       <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border:0; width:100%; height:450px; border-radius:8px;" frameborder="0"></iframe>
     </div>
 
-    <!-- 8. Fouille (avec Carte Leaflet Interactive Grille A-Z / 1-400 sur carte.png) -->
+    <!-- 8. Fouille (avec Carte Leaflet & Compteur d'actions restantes) -->
     <div id="tab-recherche" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Chasse aux Colliers</h2>
 
@@ -555,15 +565,15 @@
       } catch (err) { console.error("Erreur boutique", err); }
     }
 
-    // Modal Info Objet
+    // Modals Info, Trouvaille & Vide
     function afficherModalInfo(titre, desc) {
       document.getElementById("info-modal-title").innerText = titre;
       document.getElementById("info-modal-desc").innerText = desc;
       document.getElementById("info-modal").style.display = "flex";
     }
-    function fermerModalInfo() {
-      document.getElementById("info-modal").style.display = "none";
-    }
+    function fermerModalInfo() { document.getElementById("info-modal").style.display = "none"; }
+    function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
+    function fermerModalVide() { document.getElementById("empty-modal").style.display = "none"; chargerRecherche(); }
 
     // Modal Cibles
     function demarrerUtilisation(itemName, owner, cibleRequise) {
@@ -637,7 +647,6 @@
     }
 
     function fermerModalUtilisation() { document.getElementById("use-modal").style.display = "none"; }
-    function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
 
     // Conseil & Vote
     async function chargerConseil() {
@@ -793,7 +802,7 @@
       L.imageOverlay(imgUrl, bounds).addTo(mapLeaflet);
       mapLeaflet.fitBounds(bounds);
 
-      // Lignes verticales et labels 10, 20...
+      // Lignes verticales et repères (10, 20...)
       for (let i = 0; i <= numCols; i++) {
         let x = i * colWidth;
         let isDecade = (i % 10 === 0);
@@ -809,7 +818,7 @@
         }
       }
 
-      // Lignes horizontales et labels A-Z
+      // Lignes horizontales et repères (A à Z)
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       for (let j = 0; j <= numRows; j++) {
         let y = mapHeight - (j * rowHeight);
@@ -823,7 +832,7 @@
         }
       }
 
-      // Clic sur la carte : affiche le popup et insère directement dans le champ
+      // Clic sur la carte : remplit le champ et ouvre le popup
       mapLeaflet.on('click', function(e) {
         var clickedX = e.latlng.lng;
         var clickedY = e.latlng.lat;
@@ -846,53 +855,78 @@
       });
     }
 
-    // Fouille
+    // ---------------------------------------------------------
+    // FOUILLE & COMPTEUR DE SÉRIE / REPOS
+    // ---------------------------------------------------------
     async function chargerRecherche() {
-      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "get_recherche", username: localStorage.getItem("joueur_connecte") }) });
-      const result = await response.json();
-      if (result.status === "success") {
-        currentPosition = result.position;
-        document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille.</li>";
+      const joueur = localStorage.getItem("joueur_connecte");
+      try {
+        const response = await fetch(API_URL, { 
+          method: "POST", 
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+          body: JSON.stringify({ action: "get_recherche", username: joueur }) 
+        });
+        const result = await response.json();
 
-        const statusDiv = document.getElementById("recherche-status");
-        const actionDiv = document.getElementById("recherche-actions");
+        if (result.status === "success") {
+          currentPosition = result.position;
+          const niveau = result.niveauRecherche || 1;
+          const actionsFaite = result.actionsSerie || 0;
+          const actionsRestantes = Math.max(0, niveau - actionsFaite);
 
-        if (!result.isOpen) { 
-          statusDiv.innerHTML = "<p style='color:#856404;'>🌙 Recherche fermée la nuit (de 00h à 08h).</p>"; 
-          actionDiv.style.display = "none"; 
-          if (timerInterval) clearInterval(timerInterval);
-          return; 
-        }
+          document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille enregistrée.</li>";
 
-        const now = result.maintenant;
-        const prochaineAction = result.prochaineAction;
+          const statusDiv = document.getElementById("recherche-status");
+          const actionDiv = document.getElementById("recherche-actions");
 
-        if (!currentPosition) {
-          if (timerInterval) clearInterval(timerInterval);
-          statusDiv.innerHTML = "<p>Choisissez votre première case de départ pour aujourd'hui (A1 à Z400).</p>";
-          document.getElementById("target-cell").placeholder = "Ex: A1";
-          document.getElementById("zone-cases-adjacentes").style.display = "none";
-          actionDiv.style.display = "block";
-        } else if (prochaineAction && now < prochaineAction) {
-          actionDiv.style.display = "none";
-          lancerTimerRecherche(prochaineAction, statusDiv, actionDiv);
-        } else {
-          if (timerInterval) clearInterval(timerInterval);
-          statusDiv.innerHTML = `<p style="margin:0 0 5px 0;">Position actuelle : <strong style="color:#007bff; font-size:16px;">${currentPosition}</strong></p><span style="color:#28a745; font-weight:bold; font-size:12px;">⚡ Prêt pour une nouvelle fouille !</span>`;
-          document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
-          
-          if (result.adjacentChoices && result.adjacentChoices.length > 0) {
-            document.getElementById("zone-cases-adjacentes").style.display = "block";
-            document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
-          } else {
-            document.getElementById("zone-cases-adjacentes").style.display = "none";
+          if (!result.isOpen) { 
+            statusDiv.innerHTML = "<p style='color:#856404;'>🌙 Recherche fermée la nuit (de 00h à 08h).</p>"; 
+            actionDiv.style.display = "none"; 
+            if (timerInterval) clearInterval(timerInterval);
+            return; 
           }
-          actionDiv.style.display = "block";
+
+          const now = result.maintenant;
+          const prochaineAction = result.prochaineAction;
+
+          if (!currentPosition) {
+            if (timerInterval) clearInterval(timerInterval);
+            statusDiv.innerHTML = `
+              <p style="margin:0 0 6px 0; font-weight:bold;">Nouvelle journée ! Choisissez votre point de départ du jour (A1 à Z400).</p>
+              <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:12px; display:inline-block;">
+                Compétence : Niveau ${niveau} (${niveau} action(s) consécutive(s) par série)
+              </div>
+            `;
+            document.getElementById("target-cell").placeholder = "Ex: A1 (libre de A1 à Z400)";
+            document.getElementById("zone-cases-adjacentes").style.display = "none";
+            actionDiv.style.display = "block";
+          } else if (prochaineAction && now < prochaineAction) {
+            actionDiv.style.display = "none";
+            lancerTimerRecherche(prochaineAction, statusDiv, actionDiv, niveau);
+          } else {
+            if (timerInterval) clearInterval(timerInterval);
+            statusDiv.innerHTML = `
+              <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position actuelle : ${currentPosition}</div>
+              <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin-bottom:8px; display:inline-block;">
+                ⚡ Actions restantes dans la série : ${actionsRestantes} / ${niveau}
+              </div>
+              <div style="color:green; font-weight:bold; font-size:13px;">Prêt pour un déplacement !</div>
+            `;
+            document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
+            
+            if (result.adjacentChoices && result.adjacentChoices.length > 0) {
+              document.getElementById("zone-cases-adjacentes").style.display = "block";
+              document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
+            } else {
+              document.getElementById("zone-cases-adjacentes").style.display = "none";
+            }
+            actionDiv.style.display = "block";
+          }
         }
-      }
+      } catch (err) { console.error("Erreur recherche:", err); }
     }
 
-    function lancerTimerRecherche(endTimeMs, statusDiv, actionDiv) {
+    function lancerTimerRecherche(endTimeMs, statusDiv, actionDiv, niveau) {
       if (timerInterval) clearInterval(timerInterval);
       actionDiv.style.display = "none";
 
@@ -908,14 +942,14 @@
         }
 
         const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
+        const m = Math.floor((distanceMs % (1000 * 60)) / (1000 * 60));
         const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
 
         statusDiv.innerHTML = `
-          <p style="margin:0 0 5px 0;">Position : <strong>${currentPosition}</strong></p>
+          <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position : ${currentPosition}</div>
           <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center;">
-            💤 Repos en cours suite à votre série d'actions.<br>
-            <span style="font-size: 16px; display: inline-block; margin-top: 4px;">⏳ ${h}h ${m}m ${s}s</span>
+            💤 Série de ${niveau} action(s) terminée. Temps de repos en cours.<br>
+            <span style="font-size: 16px; display: inline-block; margin-top: 4px;">⏳ Prochaine série dans : ${h}h ${m}m ${s}s</span>
           </div>
         `;
       }
@@ -925,19 +959,27 @@
     }
 
     async function deplacerRecherche() {
-      const target = document.getElementById("target-cell").value.trim();
+      const target = document.getElementById("target-cell").value.trim().toUpperCase();
       if (!target) { alert("Veuillez entrer une case."); return; }
 
       try {
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "move_recherche", username: localStorage.getItem("joueur_connecte"), currentCell: currentPosition, targetCell: target })
+          body: JSON.stringify({ 
+            action: "move_recherche", 
+            username: localStorage.getItem("joueur_connecte"), 
+            currentCell: currentPosition, 
+            targetCell: target 
+          })
         });
         const result = await response.json();
+        
         if (result.status === "success") {
           document.getElementById("target-cell").value = "";
+
           if (result.foundItem) {
+            // Un objet a été trouvé
             document.getElementById("modal-title").innerText = result.foundItem;
             let imgUrl = result.foundImage;
             const modalImg = document.getElementById("modal-img");
@@ -953,8 +995,10 @@
             }
             document.getElementById("found-modal").style.display = "flex";
           } else {
-            alert(result.message);
-            chargerRecherche();
+            // Rien n'a été trouvé sur la case
+            document.getElementById("empty-modal-title").innerText = "Case " + target + " fouillée";
+            document.getElementById("empty-modal-desc").innerHTML = result.message + "<br><br><em>La case est vide, aucun trésor ici !</em>";
+            document.getElementById("empty-modal").style.display = "flex";
           }
         } else {
           alert(result.message);
