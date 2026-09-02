@@ -1066,6 +1066,7 @@
     }
 
     // Fouille
+    // Fouille
     async function chargerRecherche() {
       const joueur = localStorage.getItem("joueur_connecte");
       try {
@@ -1112,7 +1113,7 @@
             document.getElementById("target-cell").placeholder = "Ex: A1 (libre de A1 à Z400)";
             document.getElementById("zone-cases-adjacentes").style.display = "none";
             actionDiv.style.display = "block";
-          } else if (prochaineAction && currentSyncedTime < prochaineAction) {
+          } else if (prochaineAction > 0 && currentSyncedTime < prochaineAction) {
             actionDiv.style.display = "none";
             lancerTimerRecherche(prochaineAction, statusDiv, actionDiv, niveau);
           } else {
@@ -1138,7 +1139,6 @@
       } catch (err) { console.error("Erreur recherche:", err); }
     }
 
-    // AJOUT DE LA FONCTION MANQUANTE POUR LE TIMER
     function lancerTimerRecherche(endTimeMs, statusDiv, actionDiv, niveau) {
       if (timerInterval) clearInterval(timerInterval);
       actionDiv.style.display = "none";
@@ -1191,6 +1191,9 @@
         if (result.status === "success") {
           document.getElementById("target-cell").value = "";
 
+          // Actualisation immédiate de l'état
+          chargerRecherche();
+
           if (result.foundItem) {
             document.getElementById("modal-title").innerText = result.foundItem;
             let imgUrl = result.foundImage;
@@ -1213,6 +1216,7 @@
           }
         } else {
           alert(result.message);
+          chargerRecherche();
         }
       } catch (err) { alert("Erreur de communication."); }
     }
