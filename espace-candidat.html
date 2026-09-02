@@ -389,7 +389,7 @@
             <div id="btn-container-adjacentes" style="margin-top: 5px;"></div>
           </div>
           <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; margin-bottom: 10px;" maxlength="4">
-          <button class="btn-action btn-buy" onclick="deplacerRecherche()">Fouiller la case</button>
+          <button id="btn-fouiller" class="btn-action btn-buy" onclick="deplacerRecherche()">Fouiller la case</button>
         </div>
       </div>
       
@@ -758,18 +758,19 @@
             tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Aucun match dans la sélection pour le moment.</td></tr>";
           } else {
             tbody.innerHTML = grilleMatchsData.map((m, idx) => {
-              // --- NOUVEAU CODE CORRIGÉ ---
               const myChoice = userPronos[m.id] || "";
+              const statutUpper = String(m.statut).toUpperCase();
+              const isFinished = (statutUpper === "FINISHED" || statutUpper === "FT" || statutUpper === "TERMINÉ" || statutUpper === "TERMINE");
+              const isLive = (statutUpper === "IN_PLAY" || statutUpper === "LIVE" || statutUpper === "EN DIRECT");
               const hasScore = m.scoreDom !== undefined && m.scoreDom !== null && String(m.scoreDom).trim() !== "" && String(m.scoreDom).trim() !== "-";
-              const isFinished = m.statut === "FINISHED" || m.statut === "FT" || m.statut === "Terminé";
-              
+
               let scoreText = "";
               if (hasScore && isFinished) {
-                scoreText = `<strong style="font-size: 14px;">${m.scoreDom} - ${m.scoreExt}</strong>`;
-              } else if (hasScore && (m.statut === "IN_PLAY" || m.statut === "LIVE" || m.statut === "En direct")) {
-                scoreText = `<strong style="color: #d93025; font-size: 13px;">🔴 ${m.scoreDom} - ${m.scoreExt}</strong>`;
+                scoreText = `<strong style="font-size:14px;">${m.scoreDom} - ${m.scoreExt}</strong>`;
+              } else if (hasScore && isLive) {
+                scoreText = `<strong style="color:#d93025; font-size:13px;">🔴 ${m.scoreDom} - ${m.scoreExt}</strong>`;
               } else {
-                scoreText = `<span style="color: #888; font-weight: bold;">- vs -</span>`;
+                scoreText = `<span style="color:#888; font-weight:bold;">- vs -</span>`;
               }
               
               let resultBadge = "";
@@ -1109,7 +1110,7 @@
             document.getElementById("target-cell").placeholder = "Ex: A1 (libre de A1 à Z400)";
             document.getElementById("zone-cases-adjacentes").style.display = "none";
             actionDiv.style.display = "block";
-          } else if (prochaineAction && currentSyncedTime < prochaineAction) {
+          } else if (prochaineAction > 0 && currentSyncedTime < prochaineAction) {
             actionDiv.style.display = "none";
             lancerTimerRecherche(prochaineAction, statusDiv, actionDiv, niveau);
           } else {
@@ -1155,7 +1156,7 @@
         const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
 
         statusDiv.innerHTML = `
-          <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position : ${currentPosition}</div>
+          <div style="font-size:18px; font-weight:bold; color:#ffcc00; margin-bottom:6px;">Position : ${currentPosition || '---'}</div>
           <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center;">
             💤 Série de ${niveau} action(s) terminée. Temps de repos en cours.<br>
             <span style="font-size: 16px; display: inline-block; margin-top: 4px;">⏳ Prochaine série dans : ${h}h ${m}m ${s}s</span>
@@ -1169,7 +1170,11 @@
 
     async function deplacerRecherche() {
       const target = document.getElementById("target-cell").value.trim().toUpperCase();
+      const btnFouiller = document.getElementById("btn-fouiller");
       if (!target) { alert("Veuillez entrer une case."); return; }
+
+      btnFouiller.disabled = true;
+      btnFouiller.innerText = "Fouille en cours...";
 
       try {
         const response = await fetch(API_URL, {
@@ -1184,8 +1189,26 @@
         });
         const result = await response.json();
         
+        btnFouiller.disabled = false;
+        btnFouiller.innerText = "Fouiller la case";
+
         if (result.status === "success") {
           document.getElementById("target-cell").value = "";
+          currentPosition = result.position || target;
+
+          if (result.serverTime) {
+            serverTimeOffset = result.serverTime - Date.now();
+          }
+
+          const prochaine = Number(result.prochaineAction) || 0;
+          const syncedNow = Date.now() + serverTimeOffset;
+
+          // Si le cooldown de 1 heure est activé, déclencher directement le timer
+          if (prochaine > 0 && prochaine > syncedNow) {
+            const statusDiv = document.getElementById("recherche-status");
+            const actionDiv = document.getElementById("recherche-actions");
+            lancerTimerRecherche(prochaine, statusDiv, actionDiv, result.niveauRecherche || 1);
+          }
 
           if (result.foundItem) {
             document.getElementById("modal-title").innerText = result.foundItem;
@@ -1210,7 +1233,11 @@
         } else {
           alert(result.message);
         }
-      } catch (err) { alert("Erreur de communication."); }
+      } catch (err) { 
+        btnFouiller.disabled = false;
+        btnFouiller.innerText = "Fouiller la case";
+        alert("Erreur de communication."); 
+      }
     }
   </script>
 </body>
