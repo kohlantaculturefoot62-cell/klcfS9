@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Espace Candidat - KLCF S9</title>
+  
+  <!-- Intégration de Leaflet pour la Carte Interactive -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="style.css">
+
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f0f2f5; color: #222; }
@@ -90,7 +95,7 @@
       background: #e3f2fd;
       color: #0d47a1;
       border: 1px solid #90caf9;
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 50%;
       font-size: 12px;
       font-weight: bold;
@@ -111,6 +116,27 @@
 
     .adjacent-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 4px; display: inline-block; }
 
+    /* Carte Leaflet */
+    #map {
+      height: 55vh;
+      min-height: 380px;
+      width: 100%;
+      background: #000;
+      border-radius: 8px;
+      border: 2px solid #ffcc00;
+      margin-bottom: 15px;
+    }
+    .axis-label {
+      color: #ffcc00;
+      font-weight: bold;
+      font-size: 15px;
+      text-align: center;
+      text-shadow: 2px 2px 4px black;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      padding: 2px;
+    }
+
     /* Modals */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
     .modal-box { background: white; padding: 20px; border-radius: 12px; text-align: center; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; }
@@ -130,12 +156,12 @@
     </div>
   </div>
 
-  <!-- Modal Information Objet (Inventaire) -->
+  <!-- Modal Information Objet (Description Boutique) -->
   <div id="info-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin: 0 0 8px 0; font-size: 18px;">ℹ️ DÉTAILS DE L'OBJET</h2>
       <h3 id="info-modal-title" style="color: #1a1a1a; font-size: 16px; margin: 0 0 10px 0;">---</h3>
-      <div id="info-modal-desc" style="background: #f9fafb; border: 1px solid #eee; padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 15px; text-align: left;">---</div>
+      <div id="info-modal-desc" style="background: #f9fafb; border: 1px solid #eee; padding: 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 15px; text-align: left; color: #333;">---</div>
       <button class="btn-action btn-buy" onclick="fermerModalInfo()">Fermer</button>
     </div>
   </div>
@@ -207,7 +233,6 @@
         <button class="btn-buy" style="padding: 8px 14px; font-size: 12px; border-radius: 6px; border:none; font-weight:bold; cursor:pointer;" onclick="transfererKohrocq()">Envoyer</button>
       </div>
 
-      <!-- Message de confirmation de virement -->
       <div id="virement-confirmation-box" style="display: none; margin-top: 10px; padding: 10px; border-radius: 6px; background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; font-size: 12px; font-weight: bold;"></div>
     </div>
 
@@ -217,16 +242,13 @@
       <div class="shop-grid" id="grid-boutique-standard"><p>Chargement...</p></div>
     </div>
 
-    <!-- 2. Enchères (avec Récapitulatif de mes Mises en cours) -->
+    <!-- 2. Enchères -->
     <div id="tab-boutique-encheres" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Enchères de la Semaine</h2>
-      
-      <!-- Bloc récapitulatif des mises de l'utilisateur -->
       <div style="background: white; border-radius: 8px; padding: 12px 15px; border-left: 4px solid #ffcc00; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 15px;">
         <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #b38600;">📋 Vos Mises Actuellement en Cours :</h3>
         <div id="recap-mes-mises" style="font-size: 13px; color: #555;">Chargement de vos enchères...</div>
       </div>
-
       <div class="shop-grid" id="grid-boutique-encheres"><p>Chargement...</p></div>
     </div>
 
@@ -236,10 +258,10 @@
       <div class="shop-grid" id="grid-boutique-equipe"><p>Chargement...</p></div>
     </div>
 
-    <!-- 4. Inventaire (avec Bouton Info & Badge Expiration Enchères) -->
+    <!-- 4. Inventaire (avec Bouton ℹ️ Description Boutique) -->
     <div id="tab-inventaire" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Mon Inventaire</h2>
-      <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Cliquez sur ℹ️ pour voir les pouvoirs et règles de chaque objet.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Cliquez sur ℹ️ pour voir la description officielle de la boutique.</p>
       
       <div class="table-container">
         <table id="table-inventaire">
@@ -287,17 +309,15 @@
       <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border:0; width:100%; height:450px; border-radius:8px;" frameborder="0"></iframe>
     </div>
 
-    <!-- 8. Fouille (avec Carte Directe de l'Île A1-Z400) -->
+    <!-- 8. Fouille (avec Carte Leaflet Interactive Grille A-Z / 1-400 sur carte.png) -->
     <div id="tab-recherche" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Chasse aux Colliers</h2>
 
-      <!-- Carte Interactive intégrée -->
+      <!-- Carte Interactive Leaflet -->
       <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-        <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #007bff;">🗺️ Carte de l'Île (Grille A1 à Z400) :</h3>
-        <p style="font-size: 11px; color: #666; margin: 0 0 10px 0;">Glissez au doigt pour vous repérer sur la carte :</p>
-        <div style="width: 100%; height: 260px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; background: #eef2f5; text-align: center;">
-          <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80" alt="Carte Grille Île" style="min-width: 600px; height: 100%; object-fit: cover;">
-        </div>
+        <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #007bff;">🗺️ Carte Interactive de l'Île (Grille A-Z / 1-400)</h3>
+        <p style="font-size: 12px; color: #666; margin: 0 0 10px 0;">Zoomez et naviguez sur la carte. <strong>Cliquez sur une case pour la sélectionner automatiquement !</strong></p>
+        <div id="map"></div>
       </div>
 
       <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
@@ -328,6 +348,7 @@
     let hasDoubleVote = false;
     let currentPosition = null;
     let timerInterval = null;
+    let mapLeaflet = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -367,6 +388,12 @@
       document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
       document.getElementById("tab-" + nomOnglet).classList.add("active");
       btnElement.classList.add("active");
+
+      if (nomOnglet === 'recherche') {
+        setTimeout(() => {
+          initCarteLeaflet();
+        }, 150);
+      }
     }
 
     function deconnexion() {
@@ -408,7 +435,7 @@
           const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
           const itemsEncheres = tousNormale.filter(item => item.type.toLowerCase() === "enchere");
 
-          // 1. Récapitulatif des Mises en cours de l'utilisateur
+          // 1. Récapitulatif des Mises en cours
           const recapMisesDiv = document.getElementById("recap-mes-mises");
           if (!result.listeMesMises || result.listeMesMises.length === 0) {
             recapMisesDiv.innerHTML = "<em>Aucune enchère en cours pour le moment.</em>";
@@ -500,14 +527,14 @@
             }).join('');
           }
 
-          // 5. Inventaire avec bouton Info & Alerte Expiration
+          // 5. Inventaire avec Description issue de la Boutique
           const tbody = document.querySelector("#table-inventaire tbody");
           tbody.innerHTML = (result.inventaire.length === 0) ? "<tr><td colspan='4' style='text-align:center;'>Inventaire vide.</td></tr>" : result.inventaire.map(inv => {
             const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
             const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
             const canUse = isOwner || (isTeamItem && estCap);
             const safeItemName = inv.objet.replace(/'/g, "\\'");
-            const safeDesc = (inv.description || "Aucune description.").replace(/'/g, "\\'");
+            const safeDesc = (inv.description || "Aucune description disponible.").replace(/'/g, "\\'");
 
             const btnAction = canUse ? `<button class="btn-buy" style="padding:5px 10px; font-size:12px; border-radius:4px; border:none; cursor:pointer;" onclick="demarrerUtilisation('${safeItemName}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Verrouillé</span>`;
 
@@ -515,7 +542,7 @@
               <tr>
                 <td>
                   <strong>${inv.objet}</strong>
-                  <button class="btn-info" title="Voir l'effet" onclick="afficherModalInfo('${safeItemName}', '${safeDesc}')">ℹ️</button>
+                  <button class="btn-info" title="Voir l'effet boutique" onclick="afficherModalInfo('${safeItemName}', '${safeDesc}')">ℹ️</button>
                   ${inv.isEnchereItem ? '<br><span class="badge-enchere-expir">⏳ Valable jusqu\'au conseil (Mardi 23h)</span>' : ''}
                 </td>
                 <td>${inv.proprietaire}</td>
@@ -712,7 +739,6 @@
       if (res.status === "success") chargerBoutiqueEtInventaire();
     }
 
-    // Virement avec retour visuel clair
     async function transfererKohrocq() {
       const montantInput = document.getElementById("virement-montant");
       const montant = parseInt(montantInput.value, 10);
@@ -737,6 +763,87 @@
       } else {
         alert(res.message);
       }
+    }
+
+    // ---------------------------------------------------------
+    // INITIALISATION CARTE LEAFLET (GRILLE A-Z / 1-400 sur carte.png)
+    // ---------------------------------------------------------
+    function initCarteLeaflet() {
+      if (mapLeaflet !== null) {
+        mapLeaflet.invalidateSize();
+        return;
+      }
+
+      var numCols = 400; // 1 à 400
+      var numRows = 26;  // A à Z
+      var mapWidth = 4000;
+      var mapHeight = 2000;
+      var colWidth = mapWidth / numCols; // = 10
+      var rowHeight = mapHeight / numRows; // = 76.92
+      var bounds = [[0, 0], [mapHeight, mapWidth]];
+
+      mapLeaflet = L.map('map', {
+        crs: L.CRS.Simple,
+        minZoom: -4,
+        maxZoom: 4,
+        zoomSnap: 0
+      });
+
+      var imgUrl = 'carte.png';
+      L.imageOverlay(imgUrl, bounds).addTo(mapLeaflet);
+      mapLeaflet.fitBounds(bounds);
+
+      // Lignes verticales et labels 10, 20...
+      for (let i = 0; i <= numCols; i++) {
+        let x = i * colWidth;
+        let isDecade = (i % 10 === 0);
+        let lineWeight = isDecade ? 2 : 0.5;
+        let lineOpacity = isDecade ? 0.8 : 0.3;
+
+        L.polyline([[0, x], [mapHeight, x]], { color: '#fff', weight: lineWeight, opacity: lineOpacity }).addTo(mapLeaflet);
+
+        if (isDecade && i !== 0) {
+          L.marker([mapHeight, x], {
+            icon: L.divIcon({ className: 'axis-label', html: i, iconSize: [30, 25], iconAnchor: [15, 30] })
+          }).addTo(mapLeaflet);
+        }
+      }
+
+      // Lignes horizontales et labels A-Z
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      for (let j = 0; j <= numRows; j++) {
+        let y = mapHeight - (j * rowHeight);
+        L.polyline([[y, 0], [y, mapWidth]], { color: '#fff', weight: 1, opacity: 0.5 }).addTo(mapLeaflet);
+
+        if (j < 26) {
+          let yCenter = y - (rowHeight / 2);
+          L.marker([yCenter, 0], {
+            icon: L.divIcon({ className: 'axis-label', html: letters[j], iconSize: [25, 25], iconAnchor: [30, 12] })
+          }).addTo(mapLeaflet);
+        }
+      }
+
+      // Clic sur la carte : affiche le popup et insère directement dans le champ
+      mapLeaflet.on('click', function(e) {
+        var clickedX = e.latlng.lng;
+        var clickedY = e.latlng.lat;
+
+        var colIndex = Math.floor(clickedX / colWidth);
+        var rowIndex = Math.floor((mapHeight - clickedY) / rowHeight);
+
+        if (colIndex >= 0 && colIndex < numCols && rowIndex >= 0 && rowIndex < numRows) {
+          var rowLetter = letters[rowIndex];
+          var colNum = colIndex + 1;
+          var caseExacte = rowLetter + colNum;
+
+          document.getElementById('target-cell').value = caseExacte;
+
+          L.popup()
+            .setLatLng(e.latlng)
+            .setContent("<div style='font-size:14px; text-align:center;'>Case sélectionnée :<br><strong style='font-size:22px; color:#d93025;'>" + caseExacte + "</strong></div>")
+            .openOn(mapLeaflet);
+        }
+      });
     }
 
     // Fouille
