@@ -359,6 +359,7 @@
     let currentPosition = null;
     let timerInterval = null;
     let mapLeaflet = null;
+    let serverTimeOffset = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -783,12 +784,12 @@
         return;
       }
 
-      var numCols = 400; // 1 à 400
-      var numRows = 26;  // A à Z
+      var numCols = 400;
+      var numRows = 26;
       var mapWidth = 4000;
       var mapHeight = 2000;
-      var colWidth = mapWidth / numCols; // = 10
-      var rowHeight = mapHeight / numRows; // = 76.92
+      var colWidth = mapWidth / numCols;
+      var rowHeight = mapHeight / numRows;
       var bounds = [[0, 0], [mapHeight, mapWidth]];
 
       mapLeaflet = L.map('map', {
@@ -802,7 +803,6 @@
       L.imageOverlay(imgUrl, bounds).addTo(mapLeaflet);
       mapLeaflet.fitBounds(bounds);
 
-      // Lignes verticales et repères (10, 20...)
       for (let i = 0; i <= numCols; i++) {
         let x = i * colWidth;
         let isDecade = (i % 10 === 0);
@@ -818,7 +818,6 @@
         }
       }
 
-      // Lignes horizontales et repères (A à Z)
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       for (let j = 0; j <= numRows; j++) {
         let y = mapHeight - (j * rowHeight);
@@ -832,7 +831,6 @@
         }
       }
 
-      // Clic sur la carte : remplit le champ et ouvre le popup
       mapLeaflet.on('click', function(e) {
         var clickedX = e.latlng.lng;
         var clickedY = e.latlng.lat;
@@ -874,6 +872,10 @@
           const actionsFaite = result.actionsSerie || 0;
           const actionsRestantes = Math.max(0, niveau - actionsFaite);
 
+          if (result.serverTime) {
+            serverTimeOffset = result.serverTime - Date.now();
+          }
+
           document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille enregistrée.</li>";
 
           const statusDiv = document.getElementById("recherche-status");
@@ -886,21 +888,21 @@
             return; 
           }
 
-          const now = result.maintenant;
-          const prochaineAction = result.prochaineAction;
+          const currentSyncedTime = Date.now() + serverTimeOffset;
+          const prochaineAction = Number(result.prochaineAction) || 0;
 
           if (!currentPosition) {
             if (timerInterval) clearInterval(timerInterval);
             statusDiv.innerHTML = `
               <p style="margin:0 0 6px 0; font-weight:bold;">Nouvelle journée ! Choisissez votre point de départ du jour (A1 à Z400).</p>
               <div style="background:#e3f2fd; color:#0d47a1; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:12px; display:inline-block;">
-                Compétence : Niveau ${niveau} (${niveau} action(s) consécutive(s) par série)
+                Compétence : Niveau ${niveau} (${niveau} action(s) par série)
               </div>
             `;
             document.getElementById("target-cell").placeholder = "Ex: A1 (libre de A1 à Z400)";
             document.getElementById("zone-cases-adjacentes").style.display = "none";
             actionDiv.style.display = "block";
-          } else if (prochaineAction && now < prochaineAction) {
+          } else if (prochaineAction && currentSyncedTime < prochaineAction) {
             actionDiv.style.display = "none";
             lancerTimerRecherche(prochaineAction, statusDiv, actionDiv, niveau);
           } else {
@@ -931,8 +933,8 @@
       actionDiv.style.display = "none";
 
       function mettreAJourTemps() {
-        const now = new Date().getTime();
-        const distanceMs = endTimeMs - now;
+        const syncedNow = Date.now() + serverTimeOffset;
+        const distanceMs = endTimeMs - syncedNow;
 
         if (distanceMs <= 0) {
           clearInterval(timerInterval);
@@ -941,8 +943,8 @@
           return;
         }
 
-        const h = Math.floor((distanceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distanceMs % (1000 * 60)) / (1000 * 60));
+        const h = Math.floor(distanceMs / (1000 * 60 * 60));
+        const m = Math.floor((distanceMs % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((distanceMs % (1000 * 60)) / 1000);
 
         statusDiv.innerHTML = `
@@ -979,7 +981,6 @@
           document.getElementById("target-cell").value = "";
 
           if (result.foundItem) {
-            // Un objet a été trouvé
             document.getElementById("modal-title").innerText = result.foundItem;
             let imgUrl = result.foundImage;
             const modalImg = document.getElementById("modal-img");
@@ -995,7 +996,6 @@
             }
             document.getElementById("found-modal").style.display = "flex";
           } else {
-            // Rien n'a été trouvé sur la case
             document.getElementById("empty-modal-title").innerText = "Case " + target + " fouillée";
             document.getElementById("empty-modal-desc").innerHTML = result.message + "<br><br><em>La case est vide, aucun trésor ici !</em>";
             document.getElementById("empty-modal").style.display = "flex";
