@@ -9,7 +9,7 @@
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f0f2f5; color: #222; }
 
-    /* Header & Navigation mobile */
+    /* Header responsive */
     .banner { background: #1a1a1a; padding: 12px 15px; color: white; }
     .banner-content { display: flex; flex-direction: column; gap: 10px; max-width: 1200px; margin: auto; }
     .header-top { display: flex; justify-content: space-between; align-items: center; }
@@ -19,7 +19,7 @@
     .solde-box { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px; }
     .logout-btn { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
-    /* Onglets scrollables au doigt sur smartphone */
+    /* Onglets scrollables */
     .tabs-nav {
       display: flex;
       gap: 8px;
@@ -75,7 +75,7 @@
     .shop-desc { font-size: 13px; color: #4b5563; line-height: 1.4; background: #f9fafb; padding: 8px 10px; border-radius: 6px; min-height: 50px; max-height: 120px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #f3f4f6; }
     .shop-badge-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
 
-    /* Tableaux avec scroll horizontal fluide */
+    /* Tableaux */
     .table-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     table { width: 100%; border-collapse: collapse; min-width: 480px; font-size: 13px; text-align: left; }
     th { background: #f9fafb; padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; }
@@ -86,28 +86,61 @@
     .btn-bid { background: #ffcc00; color: #111; }
     .btn-team { background: #28a745; color: white; }
 
+    .btn-info {
+      background: #e3f2fd;
+      color: #0d47a1;
+      border: 1px solid #90caf9;
+      padding: 4px 8px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    .badge-enchere-expir {
+      display: inline-block;
+      background: #ffebee;
+      color: #c62828;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
     .adjacent-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 4px; display: inline-block; }
 
-    /* Pop-ups / Modals */
+    /* Modals */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
-    .modal-box { background: white; padding: 20px; border-radius: 12px; text-align: center; max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-box { background: white; padding: 20px; border-radius: 12px; text-align: center; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
 <body>
 
-  <!-- Modal Trouvaille -->
+  <!-- Modal Trouvaille Fouille -->
   <div id="found-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #28a745; margin: 0 0 10px 0;">🎉 DÉCOUVERTE !</h2>
       <p style="font-size: 14px; margin-bottom: 15px;">Vous avez trouvé :</p>
       <img id="modal-img" src="" alt="Objet" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; margin-bottom: 10px; display: none;">
       <h3 id="modal-title" style="color: #ffcc00; margin: 0 0 10px 0;">---</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Transféré dans votre inventaire.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 15px;">L'objet a été automatiquement ajouté à votre inventaire personnel.</p>
       <button class="btn-action btn-buy" onclick="fermerModalTrouvaille()">Super !</button>
     </div>
   </div>
 
-  <!-- Modal Cibles Multiples -->
+  <!-- Modal Information Objet (Inventaire) -->
+  <div id="info-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h2 style="color: #007bff; margin: 0 0 8px 0; font-size: 18px;">ℹ️ DÉTAILS DE L'OBJET</h2>
+      <h3 id="info-modal-title" style="color: #1a1a1a; font-size: 16px; margin: 0 0 10px 0;">---</h3>
+      <div id="info-modal-desc" style="background: #f9fafb; border: 1px solid #eee; padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 15px; text-align: left;">---</div>
+      <button class="btn-action btn-buy" onclick="fermerModalInfo()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- Modal Sélection Cibles -->
   <div id="target-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin: 0 0 10px 0; font-size: 18px;">🎯 CHOISIR LES CIBLES</h2>
@@ -120,7 +153,7 @@
     </div>
   </div>
 
-  <!-- Modal Résultat Objet -->
+  <!-- Modal Résultat Utilisation -->
   <div id="use-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin: 0 0 8px 0; font-size: 18px;">⚡ OBJET ACTIVÉ</h2>
@@ -162,39 +195,52 @@
 
   <main class="main-container">
     
-    <!-- Profil & Virement rapide -->
+    <!-- Profil & Virement avec Confirmation -->
     <div style="background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); font-size: 13px;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
         <span>Aventurier : <strong id="info-nom" style="color:#007bff;">---</strong> (<span id="info-equipe">---</span>)</span>
-        <span id="info-niveau-recherche" style="color: #28a745; font-weight: bold;">Niveau 1</span>
+        <span id="info-niveau-recherche" style="color: #28a745; font-weight: bold;">Chercheur Niv. 1</span>
       </div>
+      
       <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
-        <input type="number" id="virement-montant" min="1" placeholder="Virement binôme (K)" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; flex: 1; font-size: 13px;">
-        <button class="btn-buy" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; border:none; font-weight:bold; cursor:pointer;" onclick="transfererKohrocq()">Envoyer</button>
+        <input type="number" id="virement-montant" min="1" placeholder="Montant à virer au binôme (K)" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; flex: 1; font-size: 13px;">
+        <button class="btn-buy" style="padding: 8px 14px; font-size: 12px; border-radius: 6px; border:none; font-weight:bold; cursor:pointer;" onclick="transfererKohrocq()">Envoyer</button>
       </div>
+
+      <!-- Message de confirmation de virement -->
+      <div id="virement-confirmation-box" style="display: none; margin-top: 10px; padding: 10px; border-radius: 6px; background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; font-size: 12px; font-weight: bold;"></div>
     </div>
 
     <!-- 1. Boutique Standard -->
     <div id="tab-boutique-standard" class="tab-content active">
-      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Boutique Standard</h2>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Boutique Standard (Achats Directs)</h2>
       <div class="shop-grid" id="grid-boutique-standard"><p>Chargement...</p></div>
     </div>
 
-    <!-- 2. Enchères -->
+    <!-- 2. Enchères (avec Récapitulatif de mes Mises en cours) -->
     <div id="tab-boutique-encheres" class="tab-content">
-      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Enchères en cours</h2>
+      <h2 style="font-size: 18px; margin: 0 0 10px 0;">Enchères de la Semaine</h2>
+      
+      <!-- Bloc récapitulatif des mises de l'utilisateur -->
+      <div style="background: white; border-radius: 8px; padding: 12px 15px; border-left: 4px solid #ffcc00; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 15px;">
+        <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #b38600;">📋 Vos Mises Actuellement en Cours :</h3>
+        <div id="recap-mes-mises" style="font-size: 13px; color: #555;">Chargement de vos enchères...</div>
+      </div>
+
       <div class="shop-grid" id="grid-boutique-encheres"><p>Chargement...</p></div>
     </div>
 
     <!-- 3. Boutique Équipe -->
     <div id="tab-boutique-equipe" class="tab-content">
-      <h2 style="font-size: 18px; margin: 0 0 5px 0; color: #d93025;">👑 Boutique Réservée Capitaine</h2>
+      <h2 style="font-size: 18px; margin: 0 0 5px 0; color: #d93025;">👑 Boutique Réservée au Capitaine</h2>
       <div class="shop-grid" id="grid-boutique-equipe"><p>Chargement...</p></div>
     </div>
 
-    <!-- 4. Inventaire -->
+    <!-- 4. Inventaire (avec Bouton Info & Badge Expiration Enchères) -->
     <div id="tab-inventaire" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Mon Inventaire</h2>
+      <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Cliquez sur ℹ️ pour voir les pouvoirs et règles de chaque objet.</p>
+      
       <div class="table-container">
         <table id="table-inventaire">
           <thead>
@@ -241,20 +287,31 @@
       <iframe src="https://calendar.google.com/calendar/embed?src=aca9e18f9d62f97fb872572327b6b6941bb5b0fe9d61915d25c076137e8463bf%40group.calendar.google.com&ctz=Europe%2FParis" style="border:0; width:100%; height:450px; border-radius:8px;" frameborder="0"></iframe>
     </div>
 
-    <!-- 8. Fouille -->
+    <!-- 8. Fouille (avec Carte Directe de l'Île A1-Z400) -->
     <div id="tab-recherche" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Chasse aux Colliers</h2>
+
+      <!-- Carte Interactive intégrée -->
+      <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #007bff;">🗺️ Carte de l'Île (Grille A1 à Z400) :</h3>
+        <p style="font-size: 11px; color: #666; margin: 0 0 10px 0;">Glissez au doigt pour vous repérer sur la carte :</p>
+        <div style="width: 100%; height: 260px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; background: #eef2f5; text-align: center;">
+          <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80" alt="Carte Grille Île" style="min-width: 600px; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+
       <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
         <div id="recherche-status">Chargement...</div>
         <div id="recherche-actions" style="display: none; margin-top: 15px;">
           <div id="zone-cases-adjacentes" style="margin-bottom: 10px; display: none;">
-            <span style="font-size: 12px; color: #666;">Cases adjacentes :</span><br>
+            <span style="font-size: 12px; color: #666;">Cases adjacentes accessibles :</span><br>
             <div id="btn-container-adjacentes" style="margin-top: 5px;"></div>
           </div>
           <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; margin-bottom: 10px;" maxlength="4">
           <button class="btn-action btn-buy" onclick="deplacerRecherche()">Fouiller la case</button>
         </div>
       </div>
+      
       <div style="background: white; padding: 15px; border-radius: 8px; font-size: 13px;">
         <h3 style="margin: 0 0 10px 0; font-size: 15px;">Historique de vos fouilles</h3>
         <ul id="recherche-historique" style="padding-left: 18px; margin: 0;"></ul>
@@ -269,6 +326,8 @@
     let listeCandidatsGlobale = [];
     let pendingUseItem = null;
     let hasDoubleVote = false;
+    let currentPosition = null;
+    let timerInterval = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -339,13 +398,29 @@
             localStorage.setItem("solde_equipe", result.soldeEquipe);
             document.getElementById("solde-equipe").innerText = result.soldeEquipe;
           }
+          if (result.niveauRecherche !== undefined) {
+            localStorage.setItem("niveau_recherche", result.niveauRecherche);
+            document.getElementById("info-niveau-recherche").innerText = `Chercheur Niv. ${result.niveauRecherche}`;
+          }
 
           const mesMises = result.mesMises || {};
           const tousNormale = result.boutiqueNormale || [];
           const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
           const itemsEncheres = tousNormale.filter(item => item.type.toLowerCase() === "enchere");
 
-          // Standard
+          // 1. Récapitulatif des Mises en cours de l'utilisateur
+          const recapMisesDiv = document.getElementById("recap-mes-mises");
+          if (!result.listeMesMises || result.listeMesMises.length === 0) {
+            recapMisesDiv.innerHTML = "<em>Aucune enchère en cours pour le moment.</em>";
+          } else {
+            recapMisesDiv.innerHTML = result.listeMesMises.map(m => `
+              <div style="margin-bottom: 5px;">
+                • <strong>${m.objet}</strong> : Mise active de <span style="color:#b38600; font-weight:bold;">${m.montant} K</span> <small style="color:#888;">(déposée à ${m.date})</small>
+              </div>
+            `).join('');
+          }
+
+          // 2. Boutique Standard
           document.getElementById("grid-boutique-standard").innerHTML = itemsStandard.map(item => {
             const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
@@ -370,14 +445,14 @@
             `;
           }).join('');
 
-          // Enchères
+          // 3. Enchères
           document.getElementById("grid-boutique-encheres").innerHTML = itemsEncheres.map(item => {
             const currentBid = mesMises[item.nom];
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
             const safeItemName = item.nom.replace(/'/g, "\\'");
             
             let actionHTML = currentBid ? `
-              <div style="background:#e8f0fe; padding:6px; border-radius:6px; font-size:12px; margin-bottom:6px; text-align:center;">Mise actuelle : <strong>${currentBid} K</strong></div>
+              <div style="background:#e8f0fe; padding:6px; border-radius:6px; font-size:12px; margin-bottom:6px; text-align:center;">Votre mise actuelle : <strong>${currentBid} K</strong></div>
               <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ccc; border-radius:6px;">
               <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid" style="margin-bottom:6px;">Modifier mise</button>
               <button onclick="annulerEnchere('${safeItemName}')" class="btn-action" style="background:#dc3545; color:white; font-size:12px; padding:6px;">Retirer</button>
@@ -399,7 +474,7 @@
             `;
           }).join('');
 
-          // Équipe
+          // 4. Équipe
           if (estCap) {
             document.getElementById("grid-boutique-equipe").innerHTML = (result.boutiqueEquipe || []).map(item => {
               const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
@@ -425,18 +500,24 @@
             }).join('');
           }
 
-          // Inventaire
+          // 5. Inventaire avec bouton Info & Alerte Expiration
           const tbody = document.querySelector("#table-inventaire tbody");
           tbody.innerHTML = (result.inventaire.length === 0) ? "<tr><td colspan='4' style='text-align:center;'>Inventaire vide.</td></tr>" : result.inventaire.map(inv => {
             const isOwner = inv.proprietaire.toLowerCase() === joueur.toLowerCase();
             const isTeamItem = inv.proprietaire.toLowerCase() === (equipe || "").toLowerCase();
             const canUse = isOwner || (isTeamItem && estCap);
             const safeItemName = inv.objet.replace(/'/g, "\\'");
+            const safeDesc = (inv.description || "Aucune description.").replace(/'/g, "\\'");
+
             const btnAction = canUse ? `<button class="btn-buy" style="padding:5px 10px; font-size:12px; border-radius:4px; border:none; cursor:pointer;" onclick="demarrerUtilisation('${safeItemName}', '${inv.proprietaire}', '${inv.cibleRequise || 'AUCUNE'}')">Utiliser</button>` : `<span style="font-size:11px; color:#999;">Verrouillé</span>`;
 
             return `
               <tr>
-                <td><strong>${inv.objet}</strong></td>
+                <td>
+                  <strong>${inv.objet}</strong>
+                  <button class="btn-info" title="Voir l'effet" onclick="afficherModalInfo('${safeItemName}', '${safeDesc}')">ℹ️</button>
+                  ${inv.isEnchereItem ? '<br><span class="badge-enchere-expir">⏳ Valable jusqu\'au conseil (Mardi 23h)</span>' : ''}
+                </td>
                 <td>${inv.proprietaire}</td>
                 <td>${inv.quantite}</td>
                 <td style="text-align:center;">${btnAction}</td>
@@ -445,6 +526,16 @@
           }).join('');
         }
       } catch (err) { console.error("Erreur boutique", err); }
+    }
+
+    // Modal Info Objet
+    function afficherModalInfo(titre, desc) {
+      document.getElementById("info-modal-title").innerText = titre;
+      document.getElementById("info-modal-desc").innerText = desc;
+      document.getElementById("info-modal").style.display = "flex";
+    }
+    function fermerModalInfo() {
+      document.getElementById("info-modal").style.display = "none";
     }
 
     // Modal Cibles
@@ -474,7 +565,7 @@
 
         for (let i = 1; i <= nbCibles; i++) {
           let options = `<option value="">-- Choisir un coéquipier --</option>` + coequipiersDisponibles.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('');
-          container.innerHTML += `<label style="font-size:12px; font-weight:bold; display:block; margin-top:6px;">Cible ${i} :</label><select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; margin-top:3px;">${options}</select>`;
+          container.innerHTML += `<label style="font-size:12px; font-weight:bold; display:block; margin-top:6px;">Coéquipier ${i} :</label><select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; margin-top:3px;">${options}</select>`;
         }
         modal.style.display = "flex";
       } else {
@@ -621,10 +712,14 @@
       if (res.status === "success") chargerBoutiqueEtInventaire();
     }
 
+    // Virement avec retour visuel clair
     async function transfererKohrocq() {
-      const montant = parseInt(document.getElementById("virement-montant").value, 10);
-      if (isNaN(montant) || montant <= 0) { alert("Montant invalide."); return; }
-      if (!confirm(`Envoyer ${montant} K à votre binôme ?`)) return;
+      const montantInput = document.getElementById("virement-montant");
+      const montant = parseInt(montantInput.value, 10);
+      const confirmBox = document.getElementById("virement-confirmation-box");
+
+      if (isNaN(montant) || montant <= 0) { alert("Veuillez saisir un montant valide supérieur à 0."); return; }
+      if (!confirm(`Confirmez-vous l'envoi de ${montant} Kohrocq à votre binôme ?`)) return;
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -632,77 +727,61 @@
         body: JSON.stringify({ action: "transfer_funds", username: localStorage.getItem("joueur_connecte"), amount: montant })
       });
       const res = await response.json();
-      alert(res.message);
+      
       if (res.status === "success") {
-        document.getElementById("virement-montant").value = "";
+        montantInput.value = "";
+        confirmBox.innerText = res.message;
+        confirmBox.style.display = "block";
+        setTimeout(() => { confirmBox.style.display = "none"; }, 8000);
         chargerBoutiqueEtInventaire();
+      } else {
+        alert(res.message);
       }
     }
 
     // Fouille
-    let currentPosition = null;
-    let timerInterval = null;
-
-    function fermerModalTrouvaille() { 
-      document.getElementById("found-modal").style.display = "none"; 
-      chargerRecherche(); 
-    }
-
     async function chargerRecherche() {
-      const joueur = localStorage.getItem("joueur_connecte");
-      try {
-        const response = await fetch(API_URL, { 
-          method: "POST", 
-          headers: { "Content-Type": "text/plain;charset=utf-8" }, 
-          body: JSON.stringify({ action: "get_recherche", username: joueur }) 
-        });
-        const result = await response.json();
-        
-        if (result.status === "success") {
-          currentPosition = result.position;
-          
-          const histList = document.getElementById("recherche-historique");
-          histList.innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille enregistrée.</li>";
+      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "get_recherche", username: localStorage.getItem("joueur_connecte") }) });
+      const result = await response.json();
+      if (result.status === "success") {
+        currentPosition = result.position;
+        document.getElementById("recherche-historique").innerHTML = (result.historique || []).map(h => `<li><strong>${h.case}</strong> (${h.date.split(" ")[1]}) : ${h.resultat}</li>`).join('') || "<li>Aucune fouille.</li>";
 
-          const statusDiv = document.getElementById("recherche-status");
-          const actionDiv = document.getElementById("recherche-actions");
+        const statusDiv = document.getElementById("recherche-status");
+        const actionDiv = document.getElementById("recherche-actions");
 
-          if (!result.isOpen) { 
-            statusDiv.innerHTML = "<p style='color:#856404;'>🌙 Recherche fermée la nuit (de 00h à 08h).</p>"; 
-            actionDiv.style.display = "none"; 
-            if (timerInterval) clearInterval(timerInterval);
-            return; 
-          }
-
-          const now = result.maintenant;
-          const prochaineAction = result.prochaineAction;
-
-          if (!currentPosition) {
-            if (timerInterval) clearInterval(timerInterval);
-            statusDiv.innerHTML = "<p>Choisissez votre première case de départ pour aujourd'hui (ex: A1).</p>";
-            document.getElementById("target-cell").placeholder = "Ex: A1";
-            document.getElementById("zone-cases-adjacentes").style.display = "none";
-            actionDiv.style.display = "block";
-          } else if (prochaineAction && now < prochaineAction) {
-            // Lancer ou maintenir le compte à rebours visuel
-            actionDiv.style.display = "none";
-            lancerTimerRecherche(prochaineAction, statusDiv, actionDiv);
-          } else {
-            if (timerInterval) clearInterval(timerInterval);
-            statusDiv.innerHTML = `<p style="margin:0 0 8px 0;">Position actuelle : <strong style="color:#007bff; font-size:16px;">${currentPosition}</strong></p><span style="color:#28a745; font-weight:bold; font-size:13px;">⚡ Prêt à fouiller une case adjacente !</span>`;
-            document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
-            
-            if (result.adjacentChoices && result.adjacentChoices.length > 0) {
-              document.getElementById("zone-cases-adjacentes").style.display = "block";
-              document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
-            } else {
-              document.getElementById("zone-cases-adjacentes").style.display = "none";
-            }
-            actionDiv.style.display = "block";
-          }
+        if (!result.isOpen) { 
+          statusDiv.innerHTML = "<p style='color:#856404;'>🌙 Recherche fermée la nuit (de 00h à 08h).</p>"; 
+          actionDiv.style.display = "none"; 
+          if (timerInterval) clearInterval(timerInterval);
+          return; 
         }
-      } catch (err) {
-        console.error("Erreur recherche:", err);
+
+        const now = result.maintenant;
+        const prochaineAction = result.prochaineAction;
+
+        if (!currentPosition) {
+          if (timerInterval) clearInterval(timerInterval);
+          statusDiv.innerHTML = "<p>Choisissez votre première case de départ pour aujourd'hui (A1 à Z400).</p>";
+          document.getElementById("target-cell").placeholder = "Ex: A1";
+          document.getElementById("zone-cases-adjacentes").style.display = "none";
+          actionDiv.style.display = "block";
+        } else if (prochaineAction && now < prochaineAction) {
+          actionDiv.style.display = "none";
+          lancerTimerRecherche(prochaineAction, statusDiv, actionDiv);
+        } else {
+          if (timerInterval) clearInterval(timerInterval);
+          statusDiv.innerHTML = `<p style="margin:0 0 5px 0;">Position actuelle : <strong style="color:#007bff; font-size:16px;">${currentPosition}</strong></p><span style="color:#28a745; font-weight:bold; font-size:12px;">⚡ Prêt pour une nouvelle fouille !</span>`;
+          document.getElementById("target-cell").placeholder = "Ex: " + (result.adjacentChoices[0] || "B1");
+          
+          if (result.adjacentChoices && result.adjacentChoices.length > 0) {
+            document.getElementById("zone-cases-adjacentes").style.display = "block";
+            document.getElementById("btn-container-adjacentes").innerHTML = result.adjacentChoices.map(c => `<button type="button" class="adjacent-btn" onclick="document.getElementById('target-cell').value='${c}'">${c}</button>`).join('');
+          } else {
+            document.getElementById("zone-cases-adjacentes").style.display = "none";
+          }
+          actionDiv.style.display = "block";
+        }
       }
     }
 
@@ -717,7 +796,7 @@
         if (distanceMs <= 0) {
           clearInterval(timerInterval);
           timerInterval = null;
-          chargerRecherche(); // Actualisation automatique dès la fin du repos
+          chargerRecherche();
           return;
         }
 
@@ -746,20 +825,13 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ 
-            action: "move_recherche", 
-            username: localStorage.getItem("joueur_connecte"), 
-            currentCell: currentPosition, 
-            targetCell: target 
-          })
+          body: JSON.stringify({ action: "move_recherche", username: localStorage.getItem("joueur_connecte"), currentCell: currentPosition, targetCell: target })
         });
         const result = await response.json();
-        
         if (result.status === "success") {
           document.getElementById("target-cell").value = "";
           if (result.foundItem) {
             document.getElementById("modal-title").innerText = result.foundItem;
-            
             let imgUrl = result.foundImage;
             const modalImg = document.getElementById("modal-img");
             if (imgUrl) {
@@ -772,7 +844,6 @@
             } else {
               modalImg.style.display = "none";
             }
-
             document.getElementById("found-modal").style.display = "flex";
           } else {
             alert(result.message);
@@ -781,9 +852,7 @@
         } else {
           alert(result.message);
         }
-      } catch (err) {
-        alert("Erreur de communication avec le serveur.");
-      }
+      } catch (err) { alert("Erreur de communication."); }
     }
   </script>
 </body>
