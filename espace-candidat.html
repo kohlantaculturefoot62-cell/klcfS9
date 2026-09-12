@@ -194,7 +194,7 @@
   <div id="target-modal" class="modal-overlay">
     <div class="modal-box">
       <h2 style="color: #007bff; margin: 0 0 10px 0; font-size: 18px;">🎯 CHOISIR LES CIBLES</h2>
-      <p style="font-size: 13px; margin-bottom: 15px;">Sélectionnez vos coéquipiers pour <strong id="target-modal-item">---</strong> :</p>
+      <p style="font-size: 13px; margin-bottom: 15px;">Sélectionnez vos cibles pour <strong id="target-modal-item">---</strong> :</p>
       <div id="target-dropdowns-container" style="text-align: left; margin-bottom: 15px;"></div>
       <div style="display: flex; gap: 10px;">
         <button class="btn-action btn-team" onclick="validerUtilisationAvecCible()">Confirmer</button>
@@ -389,7 +389,7 @@
             <div id="btn-container-adjacentes" style="margin-top: 5px;"></div>
           </div>
           <input type="text" id="target-cell" placeholder="Ex: C45" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; margin-bottom: 10px;" maxlength="4">
-          <button class="btn-action btn-buy" onclick="deplacerRecherche()">Fouiller la case</button>
+          <button id="btn-fouiller" class="btn-action btn-buy" onclick="deplacerRecherche()">Fouiller la case</button>
         </div>
       </div>
       
@@ -650,8 +650,6 @@
         document.getElementById("target-modal-item").innerText = itemName;
         container.innerHTML = "";
 
-        // Si la cible est adverse : on prend les candidats des AUTRES tribus
-        // Si la cible est un allié : on prend les candidats de SA tribu (sauf soi-même)
         const candidatsEligibles = isAdverse 
           ? listeCandidatsGlobale.filter(c => c.equipe.toLowerCase() !== userEquipe.toLowerCase())
           : listeCandidatsGlobale.filter(c => c.equipe.toLowerCase() === userEquipe.toLowerCase() && c.nom.toLowerCase() !== joueur.toLowerCase());
@@ -672,6 +670,7 @@
         executerUtilisation(itemName, owner, []);
       }
     }
+
     function fermerModalCible() { document.getElementById("target-modal").style.display = "none"; pendingUseItem = null; }
 
     function validerUtilisationAvecCible() {
@@ -770,8 +769,6 @@
           } else {
             tbody.innerHTML = grilleMatchsData.map((m, idx) => {
               const myChoice = userPronos[m.id] || "";
-              
-              // FIX GRILLE FOOT: Utilisation stricte des statuts pour afficher Live / Score / Heure
               const statutUpper = String(m.statut).toUpperCase();
               const isFinished = (statutUpper === "FINISHED" || statutUpper === "FT" || statutUpper === "TERMINÉ" || statutUpper === "TERMINE");
               const isLive = (statutUpper === "IN_PLAY" || statutUpper === "LIVE" || statutUpper === "EN DIRECT");
@@ -1077,7 +1074,6 @@
     }
 
     // Fouille
-    // Fouille
     async function chargerRecherche() {
       const joueur = localStorage.getItem("joueur_connecte");
       try {
@@ -1184,7 +1180,13 @@
 
     async function deplacerRecherche() {
       const target = document.getElementById("target-cell").value.trim().toUpperCase();
+      const btnFouiller = document.getElementById("btn-fouiller");
       if (!target) { alert("Veuillez entrer une case."); return; }
+
+      if (btnFouiller) {
+        btnFouiller.disabled = true;
+        btnFouiller.innerText = "Fouille en cours...";
+      }
 
       try {
         const response = await fetch(API_URL, {
@@ -1193,16 +1195,18 @@
           body: JSON.stringify({ 
             action: "move_recherche", 
             username: localStorage.getItem("joueur_connecte"), 
-            currentCell: currentPosition, 
             targetCell: target 
           })
         });
         const result = await response.json();
         
+        if (btnFouiller) {
+          btnFouiller.disabled = false;
+          btnFouiller.innerText = "Fouiller la case";
+        }
+
         if (result.status === "success") {
           document.getElementById("target-cell").value = "";
-
-          // Actualisation immédiate de l'état
           chargerRecherche();
 
           if (result.foundItem) {
@@ -1229,7 +1233,13 @@
           alert(result.message);
           chargerRecherche();
         }
-      } catch (err) { alert("Erreur de communication."); }
+      } catch (err) { 
+        if (btnFouiller) {
+          btnFouiller.disabled = false;
+          btnFouiller.innerText = "Fouiller la case";
+        }
+        alert("Erreur de communication."); 
+      }
     }
   </script>
 </body>
