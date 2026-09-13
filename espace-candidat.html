@@ -459,7 +459,10 @@
       if (nomOnglet === 'recherche') {
         setTimeout(() => {
           initCarteLeaflet();
-        }, 150);
+          if (mapLeaflet) {
+            mapLeaflet.invalidateSize();
+          }
+        }, 200);
       }
     }
 
@@ -999,6 +1002,9 @@
 
     // Carte Leaflet
     function initCarteLeaflet() {
+      const mapContainer = document.getElementById('map');
+      if (!mapContainer) return;
+
       if (mapLeaflet !== null) {
         mapLeaflet.invalidateSize();
         return;
@@ -1015,25 +1021,28 @@
       mapLeaflet = L.map('map', {
         crs: L.CRS.Simple,
         minZoom: -4,
-        maxZoom: 4,
-        zoomSnap: 0
+        maxZoom: 2,
+        zoomSnap: 0.25,
+        attributionControl: false
       });
 
       var imgUrl = 'carte.png';
       L.imageOverlay(imgUrl, bounds).addTo(mapLeaflet);
+
       mapLeaflet.fitBounds(bounds);
+      mapLeaflet.setMaxBounds(bounds);
 
       for (let i = 0; i <= numCols; i++) {
         let x = i * colWidth;
         let isDecade = (i % 10 === 0);
         let lineWeight = isDecade ? 2 : 0.5;
-        let lineOpacity = isDecade ? 0.8 : 0.3;
+        let lineOpacity = isDecade ? 0.8 : 0.25;
 
-        L.polyline([[0, x], [mapHeight, x]], { color: '#fff', weight: lineWeight, opacity: lineOpacity }).addTo(mapLeaflet);
+        L.polyline([[0, x], [mapHeight, x]], { color: '#ffcc00', weight: lineWeight, opacity: lineOpacity }).addTo(mapLeaflet);
 
         if (isDecade && i !== 0) {
           L.marker([mapHeight, x], {
-            icon: L.divIcon({ className: 'axis-label', html: i, iconSize: [30, 25], iconAnchor: [15, 30] })
+            icon: L.divIcon({ className: 'axis-label', html: i, iconSize: [30, 25], iconAnchor: [15, 28] })
           }).addTo(mapLeaflet);
         }
       }
@@ -1041,12 +1050,12 @@
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       for (let j = 0; j <= numRows; j++) {
         let y = mapHeight - (j * rowHeight);
-        L.polyline([[y, 0], [y, mapWidth]], { color: '#fff', weight: 1, opacity: 0.5 }).addTo(mapLeaflet);
+        L.polyline([[y, 0], [y, mapWidth]], { color: '#ffcc00', weight: 1, opacity: 0.35 }).addTo(mapLeaflet);
 
         if (j < 26) {
           let yCenter = y - (rowHeight / 2);
           L.marker([yCenter, 0], {
-            icon: L.divIcon({ className: 'axis-label', html: letters[j], iconSize: [25, 25], iconAnchor: [30, 12] })
+            icon: L.divIcon({ className: 'axis-label', html: letters[j], iconSize: [25, 25], iconAnchor: [28, 12] })
           }).addTo(mapLeaflet);
         }
       }
@@ -1067,10 +1076,14 @@
 
           L.popup()
             .setLatLng(e.latlng)
-            .setContent("<div style='font-size:14px; text-align:center;'>Case sélectionnée :<br><strong style='font-size:22px; color:#d93025;'>" + caseExacte + "</strong></div>")
+            .setContent("<div style='font-size:13px; text-align:center;'>Case sélectionnée :<br><strong style='font-size:20px; color:#d93025;'>" + caseExacte + "</strong></div>")
             .openOn(mapLeaflet);
         }
       });
+
+      setTimeout(() => {
+        if (mapLeaflet) mapLeaflet.invalidateSize();
+      }, 300);
     }
 
     // Fouille
