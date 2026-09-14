@@ -2,432 +2,557 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Espace Organisation - KLCF S9</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Console Organisation - KLCF S9</title>
+  
+  <!-- Librairie pour la capture d'écran PNG (Spectateurs Discord) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; color: #333; }
-    .admin-container { max-width: 1400px; margin: 30px auto; padding: 20px; }
-    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
-    .stat-card { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #ffcc00; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-    .stat-card h4 { margin: 0 0 8px 0; color: #666; font-size: 13px; text-transform: uppercase; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background: #0f172a;
+      color: #f8fafc;
+    }
 
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
-    th { background: #f8f9fa; padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: bold; }
-    td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
-    tr:hover { background: #fdfdfe; }
+    .banner {
+      background: #1e293b;
+      padding: 15px 20px;
+      border-bottom: 2px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .logo {
+      margin: 0;
+      font-size: 20px;
+      color: #f59e0b;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
 
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-    .badge-danger { background: #f8d7da; color: #721c24; }
-    .badge-success { background: #d4edda; color: #155724; }
-    .badge-warning { background: #fff3cd; color: #856404; }
-    .badge-info { background: #d1ecf1; color: #0c5460; }
-    .badge-primary { background: #cce5ff; color: #004085; }
+    .btn-action {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-refresh { background: #3b82f6; color: white; }
+    .btn-refresh:hover { background: #2563eb; }
+    .btn-export { background: #10b981; color: white; }
+    .btn-export:hover { background: #059669; }
+    .btn-copy { background: #8b5cf6; color: white; }
+    .btn-copy:hover { background: #7c3aed; }
+    .btn-resolve { background: #10b981; color: white; padding: 4px 8px; font-size: 12px; }
 
-    .btn-resolve { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .btn-resolve:hover { background: #218838; }
+    .main-container {
+      padding: 20px;
+      max-width: 1400px;
+      margin: auto;
+    }
 
-    .search-input { padding: 10px 15px; width: 300px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
-    .login-input { width: 100%; padding: 10px; margin: 10px 0 20px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 15px; }
+    .auth-box {
+      background: #1e293b;
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .auth-input {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .section-box {
+      background: #1e293b;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #f59e0b;
+      margin: 0 0 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: #1e293b;
+      color: #94a3b8;
+      padding: 10px 12px;
+      border-bottom: 2px solid #334155;
+      font-weight: 600;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #1e293b;
+      color: #e2e8f0;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge-status {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 11px;
+      display: inline-block;
+    }
+    .badge-level {
+      background: #064e3b;
+      color: #34d399;
+      border: 1px solid #059669;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    .badge-danger { background: #7f1d1d; color: #fca5a5; }
+    .badge-success { background: #064e3b; color: #6ee7b7; }
+    .badge-warning { background: #78350f; color: #fde68a; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    #capture-area {
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
 
-  <header class="banner" style="background: #1a1a1a;">
-    <div class="banner-content" style="display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: auto; padding: 10px 20px;">
-      <h1 class="logo" style="color: #ffcc00; margin: 0;">👑 KLCF S9 - Console Organisation</h1>
-      <div id="auth-box"></div>
-    </div>
-  </header>
+  <!-- ÉCRAN DE CONNEXION ORGA -->
+  <div id="auth-screen" class="auth-box">
+    <h2 style="color: #f59e0b; margin: 0 0 10px 0;">🛡️ ACCÈS ORGANISATEUR</h2>
+    <p style="font-size: 13px; color: #94a3b8;">Entrez le mot de passe maître de l'Organisation.</p>
+    <input type="password" id="admin-password-input" class="auth-input" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') verifierAcces();">
+    <button class="btn-action btn-refresh" style="width: 100%; padding: 10px;" onclick="verifierAcces()">Ouvrir le Tableau de Bord</button>
+    <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-top: 10px; display: none;">Mot de passe incorrect.</div>
+  </div>
 
-  <main class="admin-container">
-    
-    <!-- Login Gate -->
-    <div id="login-gate" class="card" style="max-width: 420px; margin: 80px auto; text-align: center;">
-      <h2 style="color: #1a1a1a; margin-bottom: 10px;">Accès Réservé Orga</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Entrez la clé secrète administrateur :</p>
-      <form onsubmit="seConnecterAdmin(event)">
-        <input type="password" id="admin-password-input" class="login-input" placeholder="Mot de passe secret" required autofocus>
-        <button type="submit" class="login-btn" style="width: 100%; padding: 10px;">Déverrouiller l'Espace Orga</button>
-      </form>
-      <p id="auth-error" style="color: red; margin-top: 15px; font-weight: bold;"></p>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="admin-dashboard" style="display: none;">
-      
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">Tableau de Bord en Direct</h2>
-        <button class="login-btn" onclick="chargerDonneesOrga()" style="padding: 8px 16px;">🔄 Rafraîchir les données</button>
+  <!-- TABLEAU DE BORD PRINCIPAL -->
+  <div id="dashboard-screen" style="display: none;">
+    <header class="banner">
+      <div class="logo">⚡ KLCF S9 — CONSOLE ORGANISATION</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn-action btn-copy" onclick="copierResumeDiscord()">📋 Copier Résumé Discord</button>
+        <button class="btn-action btn-export" onclick="telechargerCaptureSpectateurs()">📸 Télécharger Capture PNG (Spectateurs)</button>
+        <button class="btn-action btn-refresh" onclick="chargerAdminData()">🔄 Actualiser</button>
       </div>
+    </header>
 
-      <!-- SECTION : SUIVI GRILLE FOOT -->
-      <div class="card" style="border-top: 4px solid #17a2b8;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <h3 style="margin: 0; color: #117a8b;">⚽ Suivi en Direct de la Grille Foot</h3>
-          <div style="display: flex; gap: 10px;">
-            <span class="badge badge-info" style="font-size: 13px;" id="orga-grille-participants">0 participant(s)</span>
-            <span class="badge badge-warning" style="font-size: 13px;" id="orga-grille-cagnotte">Cagnotte : 0 K</span>
-          </div>
+    <main class="main-container">
+
+      <!-- 1. ACTIONS ORGA EN ATTENTE -->
+      <div class="section-box" id="box-actions-orga" style="border-left: 4px solid #ef4444;">
+        <div class="section-title">
+          <span>🚨 Actions Requérant une Intervention Immédiate (<span id="count-actions-orga">0</span>)</span>
         </div>
-
-        <div style="margin-top: 15px; background: #e8f4f8; padding: 10px 15px; border-radius: 6px; font-size: 13px;" id="orga-grille-repartition">
-          <strong>💰 Répartition estimée des gains :</strong> 🥇 1er : 0 K | 🥈 2e : 0 K | 🥉 3e : 0 K
-        </div>
-
-        <h4 style="margin: 15px 0 5px 0;">🏆 Classement en direct des participants :</h4>
-        <div style="overflow-x: auto;">
-          <table>
+        <div class="table-container">
+          <table id="table-actions-orga">
             <thead>
               <tr>
-                <th style="width: 60px; text-align: center;">Rang</th>
+                <th>Date</th>
                 <th>Candidat</th>
                 <th>Tribu</th>
-                <th>Date Validation</th>
-                <th style="text-align: center;">Points Obtenus</th>
+                <th>Objet Utilisé</th>
+                <th>Cible(s)</th>
+                <th>Consigne / Effet Attendu</th>
+                <th style="text-align:center;">Action</th>
               </tr>
             </thead>
-            <tbody id="table-grille-orga-classement">
-              <tr><td colspan="5" style="text-align: center;">Aucun participant pour le moment.</td></tr>
-            </tbody>
+            <tbody><tr><td colspan="7" style="text-align:center;">Aucune action en attente.</td></tr></tbody>
           </table>
         </div>
       </div>
 
-      <!-- SECTION 1 : ACTIONS ORGA EN ATTENTE -->
-      <div class="card" style="border-top: 4px solid #007bff;">
-        <h3 style="margin-top: 0; color: #007bff;">⚡ Actions & Pouvoirs en Attente d'Arbitrage</h3>
-        <p style="color: #666; font-size: 13px;">Voici les pouvoirs spéciaux activés par les candidats nécessitant votre intervention :</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Joueur</th>
-              <th>Tribu</th>
-              <th>Objet Utilisé</th>
-              <th>Cible(s)</th>
-              <th>Détails Effet</th>
-              <th>Statut</th>
-              <th style="text-align: center;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="table-actions-orga">
-            <tr><td colspan="8">Chargement...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- SECTION 2 : EFFETS CONSEILS ACTIFS & DÉPOUILLEMENT -->
-      <div class="card" style="border-top: 4px solid #d93025;">
-        <h3 style="margin-top: 0; color: #d93025;">🗳️ Dépouillement Réel du Conseil</h3>
-        
-        <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
-          <h4 style="margin: 0 0 5px 0; color: #b38600;">🔥 Pouvoirs joués pour ce Conseil :</h4>
-          <div id="recap-effets-conseil" style="font-size: 13px; color: #444;">Aucun pouvoir enregistré pour le moment.</div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div>
-            <h4>Résultat Calculé des Votes</h4>
-            <table>
+      <!-- 2. RECAPITULATIF COMPLET DES CANDIDATS (ZONE DE CAPTURE PNG) -->
+      <div id="capture-area">
+        <div class="section-box" style="border-left: 4px solid #f59e0b;">
+          <div class="section-title">
+            <span>👥 État des Candidats, Cagnottes & Fouilles de l'Île</span>
+            <small style="color: #94a3b8; font-size: 12px;" id="last-update-text">Mis à jour : --:--</small>
+          </div>
+          <div class="table-container">
+            <table id="table-candidats">
               <thead>
                 <tr>
-                  <th>Candidat</th>
-                  <th style="text-align: center;">Votes Bruts</th>
-                  <th style="text-align: center;">Protection</th>
-                  <th style="text-align: center;">Score Final</th>
+                  <th>Aventurier</th>
+                  <th>Tribu</th>
+                  <th>Binôme</th>
+                  <th style="text-align:right;">Solde Indiv</th>
+                  <th style="text-align:right;">Solde Tribu</th>
+                  <th style="text-align:center;">Niv. Fouille</th>
+                  <th style="text-align:center;">Position</th>
+                  <th style="text-align:center;">Fouilles</th>
+                  <th>Objets Trouvés</th>
+                  <th>Inventaire Actif</th>
+                  <th style="text-align:center;">Conseil</th>
+                  <th>Vote Émis</th>
                 </tr>
               </thead>
-              <tbody id="table-votes-summary">
-                <tr><td colspan="4">Aucun vote enregistré.</td></tr>
+              <tbody id="tbody-candidats">
+                <tr><td colspan="12" style="text-align:center;">Chargement des candidats...</td></tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
 
-          <div>
-            <h4>Détail de l'Urne (Bulletins Déposés)</h4>
-            <div style="max-height: 250px; overflow-y: auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Votant</th>
-                    <th>Cible</th>
-                    <th>Bulletin</th>
-                    <th>Validité</th>
-                  </tr>
-                </thead>
-                <tbody id="table-votes-details">
-                  <tr><td colspan="5">Urne vide.</td></tr>
-                </tbody>
-              </table>
-            </div>
+      <!-- 3. GRILLE FOOT & ENCHÈRES -->
+      <div class="grid-2">
+        
+        <!-- CLASSEMENT GRILLE FOOT -->
+        <div class="section-box" style="border-left: 4px solid #3b82f6;">
+          <div class="section-title">
+            <span>⚽ Grille Foot Hebdo (<span id="count-grille-participants">0</span> participants — Cagnotte : <span id="cagnotte-grille">0</span> K)</span>
+          </div>
+          <div class="table-container">
+            <table id="table-grille-orga">
+              <thead>
+                <tr>
+                  <th>Rang</th>
+                  <th>Candidat</th>
+                  <th>Tribu</th>
+                  <th style="text-align:center;">Points</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-grille-orga">
+                <tr><td colspan="4" style="text-align:center;">Aucune participation pour l'instant.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
 
-      <!-- SECTION 3 : ENCHÈRES ACTIVES -->
-      <div class="card" style="border-top: 4px solid #ffcc00;">
-        <h3 style="margin-top: 0; color: #b38600;">🏷️ Enchères en Cours</h3>
-        <div id="grid-encheres-admin" class="stats-grid" style="margin-top: 15px;"></div>
-      </div>
-
-      <!-- SECTION 4 : MONITORING GLOBAL DES CANDIDATS -->
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-          <h3 style="margin: 0;">👥 Suivi des Candidats</h3>
-          <input type="text" id="search-candidate" class="search-input" placeholder="🔍 Rechercher..." onkeyup="filtrerTableau()">
+        <!-- ENCHÈRES ACTIVES -->
+        <div class="section-box" style="border-left: 4px solid #8b5cf6;">
+          <div class="section-title">
+            <span>🔨 Enchères en Cours de la Semaine</span>
+          </div>
+          <div class="table-container">
+            <table id="table-encheres-orga">
+              <thead>
+                <tr>
+                  <th>Objet</th>
+                  <th style="text-align:right;">Top Mise</th>
+                  <th>Leader Actuel</th>
+                  <th style="text-align:center;">Enchérisseurs</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-encheres-orga">
+                <tr><td colspan="4" style="text-align:center;">Aucune enchère en cours.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div style="overflow-x: auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Candidat</th>
-                <th>Tribu</th>
-                <th>Binôme</th>
-                <th>Solde Indiv.</th>
-                <th>Cagnotte Tribu</th>
-                <th>Inventaire</th>
-                <th>Objets Utilisés</th>
-                <th>Statut</th>
-                <th>Vote Déposé</th>
-                <th>Position</th>
-                <th>Fouilles</th>
-              </tr>
-            </thead>
-            <tbody id="table-candidates-body">
-              <tr><td colspan="11">Chargement...</td></tr>
-            </tbody>
-          </table>
-        </div>
+
       </div>
 
-    </div>
-  </main>
+      <!-- 4. DÉPOUILLEMENT DU CONSEIL & EFFETS ACTIFS -->
+      <div class="grid-2">
+
+        <!-- DÉPOUILLEMENT -->
+        <div class="section-box" style="border-left: 4px solid #10b981;">
+          <div class="section-title">
+            <span>🗳️ Dépouillement des Votes & Protections</span>
+          </div>
+          <div class="table-container">
+            <table id="table-depouillement">
+              <thead>
+                <tr>
+                  <th>Candidat Ciblé</th>
+                  <th style="text-align:center;">Votes Bruts</th>
+                  <th style="text-align:center;">Protège-Tibia</th>
+                  <th style="text-align:center; color:#ef4444;">Votes Finaux</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-depouillement">
+                <tr><td colspan="4" style="text-align:center;">Aucun vote scellé.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- POUVOIRS CONSEIL UTILISÉS -->
+        <div class="section-box" style="border-left: 4px solid #ec4899;">
+          <div class="section-title">
+            <span>✨ Avantages et Pouvoirs Actifs au Conseil</span>
+          </div>
+          <div class="table-container">
+            <table id="table-effets-conseil">
+              <thead>
+                <tr>
+                  <th>Heure</th>
+                  <th>Joueur</th>
+                  <th>Pouvoir</th>
+                  <th>Cible(s)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-effets-conseil">
+                <tr><td colspan="4" style="text-align:center;">Aucun pouvoir activé.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
+    let adminPasswordGlobal = "";
+    let lastLoadedData = null;
 
-    let allCandidatsData = [];
+    function verifierAcces() {
+      const pass = document.getElementById("admin-password-input").value.trim();
+      if (!pass) return;
+      adminPasswordGlobal = pass;
+      chargerAdminData(true);
+    }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedPass = sessionStorage.getItem("admin_password");
-      if (savedPass) {
-        afficherInterfaceAdmin();
-        chargerDonneesOrga();
-      }
-    });
-
-    async function seConnecterAdmin(e) {
-      e.preventDefault();
-      const pass = document.getElementById("admin-password-input").value;
-      const errorMsg = document.getElementById("auth-error");
-      errorMsg.innerText = "Vérification...";
-
+    async function chargerAdminData(isInitial = false) {
       try {
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "get_admin_data", adminPassword: pass })
+          body: JSON.stringify({ action: "get_admin_data", adminPassword: adminPasswordGlobal })
         });
         const res = await response.json();
 
         if (res.status === "success") {
-          sessionStorage.setItem("admin_password", pass);
-          errorMsg.innerText = "";
-          afficherInterfaceAdmin();
-          rendreDashboardComplet(res);
+          lastLoadedData = res;
+          if (isInitial) {
+            document.getElementById("auth-screen").style.display = "none";
+            document.getElementById("dashboard-screen").style.display = "block";
+          }
+          afficherDonnees(res);
         } else {
-          errorMsg.innerText = res.message;
+          if (isInitial) {
+            document.getElementById("auth-error").style.display = "block";
+          } else {
+            alert(res.message || "Erreur de mot de passe.");
+          }
         }
-      } catch (err) { errorMsg.innerText = "Erreur de connexion."; }
-    }
-
-    function afficherInterfaceAdmin() {
-      document.getElementById("login-gate").style.display = "none";
-      document.getElementById("admin-dashboard").style.display = "block";
-      document.getElementById("auth-box").innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; color:white;">
-          <span style="font-size:13px; color:#ffcc00;">🔑 Session Orga Active</span>
-          <button onclick="deconnexionAdmin()" style="background:#dc3545; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Déconnexion</button>
-        </div>
-      `;
-    }
-
-    function deconnexionAdmin() {
-      sessionStorage.removeItem("admin_password");
-      location.reload();
-    }
-
-    async function chargerDonneesOrga() {
-      const pass = sessionStorage.getItem("admin_password");
-      if (!pass) return;
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "get_admin_data", adminPassword: pass })
-        });
-        const res = await response.json();
-        if (res.status === "success") rendreDashboardComplet(res);
-      } catch (err) { console.error("Erreur admin:", err); }
-    }
-
-    function rendreDashboardComplet(res) {
-      allCandidatsData = res.candidats || [];
-
-      // 1. Grille Foot Orga
-      if (res.grilleOrga) {
-        document.getElementById("orga-grille-participants").innerText = `${res.grilleOrga.participantsCount} participant(s)`;
-        document.getElementById("orga-grille-cagnotte").innerText = `Cagnotte : ${res.grilleOrga.totalMises} K`;
-        
-        const pot = res.grilleOrga.totalMises;
-        document.getElementById("orga-grille-repartition").innerHTML = `
-          <strong>💰 Répartition estimée des gains :</strong> 
-          🥇 1er : <strong>${Math.round(pot * 0.5)} K</strong> | 
-          🥈 2e : <strong>${Math.round(pot * 0.3)} K</strong> | 
-          🥉 3e : <strong>${Math.round(pot * 0.2)} K</strong>
-        `;
-
-        const tbodyGrille = document.getElementById("table-grille-orga-classement");
-        if (!res.grilleOrga.classement || res.grilleOrga.classement.length === 0) {
-          tbodyGrille.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#888;'>Aucun participant pour le moment.</td></tr>";
-        } else {
-          tbodyGrille.innerHTML = res.grilleOrga.classement.map((c, idx) => `
-            <tr style="${idx === 0 ? 'background:#fffde7; font-weight:bold;' : ''}">
-              <td style="text-align:center;">${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx + 1}e`))}</td>
-              <td><strong>${c.candidat}</strong></td>
-              <td><span class="badge badge-primary">${c.equipe}</span></td>
-              <td style="font-size:11px; color:#666;">${c.date}</td>
-              <td style="text-align:center;"><span class="badge badge-success" style="font-size:13px;">${c.points} pts</span></td>
-            </tr>
-          `).join('');
-        }
+      } catch (err) {
+        alert("Erreur de connexion au serveur.");
       }
+    }
 
-      // 2. Actions en attente
-      const tbodyActions = document.getElementById("table-actions-orga");
-      if (!res.actionsOrga || res.actionsOrga.length === 0) {
-        tbodyActions.innerHTML = "<tr><td colspan='8' style='text-align:center; color:#888;'>Aucune action en attente.</td></tr>";
-      } else {
-        tbodyActions.innerHTML = res.actionsOrga.map(act => `
-          <tr style="${act.statut === 'À traiter' ? 'background:#fff8e1;' : ''}">
-            <td style="font-size:11px; color:#666;">${act.date}</td>
-            <td><strong>${act.joueur}</strong></td>
-            <td><span class="badge badge-primary">${act.equipe}</span></td>
-            <td><strong>${act.objet}</strong></td>
-            <td>${act.cibles}</td>
-            <td>${act.details}</td>
-            <td><span class="badge ${act.statut === 'À traiter' ? 'badge-warning' : 'badge-success'}">${act.statut}</span></td>
+    function afficherDonnees(data) {
+      document.getElementById("last-update-text").innerText = "Mis à jour : " + new Date().toLocaleTimeString("fr-FR");
+
+      // 1. Actions Orga en Attente
+      const actions = (data.actionsOrga || []).filter(a => a.statut !== "Traité");
+      document.getElementById("count-actions-orga").innerText = actions.length;
+      const tbodyActions = document.querySelector("#table-actions-orga tbody");
+      
+      tbodyActions.innerHTML = actions.length === 0 
+        ? "<tr><td colspan='7' style='text-align:center; color:#94a3b8;'>✅ Aucune action en attente d'arbitrage.</td></tr>"
+        : actions.map(a => `
+          <tr>
+            <td>${a.date}</td>
+            <td><strong>${a.joueur}</strong></td>
+            <td>${a.equipe}</td>
+            <td style="color:#f59e0b; font-weight:bold;">${a.objet}</td>
+            <td>${a.cibles}</td>
+            <td style="color:#38bdf8;">${a.details}</td>
             <td style="text-align:center;">
-              ${act.statut === 'À traiter' ? `<button class="btn-resolve" onclick="validerActionOrga(${act.rowIndex})">Marquer Traité ✔️</button>` : '✔️'}
+              <button class="btn-action btn-resolve" onclick="resoudreActionOrga(${a.rowIndex})">Valider / Traité</button>
             </td>
           </tr>
         `).join('');
-      }
 
-      // 3. Effets Conseil Actifs
-      const recapEffets = document.getElementById("recap-effets-conseil");
-      if (!res.effetsConseil || res.effetsConseil.length === 0) {
-        recapEffets.innerHTML = "<em>Aucun pouvoir joué pour ce conseil.</em>";
-      } else {
-        recapEffets.innerHTML = res.effetsConseil.map(ef => `
-          <div style="margin-bottom:4px;">• <strong>${ef.joueur}</strong> (${ef.equipe}) a activé <strong>${ef.objet}</strong> ${ef.cibles ? `(Cible: ${ef.cibles})` : ''} à ${ef.date}</div>
-        `).join('');
-      }
+      // 2. Tableau Récapitulatif Candidats
+      const tbodyCandidats = document.getElementById("tbody-candidats");
+      tbodyCandidats.innerHTML = (data.candidats || []).map(c => {
+        let statutConseilBadge = `<span class="badge-status badge-danger">En danger</span>`;
+        if (c.immunise) statutConseilBadge = `<span class="badge-status badge-success">🛡️ Immunisé</span>`;
+        if (c.elimine) statutConseilBadge = `<span class="badge-status badge-danger">💀 Éliminé</span>`;
 
-      // 4. Dépouillement des votes
-      const summaryTbody = document.getElementById("table-votes-summary");
-      if (!res.votesSummary || res.votesSummary.length === 0) {
-        summaryTbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#888;'>Aucun vote enregistré.</td></tr>";
-      } else {
-        summaryTbody.innerHTML = res.votesSummary.map((s, idx) => `
-          <tr style="${idx === 0 && s.votesFinaux > 0 ? 'background:#fff3f3; font-weight:bold;' : ''}">
-            <td>${idx === 0 && s.votesFinaux > 0 ? '⚠️ ' : ''}${s.nom}</td>
-            <td style="text-align:center;">${s.votesBruts}</td>
-            <td style="text-align:center;"><span class="badge ${s.protection > 0 ? 'badge-success' : 'badge-info'}">-${s.protection}</span></td>
-            <td style="text-align:center;"><span class="badge badge-danger">${s.votesFinaux}</span></td>
+        return `
+          <tr style="${c.elimine ? 'opacity:0.45; background:#0b1120;' : ''}">
+            <td><strong>${c.nom}</strong> ${c.estCapitaine ? '👑' : ''}</td>
+            <td>${c.equipe}</td>
+            <td style="color:#94a3b8;">${c.binome}</td>
+            <td style="text-align:right; font-weight:bold; color:#f59e0b;">${c.soldeIndiv} K</td>
+            <td style="text-align:right; font-weight:bold; color:#ef4444;">${c.soldeEquipe} K</td>
+            <td style="text-align:center;"><span class="badge-level">Niv. ${c.niveauRecherche || 1}</span></td>
+            <td style="text-align:center; font-weight:bold; color:#38bdf8;">${c.positionActuelle || 'Aucune'}</td>
+            <td style="text-align:center; color:#94a3b8;">${c.nbPropositions}</td>
+            <td style="font-size:12px;">${c.objetsTrouves.length > 0 ? c.objetsTrouves.join(", ") : "<span style='color:#64748b;'>Aucun</span>"}</td>
+            <td style="font-size:12px;">${c.inventaire.length > 0 ? c.inventaire.join(", ") : "<span style='color:#64748b;'>Vide</span>"}</td>
+            <td style="text-align:center;">${statutConseilBadge}</td>
+            <td style="font-size:12px; color:#e2e8f0;">${c.aVoteContre}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // 3. Grille Foot Orga
+      const grille = data.grilleOrga || { totalMises: 0, participantsCount: 0, classement: [] };
+      document.getElementById("count-grille-participants").innerText = grille.participantsCount;
+      document.getElementById("cagnotte-grille").innerText = grille.totalMises;
+      const tbodyGrille = document.getElementById("tbody-grille-orga");
+
+      tbodyGrille.innerHTML = grille.classement.length === 0
+        ? "<tr><td colspan='4' style='text-align:center; color:#94a3b8;'>Aucun participant enregistré.</td></tr>"
+        : grille.classement.map((p, idx) => `
+          <tr>
+            <td style="font-weight:bold; color:${idx === 0 ? '#f59e0b' : idx === 1 ? '#94a3b8' : idx === 2 ? '#b45309' : '#fff'};">${idx + 1}</td>
+            <td><strong>${p.candidat}</strong></td>
+            <td>${p.equipe}</td>
+            <td style="text-align:center; font-weight:bold; color:#38bdf8;">${p.points} pt(s)</td>
           </tr>
         `).join('');
-      }
 
-      // 5. Détail Bulletins
-      const detailsTbody = document.getElementById("table-votes-details");
-      if (!res.votesDetails || res.votesDetails.length === 0) {
-        detailsTbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#888;'>Urne vide.</td></tr>";
-      } else {
-        detailsTbody.innerHTML = res.votesDetails.map(d => `
-          <tr style="${!d.estValide ? 'text-decoration:line-through; opacity:0.6;' : ''}">
-            <td style="font-size:11px; color:#666;">${d.date}</td>
-            <td><strong>${d.votant}</strong></td>
-            <td><strong style="color:#d93025;">${d.cible}</strong></td>
-            <td>B${d.bulletin}</td>
-            <td>${d.estValide ? '<span class="badge badge-success">Valide</span>' : `<span class="badge badge-danger">${d.motifInvalidation}</span>`}</td>
+      // 4. Enchères Actives
+      const tbodyEncheres = document.getElementById("tbody-encheres-orga");
+      tbodyEncheres.innerHTML = (data.encheresActives || []).length === 0
+        ? "<tr><td colspan='4' style='text-align:center; color:#94a3b8;'>Aucune enchère en cours.</td></tr>"
+        : data.encheresActives.map(e => `
+          <tr>
+            <td><strong>${e.objet}</strong></td>
+            <td style="text-align:right; font-weight:bold; color:#f59e0b;">${e.topMise} K</td>
+            <td style="color:#10b981; font-weight:bold;">${e.leader}</td>
+            <td style="text-align:center;">${e.totalEncherisseurs} mise(s)</td>
           </tr>
         `).join('');
-      }
 
-      // 6. Enchères
-      const gridEnch = document.getElementById("grid-encheres-admin");
-      gridEnch.innerHTML = (res.encheresActives || []).map(ench => `
-        <div class="stat-card">
-          <div style="display:flex; justify-content:space-between;">
-            <h4 style="margin:0; font-size:15px;">${ench.objet}</h4>
-            <span class="badge badge-warning">${ench.totalEncherisseurs} mise(s)</span>
-          </div>
-          <p style="font-size:13px; margin:6px 0;">Leader : <strong>${ench.leader}</strong> (${ench.topMise} K)</p>
-          <table style="font-size:12px;">
-            <tbody>
-              ${ench.mises.map((m, idx) => `<tr><td>${idx === 0 ? '🥇' : `${idx + 1}e`}</td><td>${m.bidder}</td><td><span class="badge badge-primary">${m.amount} K</span></td></tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      `).join('') || "<p style='color:#888;'>Aucune enchère en cours.</p>";
+      // 5. Dépouillement des Votes
+      const tbodyVotes = document.getElementById("tbody-depouillement");
+      tbodyVotes.innerHTML = (data.votesSummary || []).length === 0
+        ? "<tr><td colspan='4' style='text-align:center; color:#94a3b8;'>Aucun vote enregistré dans l'urne.</td></tr>"
+        : data.votesSummary.map(v => `
+          <tr>
+            <td><strong>${v.nom}</strong></td>
+            <td style="text-align:center;">${v.votesBruts}</td>
+            <td style="text-align:center; color:#10b981;">-${v.protection}</td>
+            <td style="text-align:center; font-weight:900; font-size:15px; color:#ef4444;">${v.votesFinaux}</td>
+          </tr>
+        `).join('');
 
-      // 7. Tableau Candidats
-      rendreTableauCandidats(allCandidatsData);
+      // 6. Pouvoirs Conseil Actifs
+      const tbodyEffets = document.getElementById("tbody-effets-conseil");
+      tbodyEffets.innerHTML = (data.effetsConseil || []).length === 0
+        ? "<tr><td colspan='4' style='text-align:center; color:#94a3b8;'>Aucun pouvoir activé pour ce conseil.</td></tr>"
+        : data.effetsConseil.map(ef => `
+          <tr>
+            <td style="color:#94a3b8;">${ef.date}</td>
+            <td><strong>${ef.joueur}</strong> (${ef.equipe})</td>
+            <td style="color:#ec4899; font-weight:bold;">${ef.objet}</td>
+            <td>${ef.cibles || 'Aucune'}</td>
+          </tr>
+        `).join('');
     }
 
-    async function validerActionOrga(rowIndex) {
-      const pass = sessionStorage.getItem("admin_password");
+    async function resoudreActionOrga(rowIndex) {
+      if (!confirm("Confirmer la validation de cette action ?")) return;
       try {
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "resolve_orga_action", adminPassword: pass, rowIndex: rowIndex })
+          body: JSON.stringify({ action: "resolve_orga_action", rowIndex: rowIndex })
         });
         const res = await response.json();
-        if (res.status === "success") chargerDonneesOrga();
-        else alert(res.message);
-      } catch (err) { alert("Erreur validation."); }
+        alert(res.message);
+        chargerAdminData();
+      } catch (err) {
+        alert("Erreur lors de la validation.");
+      }
     }
 
-    function rendreTableauCandidats(candidats) {
-      const tbody = document.getElementById("table-candidates-body");
-      tbody.innerHTML = candidats.map(c => `
-        <tr>
-          <td><strong>${c.nom}</strong> ${c.estCapitaine ? '<span class="badge badge-warning">👑</span>' : ''}</td>
-          <td><span class="badge badge-primary">${c.equipe}</span></td>
-          <td>${c.binome}</td>
-          <td><strong>${c.soldeIndiv} K</strong></td>
-          <td>${c.soldeEquipe} K</td>
-          <td>${c.inventaire.length ? c.inventaire.join(', ') : '<span style="color:#999;">Vide</span>'}</td>
-          <td style="color:#666;">${c.objetsUtilises.length ? c.objetsUtilises.join(', ') : '<span style="color:#999;">Aucun</span>'}</td>
-          <td>${c.elimine ? '<span class="badge badge-danger">Éliminé</span>' : (c.immunise ? '<span class="badge badge-success">Immunisé</span>' : '<span class="badge badge-info">En jeu</span>')}</td>
-          <td><strong style="color:#d93025;">${c.aVoteContre}</strong></td>
-          <td><span class="badge badge-warning">${c.positionActuelle}</span></td>
-          <td><strong>${c.nbPropositions} fouille(s)</strong></td>
-        </tr>
-      `).join('');
+    // TÉLÉCHARGER LA CAPTURE PNG DU TABLEAU RECAPITULATIF (DISCORD)
+    function telechargerCaptureSpectateurs() {
+      const captureArea = document.getElementById("capture-area");
+      if (!captureArea) return;
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      
+      html2canvas(captureArea, {
+        backgroundColor: "#0f172a",
+        scale: 2
+      }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `KLCF_S9_Recap_${dateStr}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
     }
 
-    function filtrerTableau() {
-      const input = document.getElementById("search-candidate").value.toLowerCase();
-      const filtered = allCandidatsData.filter(c => c.nom.toLowerCase().includes(input) || c.equipe.toLowerCase().includes(input) || c.binome.toLowerCase().includes(input));
-      rendreTableauCandidats(filtered);
+    // COPIER UN RÉSUMÉ TEXTE PROPRE POUR DISCORD
+    function copierResumeDiscord() {
+      if (!lastLoadedData || !lastLoadedData.candidats) {
+        alert("Veuillez d'abord charger les données.");
+        return;
+      }
+
+      let texte = `📊 **RÉCAPITULATIF KLCF S9 — SPECTATEURS** 📊\n\n`;
+      texte += `*Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}*\n\n`;
+
+      texte += `**👥 CAGNOTTES & FOUILLES :**\n`;
+      lastLoadedData.candidats.forEach(c => {
+        if (!c.elimine) {
+          texte += `• **${c.nom}** (${c.equipe}) : 💰 **${c.soldeIndiv} K** | 🧭 Pos: **${c.positionActuelle || 'N/A'}** (Niv. ${c.niveauRecherche || 1})\n`;
+        }
+      });
+
+      if (lastLoadedData.grilleOrga && lastLoadedData.grilleOrga.classement.length > 0) {
+        texte += `\n**⚽ TOP GRILLE FOOT (Cagnotte : ${lastLoadedData.grilleOrga.totalMises} K) :**\n`;
+        lastLoadedData.grilleOrga.classement.slice(0, 3).forEach((p, idx) => {
+          const med = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
+          texte += `${med} **${p.candidat}** : ${p.points} pt(s)\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(texte).then(() => {
+        alert("✅ Résumé copié dans le presse-papier ! Vous pouvez le coller directement sur Discord.");
+      });
     }
   </script>
 </body>
