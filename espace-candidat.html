@@ -519,7 +519,11 @@
           document.getElementById("grid-boutique-standard").innerHTML = itemsStandard.map(item => {
             const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
-            let stockDisplay = item.stockType === "illimite" ? `<span style="color:#28a745; font-weight:bold;">Illimité ♾️</span>` : `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax}</span>`;
+            let stockDisplay = item.stockType === "illimite" 
+  ? `<span style="color:#28a745; font-weight:bold;">Illimité ♾️</span>` 
+  : (item.stockType === "equipe" 
+      ? `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax} (tribu)</span>`
+      : `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax}</span>`);
             const safeItemName = item.nom.replace(/'/g, "\\'");
 
             return `
