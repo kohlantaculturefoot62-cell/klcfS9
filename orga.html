@@ -50,6 +50,8 @@
     .btn-export:hover { background: #059669; }
     .btn-copy { background: #8b5cf6; color: white; }
     .btn-copy:hover { background: #7c3aed; }
+    .btn-foot { background: #0284c7; color: white; }
+    .btn-foot:hover { background: #0369a1; }
     .btn-resolve { background: #10b981; color: white; padding: 4px 8px; font-size: 12px; }
 
     .main-container {
@@ -180,9 +182,9 @@
     <header class="banner">
       <div class="logo">⚡ KLCF S9 — CONSOLE ORGANISATION</div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="btn-action btn-copy" onclick="copierResumeDiscord()">📋 Copier Résumé Discord</button>
-        <button class="btn-action btn-export" onclick="telechargerCaptureSpectateurs()">📸 Télécharger Capture PNG (Spectateurs)</button>
-        <button class="btn-action" style="background: #2563eb; color: white;" onclick="copierRecapPronosDiscord()">⚽ Copier Grille Discord (Spectateurs)</button>
+        <button class="btn-action btn-foot" onclick="copierRecapPronosDiscord()">⚽ Grille Discord (Matrice)</button>
+        <button class="btn-action btn-copy" onclick="copierResumeDiscord()">📋 Résumé Général Discord</button>
+        <button class="btn-action btn-export" onclick="telechargerCaptureSpectateurs()">📸 Capture PNG</button>
         <button class="btn-action btn-refresh" onclick="chargerAdminData()">🔄 Actualiser</button>
       </div>
     </header>
@@ -555,121 +557,108 @@
         alert("✅ Résumé copié dans le presse-papier ! Vous pouvez le coller directement sur Discord.");
       });
     }
-function copierRecapPronosDiscord() {
-  if (!lastLoadedData || !lastLoadedData.grilleOrga) {
-    alert("Veuillez d'abord charger ou actualiser les données.");
-    return;
-  }
 
-  const grille = lastLoadedData.grilleOrga;
-  const matchs = grille.matchs || [];
-  const classement = grille.classement || [];
-
-  if (classement.length === 0) {
-    alert("Aucun pronostic enregistré.");
-    return;
-  }
-
-  const journeeLabel = (matchs[0] && matchs[0].journee) ? matchs[0].journee : "Grille Hebdo";
-  const dateStr = new Date().toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" });
-  const heureStr = new Date().toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', timeZone: "Europe/Paris" });
-
-  let out = `⚽ ══════════════════════════════════════════════════════ ⚽\n`;
-  out += `🏆 **KLCF S9 — GRILLE LOTO FOOT (${journeeLabel.toUpperCase()})** 🏆\n`;
-  out += `💰 Cagnotte : **${grille.totalMises} K** | 👥 Joueurs : **${classement.length}** | 🕒 *${dateStr} - ${heureStr}*\n`;
-  out += `⚽ ══════════════════════════════════════════════════════ ⚽\n\n`;
-
-  // Construction de l'en-tête de la grille
-  // Tronque les noms à 7-8 caractères max pour que la grille tienne sur mobile et PC
-  const colNoms = classement.map(c => {
-    let nomCourt = c.candidat.length > 7 ? c.candidat.substring(0, 6) + "." : c.candidat;
-    return nomCourt.padEnd(8, " ");
-  });
-
-  out += `\`\`\`text\n`;
-  out += `N° | AFFICHE DU MATCH            | RES | ` + colNoms.join("| ") + `\n`;
-  out += `---+--------------------------+-----+` + colNoms.map(() => "---------").join("+") + `\n`;
-
-  matchs.forEach((m, idx) => {
-    const num = (idx + 1).toString().padStart(2, "0");
-    
-    // Formatage de l'affiche (ex: PSG - OM) limité à 24 caractères
-    let affiche = `${m.dom} - ${m.ext}`;
-    if (affiche.length > 24) affiche = affiche.substring(0, 22) + "..";
-    affiche = affiche.padEnd(24, " ");
-
-    // Résultat du match
-    const statutUpper = String(m.statut || "").toUpperCase();
-    const isFinished = (statutUpper === "FINISHED" || statutUpper === "FT" || statutUpper === "TERMINÉ" || statutUpper === "TERMINE");
-    const isLive = (statutUpper === "IN_PLAY" || statutUpper === "LIVE" || statutUpper === "EN DIRECT");
-    const hasScore = (m.scoreDom !== undefined && m.scoreDom !== "-" && m.scoreDom !== "" && m.scoreDom !== null);
-
-    let resCol = " - ";
-    if (hasScore && isFinished) {
-      resCol = ` ${m.resultatExact} `;
-    } else if (hasScore && isLive) {
-      resCol = `${m.scoreDom}-${m.scoreExt}`;
-      if (resCol.length === 3) resCol = `${resCol}`;
-    }
-    resCol = resCol.padEnd(3, " ");
-
-    // Colonne pour chaque joueur
-    const pronosCols = classement.map(c => {
-      const choix = (c.pronos && c.pronos[m.id]) ? String(c.pronos[m.id]).toUpperCase() : "-";
-      let rep = `  ${choix}   `;
-
-      if (isFinished && m.resultatExact) {
-        let pNorm = (choix === "N") ? "X" : choix;
-        let rNorm = (m.resultatExact === "N") ? "X" : m.resultatExact;
-        if (pNorm === rNorm) {
-          rep = ` [${choix}]✓ `; // Validé !
-        } else {
-          rep = `  ${choix} ✗ `; // Raté
-        }
+    // NOUVELLE FONCTION : MATRICE LOTO FOOT DÉTAILLÉE MATCH PAR MATCH
+    function copierRecapPronosDiscord() {
+      if (!lastLoadedData || !lastLoadedData.grilleOrga) {
+        alert("Veuillez d'abord actualiser le tableau de bord.");
+        return;
       }
-      return rep.padEnd(8, " ");
-    });
 
-    out += `${num} | ${affiche} | ${resCol} | ` + pronosCols.join("| ") + `\n`;
-  });
+      const grille = lastLoadedData.grilleOrga;
+      const matchs = grille.matchs || [];
+      const classement = grille.classement || [];
 
-  out += `---+--------------------------+-----+` + colNoms.map(() => "---------").join("+") + `\n`;
-  
-  // Ligne de total des points
-  const totauxCols = classement.map(c => {
-    return `${c.points} pts`.padStart(6, " ") + "  ";
-  });
-  out += `TOTAL POINTS                  |     | ` + totauxCols.join("| ") + `\n`;
-  out += `\`\`\`\n`;
+      if (classement.length === 0) {
+        alert("Aucun pronostic enregistré.");
+        return;
+      }
 
-  // CLASSEMENT RAPIDE SOUS LA GRILLE
-  out += `📊 **CLASSEMENT GÉNÉRAL :**\n`;
-  classement.forEach((c, idx) => {
-    const med = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "▫️";
-    out += `${med} **#${idx + 1} ${c.candidat}** (${c.equipe}) : **${c.points} / ${matchs.length} pts**\n`;
-  });
+      const journeeLabel = (matchs[0] && matchs[0].journee) ? matchs[0].journee : "Grille Hebdo";
+      const dateStr = new Date().toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" });
+      const heureStr = new Date().toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', timeZone: "Europe/Paris" });
 
-  out += `\n📌 *Légende : ` + "`[1]✓`" + ` = Bon prono  |  ` + "`1 ✗`" + ` = Erreur  |  ` + "`1`" + ` = En attente*`;
+      let out = `⚽ ══════════════════════════════════════════════════════ ⚽\n`;
+      out += `🏆 **KLCF S9 — GRILLE LOTO FOOT (${journeeLabel.toUpperCase()})** 🏆\n`;
+      out += `💰 Cagnotte : **${grille.totalMises} K** | 👥 Joueurs : **${classement.length}** | 🕒 *${dateStr} - ${heureStr}*\n`;
+      out += `⚽ ══════════════════════════════════════════════════════ ⚽\n\n`;
 
-  // Copie automatique
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(out).then(() => {
-      alert("✅ Grille complète des pronostics copiée ! Vous pouvez la coller directement sur Discord.");
-    }).catch(() => fallbackCopy(out));
-  } else {
-    fallbackCopy(out);
-  }
-}
+      const colNoms = classement.map(c => {
+        let nomCourt = c.candidat.length > 7 ? c.candidat.substring(0, 6) + "." : c.candidat;
+        return nomCourt.padEnd(8, " ");
+      });
 
-function fallbackCopy(text) {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  document.body.removeChild(textarea);
-  alert("✅ Grille copiée dans le presse-papier !");
-}
+      out += `\`\`\`text\n`;
+      out += `N° | AFFICHE DU MATCH            | RES | ` + colNoms.join("| ") + `\n`;
+      out += `---+--------------------------+-----+` + colNoms.map(() => "---------").join("+") + `\n`;
+
+      matchs.forEach((m, idx) => {
+        const num = (idx + 1).toString().padStart(2, "0");
+        
+        let affiche = `${m.dom} - ${m.ext}`;
+        if (affiche.length > 24) affiche = affiche.substring(0, 22) + "..";
+        affiche = affiche.padEnd(24, " ");
+
+        const statutUpper = String(m.statut || "").toUpperCase();
+        const isFinished = (statutUpper === "FINISHED" || statutUpper === "FT" || statutUpper === "TERMINÉ" || statutUpper === "TERMINE");
+        const isLive = (statutUpper === "IN_PLAY" || statutUpper === "LIVE" || statutUpper === "EN DIRECT");
+        const hasScore = (m.scoreDom !== undefined && m.scoreDom !== "-" && m.scoreDom !== "" && m.scoreDom !== null);
+
+        let resCol = " - ";
+        if (hasScore && isFinished) {
+          resCol = ` ${m.resultatExact} `;
+        } else if (hasScore && isLive) {
+          resCol = `${m.scoreDom}-${m.scoreExt}`;
+        }
+        resCol = resCol.padEnd(3, " ");
+
+        const pronosCols = classement.map(c => {
+          const choix = (c.pronos && c.pronos[m.id]) ? String(c.pronos[m.id]).toUpperCase() : "-";
+          let rep = `  ${choix}   `;
+
+          if (isFinished && m.resultatExact) {
+            let pNorm = (choix === "N") ? "X" : choix;
+            let rNorm = (m.resultatExact === "N") ? "X" : m.resultatExact;
+            if (pNorm === rNorm) {
+              rep = ` [${choix}]✓ `;
+            } else {
+              rep = `  ${choix} ✗ `;
+            }
+          }
+          return rep.padEnd(8, " ");
+        });
+
+        out += `${num} | ${affiche} | ${resCol} | ` + pronosCols.join("| ") + `\n`;
+      });
+
+      out += `---+--------------------------+-----+` + colNoms.map(() => "---------").join("+") + `\n`;
+      
+      const totauxCols = classement.map(c => {
+        return `${c.points} pts`.padStart(6, " ") + "  ";
+      });
+      out += `TOTAL POINTS                  |     | ` + totauxCols.join("| ") + `\n`;
+      out += `\`\`\`\n`;
+
+      out += `📊 **CLASSEMENT GÉNÉRAL :**\n`;
+      classement.forEach((c, idx) => {
+        const med = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "▫️";
+        out += `${med} **#${idx + 1} ${c.candidat}** (${c.equipe}) : **${c.points} / ${matchs.length} pts**\n`;
+      });
+
+      out += `\n📌 *Légende : ` + "`[1]✓`" + ` = Bon prono  |  ` + "`1 ✗`" + ` = Erreur  |  ` + "`1`" + ` = En attente*`;
+
+      navigator.clipboard.writeText(out).then(() => {
+        alert("✅ Matrice complète copiée ! Vous pouvez la coller directement sur Discord.");
+      }).catch(() => {
+        const textarea = document.createElement("textarea");
+        textarea.value = out;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("✅ Matrice copiée !");
+      });
+    }
   </script>
 </body>
 </html>
