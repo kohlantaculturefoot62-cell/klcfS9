@@ -267,9 +267,13 @@
       <div class="shop-grid" id="grid-boutique-standard"><p>Chargement...</p></div>
     </div>
 
-    <!-- 2. Enchères -->
+    <!-- 2. Enchères (AVEC BANDEAU DEADLINE DYNAMIQUE) -->
     <div id="tab-boutique-encheres" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Enchères de la Semaine</h2>
+      
+      <!-- Bandeau Deadline Enchères -->
+      <div id="encheres-deadline-box" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 8px; font-size: 13px; line-height: 1.4; display: none;"></div>
+
       <div style="background: white; border-radius: 8px; padding: 12px 15px; border-left: 4px solid #ffcc00; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 15px;">
         <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #b38600;">📋 Vos Mises Actuellement en Cours :</h3>
         <div id="recap-mes-mises" style="font-size: 13px; color: #555;">Chargement de vos enchères...</div>
@@ -416,6 +420,7 @@
     let userPronos = {};
     let isGrilleCloturee = false;
     let aParticipeGrille = false;
+    let isEncheresCloturees = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const joueur = localStorage.getItem("joueur_connecte");
@@ -500,6 +505,26 @@
             document.getElementById("info-niveau-recherche").innerText = `Chercheur Niv. ${result.niveauRecherche}`;
           }
 
+          // Gestion de la deadline des enchères (H-3h Conseil)
+          isEncheresCloturees = result.isEncheresCloturees === true;
+          const deadlineBox = document.getElementById("encheres-deadline-box");
+          if (result.encheresDeadlineStr) {
+            deadlineBox.style.display = "block";
+            if (isEncheresCloturees) {
+              deadlineBox.style.background = "#ffebee";
+              deadlineBox.style.border = "1px solid #ffcdd2";
+              deadlineBox.style.color = "#c62828";
+              deadlineBox.innerHTML = `🔒 <strong>Enchères closes depuis le ${result.encheresDeadlineStr}</strong> (3h avant le Conseil).<br>Les objets ont été attribués aux plus offrants dans leur inventaire !`;
+            } else {
+              deadlineBox.style.background = "#fff8e1";
+              deadlineBox.style.border = "1px solid #ffe082";
+              deadlineBox.style.color = "#b78103";
+              deadlineBox.innerHTML = `⏳ <strong>Clôture des enchères : ${result.encheresDeadlineStr}</strong> (exactement 3h avant le Conseil).<br>À cette heure précise, le vainqueur recevra automatiquement son lot dans son inventaire !`;
+            }
+          } else {
+            deadlineBox.style.display = "none";
+          }
+
           const mesMises = result.mesMises || {};
           const tousNormale = result.boutiqueNormale || [];
           const itemsStandard = tousNormale.filter(item => item.type.toLowerCase() !== "enchere");
@@ -516,14 +541,15 @@
             `).join('');
           }
 
+          // Rendu Boutique Standard
           document.getElementById("grid-boutique-standard").innerHTML = itemsStandard.map(item => {
             const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
             let stockDisplay = item.stockType === "illimite" 
-  ? `<span style="color:#28a745; font-weight:bold;">Illimité ♾️</span>` 
-  : (item.stockType === "equipe" 
-      ? `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax} (tribu)</span>`
-      : `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax}</span>`);
+              ? `<span style="color:#28a745; font-weight:bold;">Illimité ♾️</span>` 
+              : (item.stockType === "equipe" 
+                  ? `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax} (tribu)</span>`
+                  : `<span style="color:#d93025; font-weight:bold;">${item.stock}/${item.stockMax}</span>`);
             const safeItemName = item.nom.replace(/'/g, "\\'");
 
             return `
@@ -544,20 +570,30 @@
             `;
           }).join('');
 
+          // Rendu Enchères avec blocage automatique si la deadline est atteinte
           document.getElementById("grid-boutique-encheres").innerHTML = itemsEncheres.map(item => {
             const currentBid = mesMises[item.nom];
             let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
             const safeItemName = item.nom.replace(/'/g, "\\'");
             
-            let actionHTML = currentBid ? `
-              <div style="background:#e8f0fe; padding:6px; border-radius:6px; font-size:12px; margin-bottom:6px; text-align:center;">Votre mise actuelle : <strong>${currentBid} K</strong></div>
-              <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ccc; border-radius:6px;">
-              <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid" style="margin-bottom:6px;">Modifier mise</button>
-              <button onclick="annulerEnchere('${safeItemName}')" class="btn-action" style="background:#dc3545; color:white; font-size:12px; padding:6px;">Retirer</button>
-            ` : `
-              <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #ccc; border-radius:6px;">
-              <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid">Enchérir</button>
-            `;
+            let actionHTML = "";
+            if (isEncheresCloturees) {
+              actionHTML = currentBid 
+                ? `<div style="background:#f1f5f9; padding:8px; border-radius:6px; font-size:12px; text-align:center; color:#475569;">Votre mise finale : <strong>${currentBid} K</strong><br>🔒 <em>Enchères terminées</em></div>`
+                : `<button disabled class="btn-action" style="background:#cbd5e1; color:#64748b; cursor:not-allowed;">🔒 Enchères Clôturées</button>`;
+            } else if (currentBid) {
+              actionHTML = `
+                <div style="background:#e8f0fe; padding:6px; border-radius:6px; font-size:12px; margin-bottom:6px; text-align:center;">Votre mise actuelle : <strong>${currentBid} K</strong></div>
+                <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ccc; border-radius:6px;">
+                <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid" style="margin-bottom:6px;">Modifier mise</button>
+                <button onclick="annulerEnchere('${safeItemName}')" class="btn-action" style="background:#dc3545; color:white; font-size:12px; padding:6px;">Retirer</button>
+              `;
+            } else {
+              actionHTML = `
+                <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #ccc; border-radius:6px;">
+                <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid">Enchérir</button>
+              `;
+            }
 
             return `
               <div class="shop-card">
@@ -577,6 +613,9 @@
               const outOfStock = (item.stockType !== "illimite" && item.stock <= 0);
               let imgUrl = item.img && item.img.includes("file/d/") ? `https://lh3.googleusercontent.com/d/${item.img.split("file/d/")[1].split("/")[0]}` : item.img;
               const safeItemName = item.nom.replace(/'/g, "\\'");
+              let stockDisplay = (item.stockType === "equipe") 
+                ? `${item.stock}/${item.stockMax} (tribu)` 
+                : `${item.stock}`;
 
               return `
                 <div class="shop-card" style="${outOfStock ? 'opacity:0.5;' : ''}">
@@ -585,7 +624,7 @@
                     <h3 class="shop-title">${item.nom}</h3>
                     <div class="shop-badge-container">
                       <span style="font-weight:bold; color:#d93025;">👥 ${item.prix} K</span>
-                      <span>Stock: ${item.stock}</span>
+                      <span>Stock: ${stockDisplay}</span>
                     </div>
                     <div class="shop-desc">${item.desc}</div>
                   </div>
@@ -612,7 +651,7 @@
                 <td>
                   <strong>${inv.objet}</strong>
                   <button class="btn-info" title="Voir l'effet boutique" onclick="afficherModalInfo('${safeItemName}', '${safeDesc}')">ℹ️</button>
-                  ${inv.isEnchereItem ? '<br><span class="badge-enchere-expir">⏳ Valable jusqu\'au conseil (Mardi 23h)</span>' : ''}
+                  ${inv.isEnchereItem ? '<br><span class="badge-enchere-expir">⏳ Valable jusqu\'au conseil</span>' : ''}
                 </td>
                 <td>${inv.proprietaire}</td>
                 <td>${inv.quantite}</td>
@@ -950,6 +989,10 @@
     }
 
     async function placerEnchere(itemName) {
+      if (isEncheresCloturees) {
+        alert("🔒 Les enchères sont clôturées pour cette session !");
+        return;
+      }
       const input = document.getElementById(`bid-${itemName}`);
       const bidAmount = parseInt(input.value, 10);
       if (isNaN(bidAmount) || bidAmount <= 0) return;
@@ -966,6 +1009,10 @@
     }
 
     async function annulerEnchere(itemName) {
+      if (isEncheresCloturees) {
+        alert("🔒 Les enchères sont déjà closes, impossible de retirer votre mise !");
+        return;
+      }
       if (!confirm("Retirer votre mise ?")) return;
       const response = await fetch(API_URL, {
         method: "POST",
