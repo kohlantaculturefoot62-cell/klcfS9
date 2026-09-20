@@ -585,13 +585,13 @@
               actionHTML = `
                 <div style="background:#e8f0fe; padding:6px; border-radius:6px; font-size:12px; margin-bottom:6px; text-align:center;">Votre mise actuelle : <strong>${currentBid} K</strong></div>
                 <input type="number" id="bid-${item.nom}" min="${item.prix}" value="${currentBid}" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ccc; border-radius:6px;">
-                <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid" style="margin-bottom:6px;">Modifier mise</button>
+                <button onclick="placerEnchere('${safeItemName}', ${item.prix})" class="btn-action btn-bid" style="margin-bottom:6px;">Modifier mise</button>
                 <button onclick="annulerEnchere('${safeItemName}')" class="btn-action" style="background:#dc3545; color:white; font-size:12px; padding:6px;">Retirer</button>
               `;
             } else {
               actionHTML = `
                 <input type="number" id="bid-${item.nom}" min="${item.prix}" placeholder="Mise min: ${item.prix} K" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #ccc; border-radius:6px;">
-                <button onclick="placerEnchere('${safeItemName}')" class="btn-action btn-bid">Enchérir</button>
+                <button onclick="placerEnchere('${safeItemName}', ${item.prix})" class="btn-action btn-bid">Enchérir</button>
               `;
             }
 
@@ -988,26 +988,39 @@
       if (res.status === "success") chargerBoutiqueEtInventaire();
     }
 
-    async function placerEnchere(itemName) {
+    async function placerEnchere(itemName, prixMin) {
       if (isEncheresCloturees) {
         alert("🔒 Les enchères sont clôturées pour cette session !");
         return;
       }
       const input = document.getElementById(`bid-${itemName}`);
       const bidAmount = parseInt(input.value, 10);
-      if (isNaN(bidAmount) || bidAmount <= 0) return;
-      if (!confirm(`Confirmer la mise de ${bidAmount} K ?`)) return;
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "place_bid", username: localStorage.getItem("joueur_connecte"), itemName, bidAmount })
-      });
-      const res = await response.json();
-      alert(res.message);
-      if (res.status === "success") chargerBoutiqueEtInventaire();
+      if (isNaN(bidAmount) || bidAmount <= 0) {
+        alert("Veuillez entrer un montant valide.");
+        return;
+      }
+
+      if (prixMin && bidAmount < prixMin) {
+        alert(`❌ Votre mise (${bidAmount} K) est inférieure au prix minimum (${prixMin} K) !`);
+        return;
+      }
+
+      if (!confirm(`Confirmer la mise de ${bidAmount} K pour "${itemName}" ?`)) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "place_bid", username: localStorage.getItem("joueur_connecte"), itemName: itemName, bidAmount: bidAmount })
+        });
+        const res = await response.json();
+        alert(res.message);
+        if (res.status === "success") chargerBoutiqueEtInventaire();
+      } catch (err) {
+        alert("Erreur de connexion lors de la mise.");
+      }
     }
-
     async function annulerEnchere(itemName) {
       if (isEncheresCloturees) {
         alert("🔒 Les enchères sont déjà closes, impossible de retirer votre mise !");
