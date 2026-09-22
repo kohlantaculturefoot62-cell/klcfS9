@@ -672,10 +672,81 @@
     function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
     function fermerModalVide() { document.getElementById("empty-modal").style.display = "none"; chargerRecherche(); }
 
-    function demarrerUtilisation(itemName, owner, cibleRequise) {
+function demarrerUtilisation(itemName, owner, cibleRequise) {
       pendingUseItem = { itemName, owner, cibleRequise };
-      var reqUpper = String(cibleRequise).toUpperCase().trim();
+      var itemLow = itemName.toLowerCase().trim();
+      var reqUpper = String(cibleRequise || "").toUpperCase().trim();
       
+      const modal = document.getElementById("target-modal");
+      const container = document.getElementById("target-dropdowns-container");
+      const userEquipe = localStorage.getItem("equipe_joueur") || "";
+      const joueur = localStorage.getItem("joueur_connecte") || "";
+
+      // -------------------------------------------------------------
+      // CAS SPÉCIFIQUE 1 : LE BUZZER (2 joueurs en jeu distincts)
+      // -------------------------------------------------------------
+      if (itemLow.indexOf("demi-buzzer") === -1 && itemLow.indexOf("demi buzzer") === -1 && itemLow.indexOf("buzzer") !== -1) {
+        document.getElementById("target-modal-item").innerText = itemName;
+        container.innerHTML = "";
+
+        const candidatsEnJeu = (listeCandidatsGlobale || []).filter(c => !c.elimine);
+
+        if (candidatsEnJeu.length < 2) {
+          alert("Action impossible : pas assez de candidats encore en jeu.");
+          return;
+        }
+
+        let options = `<option value="">-- Choisir un joueur en jeu --</option>` + 
+          candidatsEnJeu.map(c => `<option value="${c.nom}">${c.nom} (${c.equipe})</option>`).join('');
+
+        container.innerHTML = `
+          <p style="font-size:12px; color:#555; margin-bottom:10px;">Le Buzzer nécessite de désigner <strong>2 candidats encore en jeu</strong> distincts :</p>
+          <label style="font-size:12px; font-weight:bold; display:block; margin-top:6px;">Joueur en jeu 1 :</label>
+          <select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; margin-top:3px;">${options}</select>
+          <label style="font-size:12px; font-weight:bold; display:block; margin-top:6px;">Joueur en jeu 2 :</label>
+          <select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; margin-top:3px;">${options}</select>
+        `;
+
+        modal.style.display = "flex";
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // CAS SPÉCIFIQUE 2 : LE DEMI-BUZZER (1 joueur en jeu + 1 éliminé)
+      // -------------------------------------------------------------
+      if (itemLow.indexOf("demi-buzzer") !== -1 || itemLow.indexOf("demi buzzer") !== -1) {
+        document.getElementById("target-modal-item").innerText = itemName;
+        container.innerHTML = "";
+
+        const candidatsEnJeu = (listeCandidatsGlobale || []).filter(c => !c.elimine);
+        const candidatsElimines = (listeCandidatsGlobale || []).filter(c => c.elimine);
+
+        if (candidatsEnJeu.length === 0 || candidatsElimines.length === 0) {
+          alert("Action impossible : il faut au moins 1 joueur en jeu et 1 joueur éliminé.");
+          return;
+        }
+
+        let optsEnJeu = `<option value="">-- Choisir un joueur en jeu --</option>` + 
+          candidatsEnJeu.map(c => `<option value="${c.nom}">${c.nom} (${c.equipe})</option>`).join('');
+
+        let optsElimines = `<option value="">-- Choisir un joueur éliminé --</option>` + 
+          candidatsElimines.map(c => `<option value="${c.nom}">${c.nom} (Éliminé)</option>`).join('');
+
+        container.innerHTML = `
+          <p style="font-size:12px; color:#555; margin-bottom:10px;">Le Demi-Buzzer nécessite de désigner <strong>1 joueur en jeu</strong> et <strong>1 joueur éliminé</strong> :</p>
+          <label style="font-size:12px; font-weight:bold; display:block; margin-top:6px; color:#2e7d32;">Joueur en jeu :</label>
+          <select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #2e7d32; font-size:14px; margin-top:3px;">${optsEnJeu}</select>
+          <label style="font-size:12px; font-weight:bold; display:block; margin-top:6px; color:#c62828;">Joueur éliminé :</label>
+          <select class="target-select-field" style="width:100%; padding:8px; border-radius:6px; border:1px solid #c62828; font-size:14px; margin-top:3px;">${optsElimines}</select>
+        `;
+
+        modal.style.display = "flex";
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // CAS GÉNÉRAL : TOUS LES AUTRES OBJETS
+      // -------------------------------------------------------------
       var isAdverse = (reqUpper.indexOf("ADVERSE") !== -1);
       var nbCibles = 0;
       
@@ -688,17 +759,12 @@
       }
 
       if (nbCibles > 0) {
-        const modal = document.getElementById("target-modal");
-        const container = document.getElementById("target-dropdowns-container");
-        const userEquipe = localStorage.getItem("equipe_joueur") || "";
-        const joueur = localStorage.getItem("joueur_connecte");
-
         document.getElementById("target-modal-item").innerText = itemName;
         container.innerHTML = "";
 
         const candidatsEligibles = isAdverse 
-          ? listeCandidatsGlobale.filter(c => c.equipe.toLowerCase() !== userEquipe.toLowerCase())
-          : listeCandidatsGlobale.filter(c => c.equipe.toLowerCase() === userEquipe.toLowerCase() && c.nom.toLowerCase() !== joueur.toLowerCase());
+          ? (listeCandidatsGlobale || []).filter(c => c.equipe.toLowerCase() !== userEquipe.toLowerCase())
+          : (listeCandidatsGlobale || []).filter(c => c.equipe.toLowerCase() === userEquipe.toLowerCase() && c.nom.toLowerCase() !== joueur.toLowerCase());
 
         if (candidatsEligibles.length < nbCibles) {
           alert(`Action impossible : Il faut au moins ${nbCibles} candidat(s) éligible(s).`);
@@ -723,11 +789,30 @@
       const selects = document.querySelectorAll(".target-select-field");
       let cibles = [];
       for (let sel of selects) {
-        if (!sel.value) { alert("Veuillez sélectionner toutes les cibles."); return; }
+        if (!sel.value) { 
+          alert("Veuillez sélectionner toutes les cibles."); 
+          return; 
+        }
         cibles.push(sel.value);
       }
-      if (new Set(cibles).size !== cibles.length) { alert("Pas de doublons autorisés !"); return; }
+
+      if (new Set(cibles).size !== cibles.length) { 
+        alert("Pas de doublons autorisés !"); 
+        return; 
+      }
+
       const item = pendingUseItem;
+      if (!item) {
+        fermerModalCible();
+        return;
+      }
+
+      // 🛡️ Sécurité : Récapitulatif avant déduction définitive
+      const texteCibles = cibles.join(", ");
+      if (!confirm(`Confirmez-vous l'utilisation de "${item.itemName}" sur : ${texteCibles} ?\n\n(Action irréversible)`)) {
+        return; // Le joueur peut corriger ses choix
+      }
+
       fermerModalCible();
       executerUtilisation(item.itemName, item.owner, cibles);
     }
