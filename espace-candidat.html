@@ -404,8 +404,58 @@
     </div>
 
   </main>
+<script>
+  // 1. Bloquer le clic droit
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  }, false);
 
+  // 2. Bloquer les raccourcis clavier d'inspection et de code source
+  document.addEventListener('keydown', function(e) {
+    // F12
+    if (e.keyCode === 123) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl + Maj + I / Ctrl + Maj + J / Ctrl + Maj + C (Inspecteur)
+    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl + U (Afficher le code source)
+    if (e.ctrlKey && e.keyCode === 85) {
+      e.preventDefault();
+      return false;
+    }
+    // Équivalent Mac (Cmd + Alt + I / Cmd + Alt + J / Cmd + U)
+    if (e.metaKey && e.altKey && (e.keyCode === 73 || e.keyCode === 74)) {
+      e.preventDefault();
+      return false;
+    }
+    if (e.metaKey && e.keyCode === 85) {
+      e.preventDefault();
+      return false;
+    }
+  }, false);
+
+  // 3. Détecteur anti-DevTools (Piège de redimensionnement et debugger)
+  (function() {
+    var element = new Image();
+    Object.defineProperty(element, 'id', {
+      get: function() {
+        // Déclenché uniquement quand la console essaie d'analyser l'objet
+        document.body.innerHTML = "<h2 style='color:red; text-align:center; margin-top:20%;'>⚠️ L'utilisation de la console développeur est strictement interdite sur KLCF.</h2>";
+        throw new Error("DevTools detected");
+      }
+    });
+    setInterval(function() {
+      console.log(element);
+      console.clear();
+    }, 1500);
+  })();
+</script>
   <script>
+    
     const API_URL = "https://script.google.com/macros/s/AKfycbzn8CWZKpacH6P-3n9Ew79epzHWHukCSGHeSuSnYAHlpS4nIEDmr7jFEkY072L6xRwNEQ/exec";
 
     let listeCandidatsGlobale = [];
