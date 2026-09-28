@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Console Organisation - KLCF S9</title>
   
+  <!-- Leaflet CSS & JS pour la Carte Interactive -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <!-- Librairie pour la capture d'écran PNG (Spectateurs Discord) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -98,6 +102,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .table-container {
@@ -164,6 +170,68 @@
       padding: 10px;
       border-radius: 8px;
     }
+
+    /* Styles pour la Carte Leaflet et la Heatmap */
+    #map-orga {
+      height: 60vh;
+      min-height: 480px;
+      width: 100%;
+      background: #000;
+      border-radius: 8px;
+      border: 2px solid #f59e0b;
+      margin-top: 10px;
+    }
+    .axis-label {
+      color: #ffcc00;
+      font-weight: bold;
+      font-size: 15px;
+      text-align: center;
+      text-shadow: 2px 2px 4px black;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      padding: 2px;
+    }
+    .map-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      background: #0f172a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .select-map {
+      background: #1e293b;
+      color: white;
+      border: 1px solid #475569;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .legend-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      font-size: 12px;
+      margin-top: 10px;
+      background: #0f172a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -190,6 +258,33 @@
     </header>
 
     <main class="main-container">
+
+      <!-- 0. CARTE DE L'ÎLE : HEATMAPS & SOLUTIONS (NOUVEAU) -->
+      <div class="section-box" style="border-left: 4px solid #f59e0b;">
+        <div class="section-title">
+          <span>🗺️ Cartographie Tactique : Heatmaps & Trésors Enfouis</span>
+          <span id="map-status-info" style="font-size: 13px; color: #38bdf8;"></span>
+        </div>
+
+        <div class="map-controls">
+          <label style="font-weight: bold; font-size: 13px;">Mode d'affichage :</label>
+          <select id="map-mode-select" class="select-map" onchange="changerModeCarte()">
+            <option value="solution">🔒 Solution & Objets Cachés (Orga)</option>
+            <option value="heatmap_candidat">🔥 Heatmap par Candidat</option>
+            <option value="heatmap_globale">🌋 Heatmap Globale (Tous les candidats)</option>
+          </select>
+
+          <div id="zone-select-candidat" style="display: none;">
+            <label style="font-weight: bold; font-size: 13px; margin-left: 8px;">Candidat :</label>
+            <select id="map-candidat-select" class="select-map" onchange="dessinerCarte()"></select>
+          </div>
+        </div>
+
+        <div id="map-orga"></div>
+
+        <!-- Légende Dynamique -->
+        <div id="legend-container" class="legend-box"></div>
+      </div>
 
       <!-- 1. ACTIONS ORGA EN ATTENTE -->
       <div class="section-box" id="box-actions-orga" style="border-left: 4px solid #ef4444;">
@@ -353,6 +448,17 @@
     let adminPasswordGlobal = "";
     let lastLoadedData = null;
 
+    // Variables globales Carte
+    let mapLeafletOrga = null;
+    let markersLayerGroup = null;
+    const NUM_COLS = 400; // X : 1 à 400
+    const NUM_ROWS = 26;  // Y : A à Z
+    const MAP_WIDTH = 4000;
+    const MAP_HEIGHT = 2000;
+    const COL_WIDTH = MAP_WIDTH / NUM_COLS;
+    const ROW_HEIGHT = MAP_HEIGHT / NUM_ROWS;
+    const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
     function verifierAcces() {
       const pass = document.getElementById("admin-password-input").value.trim();
       if (!pass) return;
@@ -374,8 +480,13 @@
           if (isInitial) {
             document.getElementById("auth-screen").style.display = "none";
             document.getElementById("dashboard-screen").style.display = "block";
+            setTimeout(() => {
+              initCarteLeafletOrga();
+            }, 250);
           }
           afficherDonnees(res);
+          remplirSelecteurCandidats(res.candidats || []);
+          dessinerCarte();
         } else {
           if (isInitial) {
             document.getElementById("auth-error").style.display = "block";
@@ -388,6 +499,244 @@
       }
     }
 
+    // =========================================================
+    // INITIALISATION DE LA CARTE LEAFLET
+    // =========================================================
+    function initCarteLeafletOrga() {
+      const container = document.getElementById('map-orga');
+      if (!container || mapLeafletOrga !== null) return;
+
+      const bounds = [[0, 0], [MAP_HEIGHT, MAP_WIDTH]];
+
+      mapLeafletOrga = L.map('map-orga', {
+        crs: L.CRS.Simple,
+        minZoom: -3,
+        maxZoom: 2,
+        zoomSnap: 0.25,
+        attributionControl: false
+      });
+
+      // Même fichier image que l'espace candidat
+      const imgUrl = 'carte.png';
+      L.imageOverlay(imgUrl, bounds).addTo(mapLeafletOrga);
+      mapLeafletOrga.fitBounds(bounds);
+      mapLeafletOrga.setMaxBounds(bounds);
+
+      // Tracé des lignes verticales (colonnes 1 à 400)
+      for (let i = 0; i <= NUM_COLS; i++) {
+        let x = i * COL_WIDTH;
+        let isDecade = (i % 10 === 0);
+        L.polyline([[0, x], [MAP_HEIGHT, x]], {
+          color: '#ffcc00',
+          weight: isDecade ? 1.8 : 0.4,
+          opacity: isDecade ? 0.7 : 0.2
+        }).addTo(mapLeafletOrga);
+
+        if (isDecade && i !== 0) {
+          L.marker([MAP_HEIGHT, x], {
+            icon: L.divIcon({ className: 'axis-label', html: i, iconSize: [30, 22], iconAnchor: [15, 25] })
+          }).addTo(mapLeafletOrga);
+        }
+      }
+
+      // Tracé des lignes horizontales (rangées A à Z)
+      for (let j = 0; j <= NUM_ROWS; j++) {
+        let y = MAP_HEIGHT - (j * ROW_HEIGHT);
+        L.polyline([[y, 0], [y, MAP_WIDTH]], { color: '#ffcc00', weight: 0.8, opacity: 0.3 }).addTo(mapLeafletOrga);
+
+        if (j < 26) {
+          let yCenter = y - (ROW_HEIGHT / 2);
+          L.marker([yCenter, 0], {
+            icon: L.divIcon({ className: 'axis-label', html: LETTERS[j], iconSize: [25, 25], iconAnchor: [26, 12] })
+          }).addTo(mapLeafletOrga);
+        }
+      }
+
+      markersLayerGroup = L.layerGroup().addTo(mapLeafletOrga);
+
+      setTimeout(() => {
+        if (mapLeafletOrga) mapLeafletOrga.invalidateSize();
+      }, 300);
+    }
+
+    // Convertit une case comme 'B45' en coordonnées Leaflet [Lat(Y), Lng(X)]
+    function parseCoordCase(caseStr) {
+      if (!caseStr) return null;
+      const m = String(caseStr).toUpperCase().trim().match(/^([A-Z])(\d+)$/);
+      if (!m) return null;
+      const rowLetter = m[1];
+      const colNum = parseInt(m[2], 10);
+
+      const rowIndex = LETTERS.indexOf(rowLetter);
+      const colIndex = colNum - 1;
+
+      if (rowIndex < 0 || rowIndex >= NUM_ROWS || colIndex < 0 || colIndex >= NUM_COLS) return null;
+
+      const lng = (colIndex + 0.5) * COL_WIDTH;
+      const lat = MAP_HEIGHT - ((rowIndex + 0.5) * ROW_HEIGHT);
+      return [lat, lng];
+    }
+
+    function remplirSelecteurCandidats(candidats) {
+      const select = document.getElementById("map-candidat-select");
+      const currentVal = select.value;
+      select.innerHTML = candidats.map(c => `<option value="${c.nom}">${c.nom} (${c.equipe})</option>`).join('');
+      if (currentVal) select.value = currentVal;
+    }
+
+    function changerModeCarte() {
+      const mode = document.getElementById("map-mode-select").value;
+      const zoneCand = document.getElementById("zone-select-candidat");
+      zoneCand.style.display = (mode === "heatmap_candidat") ? "inline-block" : "none";
+      dessinerCarte();
+    }
+
+    // =========================================================
+    // TRACÉ DE LA CARTE (HEATMAP OU SOLUTION)
+    // =========================================================
+    function dessinerCarte() {
+      if (!mapLeafletOrga || !markersLayerGroup || !lastLoadedData) return;
+      markersLayerGroup.clearLayers();
+
+      const mode = document.getElementById("map-mode-select").value;
+      const legendDiv = document.getElementById("legend-container");
+      const statusInfo = document.getElementById("map-status-info");
+
+      // -------------------------------------------------------
+      // 1. MODE SOLUTION : OBJETS CACHÉS & TROUVÉS
+      // -------------------------------------------------------
+      if (mode === "solution") {
+        const solutions = lastLoadedData.rechercheSolution || [];
+        let nbTrouves = 0, nbRestants = 0;
+
+        solutions.forEach(s => {
+          const coords = parseCoordCase(s.caseSol);
+          if (!coords) return;
+
+          const estTrouve = s.trouvePar && s.trouvePar.trim() !== "";
+          if (estTrouve) nbTrouves++; else nbRestants++;
+
+          // Détection de la couleur selon le type d'objet
+          let couleur = "#3b82f6"; // Bleu par défaut
+          const objLow = s.objet.toLowerCase();
+          if (objLow.includes("collier")) couleur = "#f59e0b"; // Or/Jaune
+          else if (objLow.includes("bourse")) couleur = "#10b981"; // Vert
+          else if (objLow.includes("parchemin") || objLow.includes("indice")) couleur = "#8b5cf6"; // Violet
+          else if (objLow.includes("protection") || objLow.includes("tibia")) couleur = "#06b6d4"; // Cyan
+
+          // Si déjà trouvé -> ROUGE et style barré/atténué
+          if (estTrouve) couleur = "#ef4444";
+
+          const circle = L.circleMarker(coords, {
+            radius: estTrouve ? 7 : 9,
+            fillColor: couleur,
+            color: "#ffffff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: estTrouve ? 0.75 : 0.95
+          });
+
+          const statutTexte = estTrouve 
+            ? `<span style="color:#ef4444; font-weight:bold;">❌ DÉCOUVERT</span> par <strong>${s.trouvePar}</strong> (${s.dateTrouvaille})`
+            : `<span style="color:#10b981; font-weight:bold;">🔒 ENCORE ENFOUi</span>`;
+
+          const popupContent = `
+            <div style="font-size:13px; min-width:180px;">
+              <strong style="font-size:14px; color:${couleur};">${s.objet}</strong><br>
+              📍 Case : <strong>${s.caseSol}</strong><br>
+              État : ${statutTexte}
+            </div>
+          `;
+          circle.bindPopup(popupContent);
+          markersLayerGroup.addLayer(circle);
+        });
+
+        statusInfo.innerText = `${solutions.length} trésors répertoriés (${nbTrouves} découverts, ${nbRestants} enfouis)`;
+
+        legendDiv.innerHTML = `
+          <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Collier d'immunité</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Bourse Kohrocq</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Parchemin / Indice</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#06b6d4;"></span> Protection</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Autre Avantage</div>
+          <div class="legend-item" style="margin-left:auto;"><span class="legend-dot" style="background:#ef4444;"></span> <strong>Déjà découvert (Trouvé)</strong></div>
+        `;
+        return;
+      }
+
+      // -------------------------------------------------------
+      // 2. MODE HEATMAP : CANDIDAT SPÉCIFIQUE OU GLOBALE
+      // -------------------------------------------------------
+      const hist = lastLoadedData.rechercheHistorique || [];
+      const candidatCible = (mode === "heatmap_candidat") 
+        ? document.getElementById("map-candidat-select").value.toLowerCase() 
+        : null;
+
+      // Agrégation des fouilles par case
+      const countsParCase = {};
+      let totalPoints = 0;
+
+      hist.forEach(h => {
+        if (!candidatCible || h.candidat.toLowerCase() === candidatCible) {
+          if (h.caseVisee) {
+            countsParCase[h.caseVisee] = (countsParCase[h.caseVisee] || 0) + 1;
+            totalPoints++;
+          }
+        }
+      });
+
+      // Trouver le max d'occurrences sur une seule case
+      let maxCount = 1;
+      for (let c in countsParCase) {
+        if (countsParCase[c] > maxCount) maxCount = countsParCase[c];
+      }
+
+      for (let caseStr in countsParCase) {
+        const coords = parseCoordCase(caseStr);
+        if (!coords) continue;
+
+        const count = countsParCase[caseStr];
+        const ratio = count / maxCount;
+
+        // Dégradé : Jaune -> Orange -> Rouge vif
+        let couleur = "#fde047";
+        if (ratio > 0.6) couleur = "#ef4444";
+        else if (ratio > 0.25) couleur = "#f97316";
+
+        const radius = Math.min(24, Math.max(8, 8 + (count * 2.5)));
+        const fillOpacity = Math.min(0.9, 0.35 + (ratio * 0.55));
+
+        const circle = L.circleMarker(coords, {
+          radius: radius,
+          fillColor: couleur,
+          color: couleur,
+          weight: 1,
+          opacity: 0.8,
+          fillOpacity: fillOpacity
+        });
+
+        circle.bindPopup(`
+          <div style="font-size:13px; text-align:center;">
+            <strong>Case ${caseStr}</strong><br>
+            🔨 <strong>${count}</strong> fouille(s) enregistrée(s)
+          </div>
+        `);
+        markersLayerGroup.addLayer(circle);
+      }
+
+      statusInfo.innerText = `${totalPoints} coup(s) de pioche affiché(s) sur ${Object.keys(countsParCase).length} case(s)`;
+
+      legendDiv.innerHTML = `
+        <span style="font-weight:bold;">🔥 Intensité des Fouilles :</span>
+        <div class="legend-item"><span class="legend-dot" style="background:#fde047;"></span> 1 fouille (Faible)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> 2-3 fouilles (Moyenne)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> 4+ fouilles (Zone Chaude)</div>
+      `;
+    }
+
+    // =========================================================
+    // RENDU DES DONNÉES DU DASHBOARD
+    // =========================================================
     function afficherDonnees(data) {
       document.getElementById("last-update-text").innerText = "Mis à jour : " + new Date().toLocaleTimeString("fr-FR");
 
@@ -510,7 +859,6 @@
       }
     }
 
-    // TÉLÉCHARGER LA CAPTURE PNG DU TABLEAU RECAPITULATIF (DISCORD)
     function telechargerCaptureSpectateurs() {
       const captureArea = document.getElementById("capture-area");
       if (!captureArea) return;
@@ -528,7 +876,6 @@
       });
     }
 
-    // COPIER UN RÉSUMÉ TEXTE PROPRE POUR DISCORD
     function copierResumeDiscord() {
       if (!lastLoadedData || !lastLoadedData.candidats) {
         alert("Veuillez d'abord charger les données.");
@@ -558,7 +905,6 @@
       });
     }
 
-    // NOUVELLE FONCTION : MATRICE LOTO FOOT DÉTAILLÉE MATCH PAR MATCH
     function copierRecapPronosDiscord() {
       if (!lastLoadedData || !lastLoadedData.grilleOrga) {
         alert("Veuillez d'abord actualiser le tableau de bord.");
@@ -595,7 +941,7 @@
       matchs.forEach((m, idx) => {
         const num = (idx + 1).toString().padStart(2, "0");
         
-        let affiche = `${m.dom} - ${m.ext}`;
+        let affiche = `${m.dom} -${m.ext}`;
         if (affiche.length > 24) affiche = affiche.substring(0, 22) + "..";
         affiche = affiche.padEnd(24, " ");
 
@@ -614,7 +960,7 @@
 
         const pronosCols = classement.map(c => {
           const choix = (c.pronos && c.pronos[m.id]) ? String(c.pronos[m.id]).toUpperCase() : "-";
-          let rep = `  ${choix}   `;
+          let rep = `  ${choix}    `;
 
           if (isFinished && m.resultatExact) {
             let pNorm = (choix === "N") ? "X" : choix;
@@ -628,7 +974,7 @@
           return rep.padEnd(8, " ");
         });
 
-        out += `${num} | ${affiche} | ${resCol} | ` + pronosCols.join("| ") + `\n`;
+        out += `${num} | ${affiche} \vert{}${resCol} | ` + pronosCols.join("| ") + `\n`;
       });
 
       out += `---+--------------------------+-----+` + colNoms.map(() => "---------").join("+") + `\n`;
@@ -636,7 +982,7 @@
       const totauxCols = classement.map(c => {
         return `${c.points} pts`.padStart(6, " ") + "  ";
       });
-      out += `TOTAL POINTS                  |     | ` + totauxCols.join("| ") + `\n`;
+      out += `TOTAL POINTS                   |     | ` + totauxCols.join("| ") + `\n`;
       out += `\`\`\`\n`;
 
       out += `📊 **CLASSEMENT GÉNÉRAL :**\n`;
