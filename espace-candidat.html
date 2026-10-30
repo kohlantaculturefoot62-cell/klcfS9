@@ -344,21 +344,15 @@
       </div>
     </div>
 
-    <!-- 6. Conseil -->
+    <!-- 6. Conseil (BULLETINS MULTIPLES) -->
     <div id="tab-conseil" class="tab-content">
       <h2 style="font-size: 18px; margin: 0 0 10px 0;">Conseil Tribal</h2>
       <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center;">
         <div id="conseil-status"><p>Chargement...</p></div>
         <div id="conseil-form" style="display: none; margin-top: 15px; text-align: left;">
-          <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Bulletin 1 :</label>
-          <select id="vote-select-1" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 12px;"></select>
-
-          <div id="zone-bulletin-2" style="display: none;">
-            <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px; color: #d93025;">🔥 Bulletin 2 (Double Vote) :</label>
-            <select id="vote-select-2" style="width: 100%; padding: 10px; border: 1px solid #d93025; border-radius: 6px; font-size: 14px; margin-bottom: 12px;"></select>
-          </div>
-
-          <button class="btn-action" style="background: #d93025; color: white;" onclick="soumettreVote()">Sceller mon bulletin</button>
+          <div id="conseil-pouvoirs-vote" style="margin-bottom: 12px;"></div>
+          <div id="conseil-bulletins-container"></div>
+          <button class="btn-action" style="background: #d93025; color: white;" onclick="soumettreVote()">Sceller mes bulletins</button>
         </div>
       </div>
     </div>
@@ -460,7 +454,7 @@
 
     let listeCandidatsGlobale = [];
     let pendingUseItem = null;
-    let hasDoubleVote = false;
+    let nbBulletinsConseil = 1;
     let currentPosition = null;
     let timerInterval = null;
     let mapLeaflet = null;
@@ -722,7 +716,7 @@
     function fermerModalTrouvaille() { document.getElementById("found-modal").style.display = "none"; chargerRecherche(); }
     function fermerModalVide() { document.getElementById("empty-modal").style.display = "none"; chargerRecherche(); }
 
-function demarrerUtilisation(itemName, owner, cibleRequise) {
+    function demarrerUtilisation(itemName, owner, cibleRequise) {
       pendingUseItem = { itemName, owner, cibleRequise };
       var itemLow = itemName.toLowerCase().trim();
       var reqUpper = String(cibleRequise || "").toUpperCase().trim();
@@ -1051,15 +1045,16 @@ function demarrerUtilisation(itemName, owner, cibleRequise) {
       }
     }
 
-    // Conseil & Vote
+    // ---------------------------------------------------------
+    // CONSEIL & VOTE (BULLETINS MULTIPLES)
+    // ---------------------------------------------------------
     async function chargerConseil() {
       const joueur = localStorage.getItem("joueur_connecte");
       const equipe = localStorage.getItem("equipe_joueur");
       const statusDiv = document.getElementById("conseil-status");
       const formDiv = document.getElementById("conseil-form");
-      const select1 = document.getElementById("vote-select-1");
-      const select2 = document.getElementById("vote-select-2");
-      const zoneB2 = document.getElementById("zone-bulletin-2");
+      const pouvoirsDiv = document.getElementById("conseil-pouvoirs-vote");
+      const container = document.getElementById("conseil-bulletins-container");
 
       statusDiv.innerHTML = "<p>Actualisation...</p>";
       formDiv.style.display = "none";
@@ -1076,38 +1071,69 @@ function demarrerUtilisation(itemName, owner, cibleRequise) {
           if (res.monStatut.elimine) { statusDiv.innerHTML = `<p style="color:red; font-weight:bold;">💀 Vous êtes éliminé.</p>`; return; }
           if (!res.isConseilOuvert) { statusDiv.innerHTML = `<h3>🔥 Conseil fermé pour la tribu ${equipe}.</h3>`; return; }
 
-          hasDoubleVote = res.aDoubleVote === true;
-          statusDiv.innerHTML = `<h3 style="color:#d93025; margin:0 0 10px 0;">Conseil Ouvert !</h3>${res.monVote1 ? `<p style="font-size:12px; color:green;">Bulletin déposé : <strong>${res.monVote1}</strong></p>` : ''}`;
+          nbBulletinsConseil = res.nbBulletins || 1;
+          const mesVotes = res.mesVotes || [];
+          const pouvoirs = res.pouvoirsVote || [];
+          const nbDeposes = mesVotes.filter(v => v).length;
 
-          let opts = `<option value="">-- Choisir un aventurier --</option>` + res.candidatsVotables.map(c => `<option value="${c}">${c}</option>`).join('');
-          select1.innerHTML = opts;
-          if (res.monVote1) select1.value = res.monVote1;
+          statusDiv.innerHTML = `
+            <h3 style="color:#d93025; margin:0 0 8px 0;">Conseil Ouvert !</h3>
+            <p style="font-size:13px; margin:0;">
+              Vous disposez de <strong>${nbBulletinsConseil} bulletin(s)</strong>
+              ${nbDeposes > 0 ? `— <span style="color:green;">${nbDeposes} déjà scellé(s), modifiable(s)</span>` : ''}
+            </p>`;
 
-          if (hasDoubleVote) {
-            zoneB2.style.display = "block";
-            select2.innerHTML = opts;
-            if (res.monVote2) select2.value = res.monVote2;
-          } else { zoneB2.style.display = "none"; }
+          pouvoirsDiv.innerHTML = pouvoirs.length > 0
+            ? `<div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:bold;">
+                 🔥 Pouvoirs de vote actifs : ${pouvoirs.join(" + ")} → ${pouvoirs.length} bulletin(s) bonus
+               </div>`
+            : "";
+
+          const opts = `<option value="">-- Choisir un aventurier --</option>` +
+            res.candidatsVotables.map(c => `<option value="${c}">${c}</option>`).join('');
+
+          container.innerHTML = Array.from({ length: nbBulletinsConseil }, (_, i) => `
+            <label style="font-weight:bold; font-size:13px; display:block; margin-bottom:5px; color:${i === 0 ? '#222' : '#d93025'};">
+              ${i === 0 ? 'Bulletin 1' : `🔥 Bulletin ${i + 1} (bonus)`} :
+            </label>
+            <select class="vote-select-bulletin" style="width:100%; padding:10px; border:1px solid ${i === 0 ? '#ccc' : '#d93025'}; border-radius:6px; font-size:14px; margin-bottom:12px;">${opts}</select>
+          `).join('');
+
+          container.querySelectorAll(".vote-select-bulletin").forEach((sel, i) => {
+            if (mesVotes[i]) sel.value = mesVotes[i];
+          });
 
           formDiv.style.display = "block";
+        } else {
+          statusDiv.innerHTML = `<p style='color:red;'>${res.message || "Erreur conseil."}</p>`;
         }
       } catch (err) { statusDiv.innerHTML = "<p style='color:red;'>Erreur conseil.</p>"; }
     }
 
     async function soumettreVote() {
-      const v1 = document.getElementById("vote-select-1").value;
-      const v2 = document.getElementById("vote-select-2").value;
-      if (!v1 || (hasDoubleVote && !v2)) { alert("Veuillez remplir vos bulletins."); return; }
-      if (!confirm("Sceller définitivement votre vote ?")) return;
+      const votes = Array.from(document.querySelectorAll(".vote-select-bulletin")).map(s => s.value);
+      if (votes.length === 0 || votes.some(v => !v)) {
+        alert(`Veuillez remplir vos ${votes.length} bulletin(s).`);
+        return;
+      }
+      const recap = votes.map((v, i) => `Bulletin ${i + 1} : ${v}`).join("\n");
+      if (!confirm(`Sceller définitivement votre vote ?\n\n${recap}`)) return;
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "submit_vote", username: localStorage.getItem("joueur_connecte"), equipe: localStorage.getItem("equipe_joueur"), vote1: v1, vote2: v2, aDoubleVote: hasDoubleVote })
-      });
-      const res = await response.json();
-      alert(res.message);
-      if (res.status === "success") chargerConseil();
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "submit_vote",
+            username: localStorage.getItem("joueur_connecte"),
+            equipe: localStorage.getItem("equipe_joueur"),
+            votes: votes
+          })
+        });
+        const res = await response.json();
+        alert(res.message);
+        if (res.status === "success") chargerConseil();
+      } catch (err) { alert("Erreur serveur."); }
     }
 
     // Achat & Enchères
