@@ -259,7 +259,7 @@
 
     <main class="main-container">
 
-      <!-- 0. CARTE DE L'ÎLE : HEATMAPS & SOLUTIONS (NOUVEAU) -->
+      <!-- 0. CARTE DE L'ÎLE : HEATMAPS & SOLUTIONS -->
       <div class="section-box" style="border-left: 4px solid #f59e0b;">
         <div class="section-title">
           <span>🗺️ Cartographie Tactique : Heatmaps & Trésors Enfouis</span>
@@ -438,6 +438,29 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- 5. BULLETINS PAR VOTANT (POUVOIRS DE VOTE CUMULÉS) -->
+      <div class="section-box" style="border-left: 4px solid #f97316;">
+        <div class="section-title">
+          <span>🗳️ Bulletins par Votant & Pouvoirs de Vote</span>
+        </div>
+        <div class="table-container">
+          <table id="table-bulletins-votants">
+            <thead>
+              <tr>
+                <th>Votant</th>
+                <th>Tribu</th>
+                <th>Pouvoirs de vote</th>
+                <th style="text-align:center;">Bulletins</th>
+                <th>Détail des bulletins</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-bulletins-votants">
+              <tr><td colspan="5" style="text-align:center;">Aucun bulletin.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </main>
@@ -768,6 +791,10 @@
         if (c.immunise) statutConseilBadge = `<span class="badge-status badge-success">🛡️ Immunisé</span>`;
         if (c.elimine) statutConseilBadge = `<span class="badge-status badge-danger">💀 Éliminé</span>`;
 
+        const badgeBulletins = (c.nbBulletinsPrevus > 1)
+          ? `<span class="badge-status badge-warning">${c.nbBulletinsDeposes}/${c.nbBulletinsPrevus} bull.</span> `
+          : '';
+
         return `
           <tr style="${c.elimine ? 'opacity:0.45; background:#0b1120;' : ''}">
             <td><strong>${c.nom}</strong> ${c.estCapitaine ? '👑' : ''}</td>
@@ -781,7 +808,7 @@
             <td style="font-size:12px;">${c.objetsTrouves.length > 0 ? c.objetsTrouves.join(", ") : "<span style='color:#64748b;'>Aucun</span>"}</td>
             <td style="font-size:12px;">${c.inventaire.length > 0 ? c.inventaire.join(", ") : "<span style='color:#64748b;'>Vide</span>"}</td>
             <td style="text-align:center;">${statutConseilBadge}</td>
-            <td style="font-size:12px; color:#e2e8f0;">${c.aVoteContre}</td>
+            <td style="font-size:12px; color:#e2e8f0;">${badgeBulletins}${c.aVoteContre}</td>
           </tr>
         `;
       }).join('');
@@ -841,6 +868,40 @@
             <td>${ef.cibles || 'Aucune'}</td>
           </tr>
         `).join('');
+
+      // 7. Bulletins par votant (pouvoirs de vote cumulés)
+      const tbodyBV = document.getElementById("tbody-bulletins-votants");
+      const votants = data.votesParVotant || [];
+      tbodyBV.innerHTML = votants.length === 0
+        ? "<tr><td colspan='5' style='text-align:center; color:#94a3b8;'>Aucun Conseil ouvert / aucun bulletin.</td></tr>"
+        : votants.map(v => {
+            const pouvoirsHtml = v.pouvoirs.length === 0
+              ? "<span style='color:#64748b;'>Aucun</span>"
+              : v.pouvoirs.map(p => p.annule
+                  ? `<span class="badge-status badge-danger" style="text-decoration:line-through;" title="Annulé">${p.label}</span>`
+                  : `<span class="badge-status badge-warning">🔥 ${p.label}</span>`).join(" ");
+
+            const complet = v.nbBulletinsDeposes >= v.nbBulletinsPrevus;
+            const compteur = `<span class="badge-status ${complet ? 'badge-success' : 'badge-warning'}" style="font-size:13px;">${v.nbBulletinsDeposes} / ${v.nbBulletinsPrevus}</span>`
+              + (v.nbBulletinsAutorises < v.nbBulletinsPrevus
+                  ? `<br><small style="color:#fca5a5;">${v.nbBulletinsAutorises} valable(s) après annulation</small>` : "");
+
+            const detail = v.bulletins.length === 0
+              ? "<span style='color:#fde68a;'>⏳ Pas encore voté</span>"
+              : v.bulletins.map(b => b.estValide
+                  ? `<span style="color:#6ee7b7;">B${b.bulletin} → <strong>${b.cible}</strong></span>`
+                  : `<span style="color:#fca5a5; text-decoration:line-through;">B${b.bulletin} → ${b.cible}</span> <small style="color:#fca5a5;">(${b.motifInvalidation})</small>`
+                ).join("<br>");
+
+            return `
+              <tr>
+                <td><strong>${v.votant}</strong>${v.estBloque ? ' <span class="badge-status badge-danger">⛔ Vote bloqué</span>' : ''}</td>
+                <td>${v.equipe || ''}</td>
+                <td>${pouvoirsHtml}</td>
+                <td style="text-align:center;">${compteur}</td>
+                <td style="font-size:12px; white-space:normal;">${detail}</td>
+              </tr>`;
+          }).join('');
     }
 
     async function resoudreActionOrga(rowIndex) {
@@ -974,7 +1035,7 @@
           return rep.padEnd(8, " ");
         });
 
-        out += `${num} | ${affiche} \vert{}${resCol} | ` + pronosCols.join("| ") + `\n`;
+        out += `${num} | ${affiche} | ${resCol} | ` + pronosCols.join("| ") + `\n`;
       });
 
       out += `---+--------------------------+-----+` + colNoms.map(() => "---------").join("+") + `\n`;
