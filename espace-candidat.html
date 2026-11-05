@@ -315,7 +315,7 @@
         <div style="background: #e3f2fd; border-left: 4px solid #1e88e5; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; color: #0d47a1; margin-bottom: 15px;">
           <strong>📜 RÈGLES DU JEU :</strong><br>
           • <strong>Créneau d'ouverture :</strong> Du <strong>Mercredi 00h01 au Jeudi 23h59 (heure de Paris)</strong>.<br>
-          • <strong>Frais d'entrée :</strong> <strong>25 Kohrocq</strong> prélevés sur votre cagnotte individuelle.<br>
+          • <strong>Frais d'entrée :</strong> <strong>50 Kohrocq</strong> prélevés sur votre cagnotte individuelle.<br>
           • <strong>Pronostics :</strong> Choisissez pour chaque match <strong>1</strong> (Victoire Domicile), <strong>X</strong> (Match Nul), ou <strong>2</strong> (Victoire Extérieur).<br>
           • <strong>Points :</strong> <strong>1 point</strong> par bon résultat calculé automatiquement dès la fin des rencontres.<br>
           • <strong>Gains :</strong> 100% des mises reversées au <strong>Top 3</strong>.
@@ -340,7 +340,7 @@
           </table>
         </div>
 
-        <button id="btn-valider-grille" class="btn-action btn-buy" style="margin-top: 15px; font-size: 15px; padding: 12px;" onclick="validerGrilleFoot()">Valider mes pronostics (25 Kohrocq)</button>
+        <button id="btn-valider-grille" class="btn-action btn-buy" style="margin-top: 15px; font-size: 15px; padding: 12px;" onclick="validerGrilleFoot()">Valider mes pronostics (50 Kohrocq)</button>
       </div>
     </div>
 
@@ -1017,7 +1017,7 @@
       const equipe = localStorage.getItem("equipe_joueur");
       const confirmationMsg = aParticipeGrille 
         ? "Confirmez-vous la modification de vos pronostics ?" 
-        : "Confirmez-vous votre participation à la Grille Foot ?\n\n25 Kohrocq seront débités de votre solde individuel.";
+        : "Confirmez-vous votre participation à la Grille Foot ?\n\n50 Kohrocq seront débités de votre solde individuel.";
 
       if (!confirm(confirmationMsg)) return;
 
